@@ -53,6 +53,7 @@ public class TestGenericQuery extends DataDrivenTestEnvironment {
     @Test
     public void executeQueryShouldWorkWithRelations() throws Exception {
         String sql = generateSelectSQL(Dog.class, true);
+        System.out.println(sql);
         execute(sql);
     }
 }
