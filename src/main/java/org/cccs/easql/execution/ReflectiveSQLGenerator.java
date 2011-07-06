@@ -1,4 +1,8 @@
-package org.cccs.easql;
+package org.cccs.easql.execution;
+
+import org.cccs.easql.Cardinality;
+import org.cccs.easql.Column;
+import org.cccs.easql.Relation;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -8,7 +12,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.Utils.*;
+import static org.cccs.easql.util.ReflectionUtils.*;
 
 /**
  * User: boycook
@@ -27,14 +31,6 @@ public final class ReflectiveSQLGenerator {
     private final static String DELETE_TEMPLATE = "DELETE FROM %s WHERE %s;";
     private final static String CREATE_TEMPLATE = "CREATE TABLE %s (%s);";
     private final static String SEQUENCE_TEMPLATE = "(SELECT NEXT VALUE FOR %s FROM %s)";
-
-    private static Map<Class, String[]> columnNames;
-    private static Map<Class, DBField[]> columns;
-
-    static {
-        columnNames = new HashMap<Class, String[]>();
-        columns = new HashMap<Class, DBField[]>();
-    }
 
     public static String generateInsertSQL(Object o) {
         Class c = o.getClass();
@@ -90,12 +86,7 @@ public final class ReflectiveSQLGenerator {
             Relation relation = field.getAnnotation(Relation.class);
 
             if (column != null) {
-                if (loadRelations) {
-//                    appendColumn(select, tableName + "." + getColumnName(field));
-                    appendColumn(select, getColumnName(field));
-                } else {
-                    appendColumn(select, getColumnName(field));
-                }
+                appendColumn(select, getColumnName(field));
             } else if (relation != null) {
                 if (relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
                     if (loadRelations) {
@@ -189,48 +180,6 @@ public final class ReflectiveSQLGenerator {
 
     public static String generateDropSQL(Object o) {
         throw new UnsupportedOperationException("Drop is not yet supported");
-    }
-
-    public static String[] getColumnNames(Class c) {
-        String[] columns = columnNames.get(c);
-        if (columns == null) {
-            columns = getColumnNamesForClass(c);
-            columnNames.put(c, columns);
-        }
-        return columns;
-    }
-
-    private static String[] getColumnNamesForClass(Class c) {
-        Collection<String> columns = new ArrayList<String>();
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
-            Column column = field.getAnnotation(Column.class);
-            if (column != null) {
-                columns.add(getColumnName(field));
-            }
-        }
-        return columns.toArray(new String[columns.size()]);
-    }
-
-    public static DBField[] getColumns(Class c) {
-        DBField[] tempColumns = columns.get(c);
-        if (tempColumns == null) {
-            tempColumns = getColumnsForClass(c);
-            columns.put(c, tempColumns);
-        }
-        return tempColumns;
-    }
-
-    private static DBField[] getColumnsForClass(Class c) {
-        Collection<DBField> columns = new ArrayList<DBField>();
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
-            Column column = field.getAnnotation(Column.class);
-            if (column != null) {
-                columns.add(new DBField(field, getColumnName(field), ""));
-            }
-        }
-        return columns.toArray(new DBField[columns.size()]);
     }
 
     private static void appendColumn(StringBuilder select, String column) {

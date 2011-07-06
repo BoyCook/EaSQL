@@ -1,20 +1,29 @@
-package org.cccs.easql;
+package org.cccs.easql.util;
+
+import org.cccs.easql.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.ReflectiveSQLGenerator.getColumnNames;
-import static org.cccs.easql.ReflectiveSQLGenerator.getColumns;
-import static org.cccs.easql.Utils.getTableName;
 
 /**
  * User: boycook
  * Date: 30/06/2011
  * Time: 18:42
  */
-public final class Utils {
+public final class ReflectionUtils {
+
+    private static Map<Class, String[]> columnNames;
+    private static Map<Class, DBField[]> columns;
+
+    static {
+        columnNames = new HashMap<Class, String[]>();
+        columns = new HashMap<Class, DBField[]>();
+    }
 
     public static String getPrimaryColumn(Class c) {
         Field[] fields = c.getFields();
@@ -88,7 +97,7 @@ public final class Utils {
         return o;
     }
 
-    public static DBField[] getDBColumns(Class c, boolean loadRelations)  {
+    public static DBField[] getExtractionMappings(Class c, boolean loadRelations)  {
         Collection<DBField> columns = new ArrayList<DBField>();
         Field[] fields = c.getFields();
         Object o = getObject(c);
@@ -110,7 +119,7 @@ public final class Utils {
 
                         for (DBField relatedColumn : relatedColumns) {
                             columns.add(new DBField(relatedColumn.field, relation.name() + "_" + relatedColumn.columnName, "", relatedO));
-                            setValue(c, field.getName(), o, relatedO);
+                            setObjectValue(c, field.getName(), o, relatedO);
                         }
                     } else {
                         columns.add(new DBField(field, relation.key(), "", o));
@@ -121,7 +130,7 @@ public final class Utils {
         return columns.toArray(new DBField[columns.size()]);
     }
 
-    public static void setValue(Class c, String fieldName, Object o, Object value) {
+    public static void setObjectValue(Class c, String fieldName, Object o, Object value) {
         Field field = null;
         try {
             field = c.getField(fieldName);
@@ -131,5 +140,47 @@ public final class Utils {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String[] getColumnNames(Class c) {
+        String[] columns = columnNames.get(c);
+        if (columns == null) {
+            columns = getColumnNamesForClass(c);
+            columnNames.put(c, columns);
+        }
+        return columns;
+    }
+
+    private static String[] getColumnNamesForClass(Class c) {
+        Collection<String> columns = new ArrayList<String>();
+        Field[] fields = c.getFields();
+        for (Field field : fields) {
+            Column column = field.getAnnotation(Column.class);
+            if (column != null) {
+                columns.add(getColumnName(field));
+            }
+        }
+        return columns.toArray(new String[columns.size()]);
+    }
+
+    public static DBField[] getColumns(Class c) {
+        DBField[] tempColumns = columns.get(c);
+        if (tempColumns == null) {
+            tempColumns = getColumnsForClass(c);
+            columns.put(c, tempColumns);
+        }
+        return tempColumns;
+    }
+
+    private static DBField[] getColumnsForClass(Class c) {
+        Collection<DBField> columns = new ArrayList<DBField>();
+        Field[] fields = c.getFields();
+        for (Field field : fields) {
+            Column column = field.getAnnotation(Column.class);
+            if (column != null) {
+                columns.add(new DBField(field, getColumnName(field), ""));
+            }
+        }
+        return columns.toArray(new DBField[columns.size()]);
     }
 }

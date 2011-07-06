@@ -4,15 +4,13 @@ import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
+import org.cccs.easql.execution.Query;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.sql.DataSource;
 import java.util.Collection;
 
-import static org.cccs.easql.ReflectiveSQLGenerator.generateSelectSQL;
+import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;

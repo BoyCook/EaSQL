@@ -1,12 +1,12 @@
-package org.cccs.easql;
+package org.cccs.easql.execution;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.util.Collection;
 
-import static org.cccs.easql.ReflectiveSQLGenerator.generateSelectSQL;
-import static org.cccs.easql.Utils.getDBColumns;
+import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
+import static org.cccs.easql.util.ReflectionUtils.getExtractionMappings;
 
 /**
  * User: boycook
@@ -26,7 +26,7 @@ public class Query {
     }
 
     public Collection execute(final Class c, boolean loadRelations)  {
-        final String sql = generateSelectSQL(c, loadRelations);
+        final String sql = ReflectiveSQLGenerator.generateSelectSQL(c, loadRelations);
         final GenericQuery query = new GenericQuery(this.dataSource);
         return query.execute(c, sql, loadRelations);
     }
@@ -37,7 +37,7 @@ public class Query {
         }
 
         public Collection execute(final Class c, final String sql, boolean loadRelations){
-            return query(sql, new ReflectiveExtractor(c, getDBColumns(c, loadRelations)));
+            return query(sql, new ReflectiveExtractor(c, getExtractionMappings(c, loadRelations)));
         }
     }
 }

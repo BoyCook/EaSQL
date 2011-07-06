@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.apache.commons.io.FileUtils.readFileToString;
-import static org.cccs.easql.ReflectiveSQLGenerator.generateCreateSQL;
+import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateCreateSQL;
 
 /**
  * User: boycook

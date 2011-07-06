@@ -1,18 +1,16 @@
-package org.cccs.easql;
+package org.cccs.easql.execution;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.cccs.easql.DBField;
 import static java.lang.String.format;
-import static org.cccs.easql.ReflectiveSQLGenerator.getColumns;
-import static org.cccs.easql.Utils.getObject;
-import static org.cccs.easql.Utils.setValue;
+import static org.cccs.easql.util.ReflectionUtils.setObjectValue;
 
 /**
  * User: boycook
@@ -32,7 +30,6 @@ public class ReflectiveExtractor implements ResultSetExtractor<Collection<?>> {
     @Override
     public Collection<?> extractData(ResultSet rs) throws SQLException, DataAccessException {
         final Collection results = new ArrayList();
-
         while (rs.next()) {
             for (DBField column: columns) {
                 setColumnValue(rs, column, column.object);
@@ -41,7 +38,6 @@ public class ReflectiveExtractor implements ResultSetExtractor<Collection<?>> {
                 }
             }
         }
-
         return results;
     }
 
@@ -49,13 +45,13 @@ public class ReflectiveExtractor implements ResultSetExtractor<Collection<?>> {
         int index = rs.findColumn(column.columnName);
 
         if (column.field.getType().equals(String.class)) {
-            setValue(column.object.getClass(), column.field.getName(), o, rs.getString(index));
+            setObjectValue(column.object.getClass(), column.field.getName(), o, rs.getString(index));
         } else if (column.field.getType().equals(Long.TYPE)) {
-            setValue(column.object.getClass(), column.field.getName(), o, rs.getLong(index));
+            setObjectValue(column.object.getClass(), column.field.getName(), o, rs.getLong(index));
         } else if (column.field.getType().equals(Integer.TYPE)) {
-            setValue(column.object.getClass(), column.field.getName(), o, rs.getInt(index));
+            setObjectValue(column.object.getClass(), column.field.getName(), o, rs.getInt(index));
         } else if (column.field.getType().equals(Boolean.TYPE)) {
-            setValue(column.object.getClass(), column.field.getName(), o, rs.getBoolean(index));
+            setObjectValue(column.object.getClass(), column.field.getName(), o, rs.getBoolean(index));
         } else {
             System.out.println(format("[%s] has unknown class: [%s]", column.columnName, column.field.getType().getName()));
         }

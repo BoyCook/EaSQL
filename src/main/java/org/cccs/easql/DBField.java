@@ -2,7 +2,7 @@ package org.cccs.easql;
 
 import java.lang.reflect.Field;
 
-import static org.cccs.easql.Utils.getObject;
+import static org.cccs.easql.util.ReflectionUtils.getObject;
 
 /**
  * User: boycook

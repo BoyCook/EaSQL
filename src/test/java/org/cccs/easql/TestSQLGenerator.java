@@ -5,13 +5,11 @@ import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.smartcardio.CardTerminal;
 import java.io.IOException;
 
-import static org.cccs.easql.ReflectiveSQLGenerator.*;
+import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
