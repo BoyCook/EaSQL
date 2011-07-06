@@ -11,6 +11,8 @@ import java.util.Collection;
 
 import static java.lang.String.format;
 import static org.cccs.easql.ReflectiveSQLGenerator.getColumns;
+import static org.cccs.easql.Utils.getObject;
+import static org.cccs.easql.Utils.setValue;
 
 /**
  * User: boycook
@@ -32,11 +34,12 @@ public class ReflectiveExtractor implements ResultSetExtractor<Collection<?>> {
         final Collection results = new ArrayList();
 
         while (rs.next()) {
-            Object o = getObject();
             for (DBField column: columns) {
-                setColumnValue(rs, column, o);
+                setColumnValue(rs, column, column.object);
+                if (getClassType().equals(column.object.getClass()) && !results.contains(column.object)) {
+                    results.add(column.object);
+                }
             }
-            results.add(o);
         }
 
         return results;
@@ -46,40 +49,16 @@ public class ReflectiveExtractor implements ResultSetExtractor<Collection<?>> {
         int index = rs.findColumn(column.columnName);
 
         if (column.field.getType().equals(String.class)) {
-            setValue(getClassType(), column.field.getName(), o, rs.getString(index));
+            setValue(column.object.getClass(), column.field.getName(), o, rs.getString(index));
         } else if (column.field.getType().equals(Long.TYPE)) {
-            setValue(getClassType(), column.field.getName(), o, rs.getLong(index));
+            setValue(column.object.getClass(), column.field.getName(), o, rs.getLong(index));
         } else if (column.field.getType().equals(Integer.TYPE)) {
-            setValue(getClassType(), column.field.getName(), o, rs.getInt(index));
+            setValue(column.object.getClass(), column.field.getName(), o, rs.getInt(index));
         } else if (column.field.getType().equals(Boolean.TYPE)) {
-            setValue(getClassType(), column.field.getName(), o, rs.getBoolean(index));
+            setValue(column.object.getClass(), column.field.getName(), o, rs.getBoolean(index));
         } else {
             System.out.println(format("[%s] has unknown class: [%s]", column.columnName, column.field.getType().getName()));
         }
-    }
-
-    private void setValue(Class c, String fieldName, Object o, Object value) {
-        Field field = null;
-        try {
-            field = c.getField(fieldName);
-            field.set(o, value);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Object getObject() {
-        Object o = null;
-        try {
-            o = classType.newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return o;
     }
 
     private Class getClassType() {

@@ -84,7 +84,7 @@ public class TestSQLGenerator {
 
     @Test
     public void reflectiveSQLBuilderShouldWorkForDogAndRelations() throws Exception {
-        String sql = "SELECT Dog.id, Dog.name, person2dog.id as person2dog_id, person2dog.name as person2dog_name, person2dog.email as person2dog_email, person2dog.phone as person2dog_phone FROM Dog LEFT OUTER JOIN Person person2dog ON Dog.id = person2dog.id";
+        String sql = "SELECT id, name, person2dog.id as person2dog_id, person2dog.name as person2dog_name, person2dog.email as person2dog_email, person2dog.phone as person2dog_phone FROM Dog LEFT OUTER JOIN Person person2dog ON Dog.id = person2dog.id";
         assertThat(generateSelectSQL(Dog.class, true), is(equalTo(sql)));
     }
 
@@ -96,7 +96,7 @@ public class TestSQLGenerator {
 
     @Test
     public void reflectiveSQLBuilderShouldWorkForCatAndRelations() throws Exception {
-        String sql = "SELECT Cat.id, Cat.name, person2cat.id as person2cat_id, person2cat.name as person2cat_name, person2cat.email as person2cat_email, person2cat.phone as person2cat_phone FROM Cat LEFT OUTER JOIN Person person2cat ON Cat.id = person2cat.id";
+        String sql = "SELECT id, name, person2cat.id as person2cat_id, person2cat.name as person2cat_name, person2cat.email as person2cat_email, person2cat.phone as person2cat_phone FROM Cat LEFT OUTER JOIN Person person2cat ON Cat.id = person2cat.id";
         assertThat(generateSelectSQL(Cat.class, true), is(equalTo(sql)));
     }
 

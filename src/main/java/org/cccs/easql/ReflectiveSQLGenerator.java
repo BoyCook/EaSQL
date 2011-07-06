@@ -27,6 +27,7 @@ public final class ReflectiveSQLGenerator {
     private final static String DELETE_TEMPLATE = "DELETE FROM %s WHERE %s;";
     private final static String CREATE_TEMPLATE = "CREATE TABLE %s (%s);";
     private final static String SEQUENCE_TEMPLATE = "(SELECT NEXT VALUE FOR %s FROM %s)";
+
     private static Map<Class, String[]> columnNames;
     private static Map<Class, DBField[]> columns;
 
@@ -90,7 +91,8 @@ public final class ReflectiveSQLGenerator {
 
             if (column != null) {
                 if (loadRelations) {
-                    appendColumn(select, tableName + "." + getColumnName(field));
+//                    appendColumn(select, tableName + "." + getColumnName(field));
+                    appendColumn(select, getColumnName(field));
                 } else {
                     appendColumn(select, getColumnName(field));
                 }
@@ -224,8 +226,8 @@ public final class ReflectiveSQLGenerator {
         Field[] fields = c.getFields();
         for (Field field : fields) {
             Column column = field.getAnnotation(Column.class);
-            if (column != null && !Collection.class.isAssignableFrom(field.getType())) {
-                columns.add(new DBField(field, column, getColumnName(field), ""));
+            if (column != null) {
+                columns.add(new DBField(field, getColumnName(field), ""));
             }
         }
         return columns.toArray(new DBField[columns.size()]);

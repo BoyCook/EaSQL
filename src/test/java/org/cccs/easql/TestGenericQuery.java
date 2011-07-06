@@ -15,6 +15,8 @@ import java.util.Collection;
 import static org.cccs.easql.ReflectiveSQLGenerator.generateSelectSQL;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -35,25 +37,51 @@ public class TestGenericQuery extends DataDrivenTestEnvironment {
     @Test
     public void executeQueryShouldWorkForJustClassForPerson() throws Exception {
         Collection<Person> results = query.execute(Person.class);
+        Person craig = (Person) results.toArray()[0];
         assertThat(results.size(), is(equalTo(1)));
+        assertCraig(craig);
     }
 
     @Test
     public void executeQueryShouldWorkForJustClassForDog() throws Exception {
-        Collection<Person> results = query.execute(Dog.class);
+        Collection<Dog> results = query.execute(Dog.class);
+        Dog lassie = (Dog) results.toArray()[0];
+
         assertThat(results.size(), is(equalTo(1)));
+        assertThat(lassie.id, is(equalTo(1l)));
+        assertThat(lassie.name, is(equalTo("Lassie")));
+        assertNull(lassie.owner);
     }
 
     @Test
     public void executeQueryShouldWorkForJustClassForCat() throws Exception {
-        Collection<Person> results = query.execute(Cat.class);
+        Collection<Cat> results = query.execute(Cat.class);
+        Cat bagpuss = (Cat) results.toArray()[0];
+
         assertThat(results.size(), is(equalTo(1)));
+        assertThat(bagpuss.id, is(equalTo(1l)));
+        assertThat(bagpuss.name, is(equalTo("Bagpuss")));
+        assertNull(bagpuss.owner);
     }
 
     @Test
     public void executeQueryShouldWorkWithRelations() throws Exception {
-        String sql = generateSelectSQL(Dog.class, true);
-        System.out.println(sql);
-        execute(sql);
+        Collection<Cat> results = query.execute(Cat.class, true);
+        Cat bagpuss = (Cat) results.toArray()[0];
+
+        //SELECT Cat.id, Cat.name, person2cat.id as person2cat_id, person2cat.name as person2cat_name, person2cat.email as person2cat_email, person2cat.phone as person2cat_phone FROM Cat LEFT OUTER JOIN Person person2cat ON Cat.id = person2cat.id
+
+        assertThat(results.size(), is(equalTo(1)));
+        assertThat(bagpuss.id, is(equalTo(1l)));
+        assertThat(bagpuss.name, is(equalTo("Bagpuss")));
+        assertCraig(bagpuss.owner);
+    }
+
+    private void assertCraig(Person craig) {
+        assertNotNull(craig);
+        assertThat(craig.id, is(equalTo(1l)));
+        assertThat(craig.name, is(equalTo("Craig")));
+        assertThat(craig.email, is(equalTo("craig@cook.com")));
+        assertThat(craig.phone, is(equalTo("07234123456")));
     }
 }

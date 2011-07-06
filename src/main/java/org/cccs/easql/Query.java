@@ -6,7 +6,7 @@ import javax.sql.DataSource;
 import java.util.Collection;
 
 import static org.cccs.easql.ReflectiveSQLGenerator.generateSelectSQL;
-import static org.cccs.easql.ReflectiveSQLGenerator.getColumns;
+import static org.cccs.easql.Utils.getDBColumns;
 
 /**
  * User: boycook
@@ -22,9 +22,13 @@ public class Query {
     }
 
     public Collection execute(final Class c)  {
-        final String sql = generateSelectSQL(c, false);
+        return execute(c, false);
+    }
+
+    public Collection execute(final Class c, boolean loadRelations)  {
+        final String sql = generateSelectSQL(c, loadRelations);
         final GenericQuery query = new GenericQuery(this.dataSource);
-        return query.execute(c, sql);
+        return query.execute(c, sql, loadRelations);
     }
 
     class GenericQuery extends JdbcTemplate {
@@ -32,8 +36,8 @@ public class Query {
             super(dataSource);
         }
 
-        public Collection execute(final Class c, final String sql){
-            return query(sql, new ReflectiveExtractor(c, getColumns(c)));
+        public Collection execute(final Class c, final String sql, boolean loadRelations){
+            return query(sql, new ReflectiveExtractor(c, getDBColumns(c, loadRelations)));
         }
     }
 }
