@@ -1,4 +1,4 @@
-package org.cccs.easql;
+package org.cccs.easql.execution;
 
 import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;

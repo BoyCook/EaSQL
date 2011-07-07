@@ -1,4 +1,4 @@
-package org.cccs.easql;
+package org.cccs.easql.execution;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.cccs.easql.domain.Cat;
