@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
+import static org.cccs.easql.util.ReflectionUtils.getColumnNames;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;

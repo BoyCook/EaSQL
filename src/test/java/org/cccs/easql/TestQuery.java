@@ -23,7 +23,7 @@ import static org.junit.Assert.assertThat;
  * Time: 19:08
  */
 @SuppressWarnings({"unchecked"})
-public class TestGenericQuery extends DataDrivenTestEnvironment {
+public class TestQuery extends DataDrivenTestEnvironment {
 
     private Query query;
 
@@ -66,8 +66,6 @@ public class TestGenericQuery extends DataDrivenTestEnvironment {
     public void executeQueryShouldWorkWithRelations() throws Exception {
         Collection<Cat> results = query.execute(Cat.class, true);
         Cat bagpuss = (Cat) results.toArray()[0];
-
-        //SELECT Cat.id, Cat.name, person2cat.id as person2cat_id, person2cat.name as person2cat_name, person2cat.email as person2cat_email, person2cat.phone as person2cat_phone FROM Cat LEFT OUTER JOIN Person person2cat ON Cat.id = person2cat.id
 
         assertThat(results.size(), is(equalTo(1)));
         assertThat(bagpuss.id, is(equalTo(1l)));

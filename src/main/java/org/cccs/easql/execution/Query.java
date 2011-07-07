@@ -37,7 +37,7 @@ public class Query {
         }
 
         public Collection execute(final Class c, final String sql, boolean loadRelations){
-            return query(sql, new ReflectiveExtractor(c, getExtractionMappings(c, loadRelations)));
+            return query(sql, new ReflectiveExtractor(c, loadRelations));
         }
     }
 }

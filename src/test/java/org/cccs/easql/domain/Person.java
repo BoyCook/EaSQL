@@ -28,14 +28,19 @@ public class Person {
     @Relation(cardinality = Cardinality.ONE_TO_MANY, key = "person_id")
     public Collection<Cat> cats;
 
+    public Person() {}
+
+    public Person(long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public Person(long id, String name, String email, String phone) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
     }
-
-    public Person() {}
 
     @Override
     public boolean equals(Object o) {

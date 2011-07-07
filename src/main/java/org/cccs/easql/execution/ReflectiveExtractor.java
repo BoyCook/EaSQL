@@ -10,6 +10,7 @@ import java.util.Collection;
 
 import org.cccs.easql.DBField;
 import static java.lang.String.format;
+import static org.cccs.easql.util.ReflectionUtils.getExtractionMappings;
 import static org.cccs.easql.util.ReflectionUtils.setObjectValue;
 
 /**
@@ -19,11 +20,11 @@ import static org.cccs.easql.util.ReflectionUtils.setObjectValue;
  */
 public class ReflectiveExtractor implements ResultSetExtractor<Collection<?>> {
     private final Class<?> classType;
-    private final DBField[] columns;
+    private final boolean loadRelations;
 
-    public ReflectiveExtractor(final Class<?> type, final DBField[] columns) {
+    public ReflectiveExtractor(final Class<?> type, boolean loadRelations) {
         this.classType = type;
-        this.columns = columns;
+        this.loadRelations = loadRelations;
     }
 
     @SuppressWarnings({"unchecked"})
@@ -31,7 +32,9 @@ public class ReflectiveExtractor implements ResultSetExtractor<Collection<?>> {
     public Collection<?> extractData(ResultSet rs) throws SQLException, DataAccessException {
         final Collection results = new ArrayList();
         while (rs.next()) {
-            for (DBField column: columns) {
+            DBField[] dbFields = getExtractionMappings(getClassType(), loadRelations);
+
+            for (DBField column: dbFields) {
                 setColumnValue(rs, column, column.object);
                 if (getClassType().equals(column.object.getClass()) && !results.contains(column.object)) {
                     results.add(column.object);
