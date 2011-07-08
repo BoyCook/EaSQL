@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
 import static org.hamcrest.Matchers.equalTo;
@@ -35,6 +37,16 @@ public class TestQuery extends DataDrivenTestEnvironment {
     @Test
     public void executeQueryShouldWorkForJustClassForPerson() throws Exception {
         Collection<Person> results = query.execute(Person.class);
+        Person craig = (Person) results.toArray()[0];
+        assertThat(results.size(), is(equalTo(3)));
+        assertCraig(craig);
+    }
+
+    @Test
+    public void executeQueryShouldWorkForWithWhereClause() throws Exception {
+        Map<String, String> where = new HashMap<String, String>();
+        where.put("id", "1");
+        Collection<Person> results = query.execute(Person.class, false, where);
         Person craig = (Person) results.toArray()[0];
         assertThat(results.size(), is(equalTo(1)));
         assertCraig(craig);
@@ -78,6 +90,6 @@ public class TestQuery extends DataDrivenTestEnvironment {
         assertThat(craig.id, is(equalTo(1l)));
         assertThat(craig.name, is(equalTo("Craig")));
         assertThat(craig.email, is(equalTo("craig@cook.com")));
-        assertThat(craig.phone, is(equalTo("07234123456")));
+        assertThat(craig.phone, is(equalTo("07345123456")));
     }
 }

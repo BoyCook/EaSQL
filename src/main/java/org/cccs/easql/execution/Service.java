@@ -1,5 +1,13 @@
 package org.cccs.easql.execution;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import javax.sql.DataSource;
+
+import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateInsertSQL;
+import static org.cccs.easql.util.ReflectionUtils.getPrimaryValue;
+import static org.cccs.easql.util.ReflectionUtils.getRelations;
+
 /**
  * User: boycook
  * Date: 07/07/2011
@@ -7,11 +15,23 @@ package org.cccs.easql.execution;
  */
 public class Service {
 
-    public void insert(Object o) {
-        //Generate INSERT sql for object
-        //Check for any @Relation annotations - these will require sub-selects for ID's
+    private DataSource dataSource;
 
-        throw new UnsupportedOperationException();
+    public Service(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public void insert(Object o) {
+        String sql = generateInsertSQL(o);
+        Object[] relations = getRelations(o);
+
+        if (relations.length > 0) {
+            for (Object relatedObject : relations) {
+                sql = sql.replaceFirst("%s", String.valueOf(getPrimaryValue(relatedObject)));
+            }
+        }
+
+        execute(sql);
     }
 
     public void update(Object o) {
@@ -20,5 +40,11 @@ public class Service {
 
     public void delete(Object o) {
         throw new UnsupportedOperationException();
+    }
+
+    private void execute(String sql) {
+        System.out.println(sql);
+        JdbcTemplate db = new JdbcTemplate(this.dataSource);
+        db.execute(sql);
     }
 }

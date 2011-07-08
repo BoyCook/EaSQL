@@ -5,9 +5,6 @@ import org.cccs.easql.Column;
 import org.cccs.easql.Relation;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -46,7 +43,7 @@ public final class ReflectiveSQLGenerator {
 
             if (column != null) {
                 String columnName = getColumnName(field);
-                Object columnValue = getColumnValue(field, o);
+                Object columnValue = getFieldValue(field, o);
 
                 if (column.mandatory() && columnValue == null) {
                     throw new IllegalArgumentException(columnName + " must be specified");
@@ -121,7 +118,7 @@ public final class ReflectiveSQLGenerator {
 
             if (column != null) {
                 String columnName = getColumnName(field);
-                Object columnValue = getColumnValue(field, o);
+                Object columnValue = getFieldValue(field, o);
 
                 if (column.mandatory() && columnValue == null) {
                     throw new IllegalArgumentException(columnName + " must be specified");
@@ -148,7 +145,7 @@ public final class ReflectiveSQLGenerator {
             Column column = field.getAnnotation(Column.class);
 
             if (column != null && column.primaryKey()) {
-                Object columnValue = getColumnValue(field, o);
+                Object columnValue = getFieldValue(field, o);
                 where = getColumnName(field) + " = " + columnValue ;
             }
         }
@@ -180,6 +177,27 @@ public final class ReflectiveSQLGenerator {
 
     public static String generateDropSQL(Object o) {
         throw new UnsupportedOperationException("Drop is not yet supported");
+    }
+
+    public static String generateWhere(Map<String, String> whereClauses) {
+        StringBuilder where = new StringBuilder();
+
+        for (String key : whereClauses.keySet()) {
+            String value = whereClauses.get(key);
+
+            if (where.length() == 0) {
+                where.append(" WHERE ");
+            } else {
+                where.append(" AND ");
+            }
+
+            where.append(key);
+            where.append(" = '");
+            where.append(value);
+            where.append("' ");
+        }
+
+        return where.toString();
     }
 
     private static void appendColumn(StringBuilder select, String column) {

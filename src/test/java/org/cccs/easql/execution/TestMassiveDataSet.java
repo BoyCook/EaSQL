@@ -36,7 +36,7 @@ public class TestMassiveDataSet extends DataDrivenTestEnvironment {
     public void testDataShouldInstall() {
         installMassiveDataSet();
         Collection people = query.execute(Person.class);
-        assertThat(people.size(), is(equalTo(9999)));
+        assertThat(people.size(), is(equalTo(9998)));
 
 //        Collection dogs = query.execute(Dog.class);
 //        assertThat(dogs.size(), is(equalTo(9999)));
@@ -50,7 +50,7 @@ public class TestMassiveDataSet extends DataDrivenTestEnvironment {
 
         List<Person> people = new ArrayList<Person>();
 
-        for (int i=2; i<10000; i++) {
+        for (int i=5; i<10000; i++) {
             Person person = new Person(i, "Person" + i);
             people.add(person);
             sql.append(generateInsertSQL(person));

@@ -1,6 +1,8 @@
 package org.cccs.easql.util;
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.cccs.easql.*;
+import org.cccs.easql.domain.Pair;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -36,6 +38,19 @@ public final class ReflectionUtils {
         return null;
     }
 
+    public static Object getPrimaryValue(Object o) {
+        Class c = o.getClass();
+        Field[] fields = c.getFields();
+        Object primary = null;
+        for (Field field : fields) {
+            Column column = field.getAnnotation(Column.class);
+            if (column != null && column.primaryKey()) {
+                primary = getFieldValue(field, o);
+            }
+        }
+        return primary;
+    }
+
     public static String getColumnName(Field field) {
         Column column = field.getAnnotation(Column.class);
         return isNotEmpty(column.name()) ? column.name() : field.getName();
@@ -59,16 +74,16 @@ public final class ReflectionUtils {
         return table != null ? table.name() : c.getSimpleName();
     }
 
-    public static Object getColumnValue(Field field, Object o) {
-        Object columnValue = null;
+    public static Object getFieldValue(Field field, Object o) {
+        Object value = null;
 
         try {
-            columnValue = field.get(o);
+            value = field.get(o);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
 
-        return columnValue;
+        return value;
     }
 
     public static String value(Object value) {
@@ -119,7 +134,7 @@ public final class ReflectionUtils {
 
                         for (DBField relatedColumn : relatedColumns) {
                             columns.add(new DBField(relatedColumn.field, relation.name() + "_" + relatedColumn.columnName, "", relatedO));
-                            setObjectValue(c, field.getName(), o, relatedO);
+                            setObjectValue(field.getName(), o, relatedO);
                         }
                     } else {
                         columns.add(new DBField(field, relation.key(), "", o));
@@ -130,7 +145,8 @@ public final class ReflectionUtils {
         return columns.toArray(new DBField[columns.size()]);
     }
 
-    public static void setObjectValue(Class c, String fieldName, Object o, Object value) {
+    public static void setObjectValue(String fieldName, Object o, Object value) {
+        Class c = o.getClass();
         Field field = null;
         try {
             field = c.getField(fieldName);
@@ -182,5 +198,46 @@ public final class ReflectionUtils {
             }
         }
         return columns.toArray(new DBField[columns.size()]);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    public static Object[] getRelatedValues(Object o) {
+        Class c = o.getClass();
+        Field[] fields = c.getFields();
+        Collection values = new ArrayList();
+
+        for (Field field : fields) {
+            Relation relation = field.getAnnotation(Relation.class);
+            if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
+                values.add(getFieldValue(field, c));
+            }
+        }
+        return values.toArray();
+    }
+
+    public static Object[] getRelations(Object o) {
+        Collection<Object> relations = new ArrayList<Object>();
+        Class c = o.getClass();
+        Field[] fields = c.getFields();
+        for (Field field : fields) {
+            Relation relation = field.getAnnotation(Relation.class);
+            if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
+                relations.add(getFieldValue(field, o));
+            }
+        }
+        return relations.toArray(new Object[relations.size()]);
+    }
+
+    @Deprecated
+    public static Pair[] getRelations(Class c) {
+        Collection<Pair> relations = new ArrayList<Pair>();
+        Field[] fields = c.getFields();
+        for (Field field : fields) {
+            Relation relation = field.getAnnotation(Relation.class);
+            if (relation != null) {
+                relations.add(new Pair(relation, field));
+            }
+        }
+        return relations.toArray(new Pair[relations.size()]);
     }
 }

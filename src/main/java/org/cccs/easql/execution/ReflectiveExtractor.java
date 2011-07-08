@@ -48,13 +48,13 @@ public class ReflectiveExtractor implements ResultSetExtractor<Collection<?>> {
         int index = rs.findColumn(column.columnName);
 
         if (column.field.getType().equals(String.class)) {
-            setObjectValue(column.object.getClass(), column.field.getName(), o, rs.getString(index));
+            setObjectValue(column.field.getName(), o, rs.getString(index));
         } else if (column.field.getType().equals(Long.TYPE)) {
-            setObjectValue(column.object.getClass(), column.field.getName(), o, rs.getLong(index));
+            setObjectValue(column.field.getName(), o, rs.getLong(index));
         } else if (column.field.getType().equals(Integer.TYPE)) {
-            setObjectValue(column.object.getClass(), column.field.getName(), o, rs.getInt(index));
+            setObjectValue(column.field.getName(), o, rs.getInt(index));
         } else if (column.field.getType().equals(Boolean.TYPE)) {
-            setObjectValue(column.object.getClass(), column.field.getName(), o, rs.getBoolean(index));
+            setObjectValue(column.field.getName(), o, rs.getBoolean(index));
         } else {
             System.out.println(format("[%s] has unknown class: [%s]", column.columnName, column.field.getType().getName()));
         }
