@@ -43,7 +43,6 @@ public class Service {
     }
 
     private void execute(String sql) {
-        System.out.println(sql);
         JdbcTemplate db = new JdbcTemplate(this.dataSource);
         db.execute(sql);
     }

@@ -26,10 +26,12 @@ import static org.junit.Assert.assertThat;
 public class TestMassiveDataSet extends DataDrivenTestEnvironment {
 
     private Query query;
+    private Service service;
 
     @Before
     public void beforeEach() {
         query = new Query(getDataSource());
+        service = new Service(getDataSource());
     }
 
     @Test
@@ -38,33 +40,28 @@ public class TestMassiveDataSet extends DataDrivenTestEnvironment {
         Collection people = query.execute(Person.class);
         assertThat(people.size(), is(equalTo(9998)));
 
-//        Collection dogs = query.execute(Dog.class);
-//        assertThat(dogs.size(), is(equalTo(9999)));
-//
-//        Collection cats = query.execute(Cat.class);
-//        assertThat(cats.size(), is(equalTo(9999)));
+        Collection dogs = query.execute(Dog.class);
+        assertThat(dogs.size(), is(equalTo(9996)));
+
+        Collection cats = query.execute(Cat.class);
+        assertThat(cats.size(), is(equalTo(9996)));
     }
 
     private void installMassiveDataSet() {
-        StringBuilder sql = new StringBuilder();
-
         List<Person> people = new ArrayList<Person>();
 
         for (int i=5; i<10000; i++) {
             Person person = new Person(i, "Person" + i);
             people.add(person);
-            sql.append(generateInsertSQL(person));
+            service.insert(person);
         }
 
-//        for (int i=2; i<10000; i++) {
-//            sql.append(generateInsertSQL(new Dog(i, "Dog" + i, people.get(i-2))));
-//        }
-//
-//        for (int i=2; i<10000; i++) {
-//            sql.append(generateInsertSQL(new Cat(i, "Cat" + i, people.get(i-2))));
-//        }
+        for (int i=5; i<10000; i++) {
+            service.insert(new Dog(i, "Dog" + i, people.get(i-5)));
+        }
 
-        JdbcTemplate db = new JdbcTemplate(getDataSource());
-        db.execute(sql.toString());
+        for (int i=5; i<10000; i++) {
+            service.insert(new Cat(i, "Cat" + i, people.get(i-5)));
+        }
     }
 }

@@ -1,9 +1,12 @@
 package org.cccs.easql.execution;
 
+import org.cccs.easql.Cardinality;
+import org.cccs.easql.Relation;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StopWatch;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +15,7 @@ import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateWhere;
+import static org.cccs.easql.util.ReflectionUtils.*;
 
 /**
  * User: boycook
@@ -43,7 +47,29 @@ public class Query {
         }
 
         final GenericQuery query = new GenericQuery(this.dataSource);
-        return query.execute(c, sql, loadRelations);
+        Collection results = query.execute(c, sql, loadRelations);
+
+        if (loadRelations && hasOneToMany(c)) {
+            loadRelatedEntities(results);
+        }
+
+        return results;
+    }
+
+    private void loadRelatedEntities(Collection results) {
+        for (Object result : results) {
+            Class c = result.getClass();
+            Field[] fields = c.getFields();
+            for (Field field : fields) {
+                Relation relation = field.getAnnotation(Relation.class);
+                if (relation != null && relation.cardinality().equals(Cardinality.ONE_TO_MANY)) {
+                    Class relatedClass = getGenericType(field);
+                    Map<String, String> where = new HashMap<String, String>();
+                    where.put(relation.key(), getPrimaryValue(result).toString());
+                    setObjectValue(field, result, execute(relatedClass, false, where));
+                }
+            }
+        }
     }
 
     class GenericQuery extends JdbcTemplate {

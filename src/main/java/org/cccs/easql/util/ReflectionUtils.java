@@ -1,10 +1,10 @@
 package org.cccs.easql.util;
 
-import com.sun.org.apache.regexp.internal.RE;
 import org.cccs.easql.*;
 import org.cccs.easql.domain.Pair;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,6 +54,17 @@ public final class ReflectionUtils {
     public static String getColumnName(Field field) {
         Column column = field.getAnnotation(Column.class);
         return isNotEmpty(column.name()) ? column.name() : field.getName();
+    }
+
+    public static boolean hasOneToMany(Class c) {
+        Field[] fields = c.getFields();
+        for (Field field : fields) {
+            Relation relation = field.getAnnotation(Relation.class);
+            if (relation != null && relation.cardinality().equals(Cardinality.ONE_TO_MANY)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static String getColumnType(Field field) {
@@ -134,7 +145,7 @@ public final class ReflectionUtils {
 
                         for (DBField relatedColumn : relatedColumns) {
                             columns.add(new DBField(relatedColumn.field, relation.name() + "_" + relatedColumn.columnName, "", relatedO));
-                            setObjectValue(field.getName(), o, relatedO);
+                            setObjectValue(field, o, relatedO);
                         }
                     } else {
                         columns.add(new DBField(field, relation.key(), "", o));
@@ -145,14 +156,10 @@ public final class ReflectionUtils {
         return columns.toArray(new DBField[columns.size()]);
     }
 
-    public static void setObjectValue(String fieldName, Object o, Object value) {
+    public static void setObjectValue(Field field, Object o, Object value) {
         Class c = o.getClass();
-        Field field = null;
         try {
-            field = c.getField(fieldName);
             field.set(o, value);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -226,6 +233,11 @@ public final class ReflectionUtils {
             }
         }
         return relations.toArray(new Object[relations.size()]);
+    }
+
+    public static Class getGenericType(Field field) {
+        ParameterizedType stringListType = (ParameterizedType) field.getGenericType();
+        return (Class<?>) stringListType.getActualTypeArguments()[0];
     }
 
     @Deprecated

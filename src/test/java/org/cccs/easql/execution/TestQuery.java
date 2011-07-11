@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -40,6 +41,16 @@ public class TestQuery extends DataDrivenTestEnvironment {
         Person craig = (Person) results.toArray()[0];
         assertThat(results.size(), is(equalTo(3)));
         assertCraig(craig);
+    }
+
+    @Test
+    public void executeQueryShouldWorkForOneToManyRelations() throws Exception {
+        Collection<Person> results = query.execute(Person.class, true);
+        Person craig = (Person) results.toArray()[0];
+        assertThat(results.size(), is(equalTo(3)));
+        assertCraig(craig);
+        assertThat(craig.cats.size(), is(equalTo(1)));
+        assertThat(craig.dogs.size(), is(equalTo(1)));
     }
 
     @Test
