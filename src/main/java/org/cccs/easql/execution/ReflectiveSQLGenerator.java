@@ -9,7 +9,9 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.util.ReflectionUtils.*;
+import static org.cccs.easql.util.ClassUtils.*;
+import static org.cccs.easql.util.ObjectUtils.getFieldValue;
+import static org.cccs.easql.util.ObjectUtils.value;
 
 /**
  * User: boycook
@@ -198,6 +200,10 @@ public final class ReflectiveSQLGenerator {
         }
 
         return where.toString();
+    }
+
+    private static String getJoinColumnName(String joinTable, String joinColumn) {
+        return joinTable + "." + joinColumn + " as " + joinTable + "_" + joinColumn;
     }
 
     private static void appendColumn(StringBuilder select, String column) {

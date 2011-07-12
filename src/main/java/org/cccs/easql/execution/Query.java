@@ -2,6 +2,8 @@ package org.cccs.easql.execution;
 
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.Relation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StopWatch;
 
@@ -15,7 +17,9 @@ import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateWhere;
-import static org.cccs.easql.util.ReflectionUtils.*;
+import static org.cccs.easql.util.ClassUtils.*;
+import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
+import static org.cccs.easql.util.ObjectUtils.setObjectValue;
 
 /**
  * User: boycook
@@ -24,6 +28,7 @@ import static org.cccs.easql.util.ReflectionUtils.*;
  */
 public class Query {
 
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private DataSource dataSource;
 
     public Query(final DataSource dataSource) {
@@ -38,6 +43,7 @@ public class Query {
         return execute(c, loadRelations, new HashMap<String, String>());
     }
 
+    //TODO: implement a better way of generating where clauses
     public Collection execute(final Class c, boolean loadRelations, Map<String, String> whereClauses)  {
         String sql = generateSelectSQL(c, loadRelations);
         final String where = generateWhere(whereClauses);
@@ -84,7 +90,7 @@ public class Query {
             clock.start();
             Collection<?> results = query(sql, new ReflectiveExtractor(c, loadRelations));
             clock.stop();
-            System.out.println(format("Executing SQL [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
+            log.debug(format("Executing SQL [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
             return results;
         }
     }

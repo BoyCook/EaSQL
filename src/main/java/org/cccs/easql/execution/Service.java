@@ -1,12 +1,11 @@
 package org.cccs.easql.execution;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-
 import javax.sql.DataSource;
 
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateInsertSQL;
-import static org.cccs.easql.util.ReflectionUtils.getPrimaryValue;
-import static org.cccs.easql.util.ReflectionUtils.getRelations;
+import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
+import static org.cccs.easql.util.ObjectUtils.getRelations;
 
 /**
  * User: boycook

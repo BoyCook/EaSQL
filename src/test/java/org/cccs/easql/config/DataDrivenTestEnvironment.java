@@ -76,7 +76,6 @@ public class DataDrivenTestEnvironment {
 
     public void execute(String sql) {
         JdbcTemplate db = new JdbcTemplate(getDataSource());
-        System.out.println("Executing SQL: " + sql);
         db.execute(sql);
     }
 
