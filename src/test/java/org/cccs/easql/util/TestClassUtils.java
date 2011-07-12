@@ -2,9 +2,12 @@ package org.cccs.easql.util;
 
 import org.cccs.easql.ColumnMapping;
 import org.cccs.easql.domain.Cat;
+import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
 import org.junit.Test;
+
+import java.lang.reflect.Field;
 
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -65,27 +68,54 @@ public class TestClassUtils {
     }
 
     @Test
-    public void getColumnNameShouldWork() {
+    public void getColumnNameShouldWork() throws NoSuchFieldException {
+        Field personId = Person.class.getField("id");
+        assertColumnName(personId, "id");
 
+        Field cntId = Country.class.getField("id");
+        assertColumnName(cntId, "cntId");
+    }
+
+    private void assertColumnName(Field field, String name) {
+        assertThat(getColumnName(field), is(equalTo(name)));
     }
 
     @Test
-    public void getColumnTypeShouldWork() {
+    public void getColumnTypeShouldWork() throws NoSuchFieldException {
+        Field personId = Person.class.getField("id");
+        Field personName = Person.class.getField("name");
+        assertColumnType(personId, "INTEGER");
+        assertColumnType(personName, "VARCHAR");
+    }
 
+    private void assertColumnType(Field field, String type) {
+        assertThat(getColumnType(field), is(equalTo(type)));
     }
 
     @Test
     public void getTableNameShouldWork() {
+        assertTableName(Person.class, "Person");
+        assertTableName(Country.class, "countries");
+    }
 
+    private void assertTableName(Class c, String name) {
+        assertThat(getTableName(c), is(equalTo(name)));
     }
 
     @Test
     public void getExtractionMappingsShouldWork() {
-
+        //TODO: implement this
     }
 
     @Test
-    public void getGenericTypeShouldWork() {
+    public void getGenericTypeShouldWork() throws NoSuchFieldException {
+        Field dogs = Person.class.getField("dogs");
+        Field cats = Person.class.getField("cats");
+        assertGenericType(dogs, Dog.class);
+        assertGenericType(cats, Cat.class);
+    }
 
+    private void assertGenericType(Field field, Class c) {
+        assertThat(getGenericType(field), is(equalTo(c)));
     }
 }
