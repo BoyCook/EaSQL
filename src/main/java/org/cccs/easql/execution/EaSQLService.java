@@ -6,14 +6,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateInsertSQL;
 import static org.cccs.easql.util.ClassUtils.getPrimaryColumn;
 import static org.cccs.easql.util.ClassUtils.hasRelations;
-import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
-import static org.cccs.easql.util.ObjectUtils.getRelations;
+import static org.cccs.easql.util.ObjectUtils.*;
 
 /**
  * User: boycook
@@ -66,9 +67,12 @@ public class EaSQLService {
         if (hasRelations(o.getClass(), Cardinality.ONE_TO_MANY)) {
             System.out.println("Object has Collections, checking...");
 
-            Object[] dbRelations = getRelations(inDB, Cardinality.ONE_TO_MANY);
-            Object[] relations = getRelations(o, Cardinality.ONE_TO_MANY);
+            Field[] fields = getRelationFields(o.getClass(), Cardinality.ONE_TO_MANY);
 
+            for (Field field : fields) {
+                Collection dbList = (Collection) getFieldValue(field, inDB);
+                Collection list = (Collection) getFieldValue(field, o);
+            }
 
             //TODO diff items in Collections and create UPDATE SQL from diff
         }

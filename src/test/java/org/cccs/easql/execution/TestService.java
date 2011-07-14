@@ -4,6 +4,7 @@ import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Person;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -40,6 +41,7 @@ public class TestService extends DataDrivenTestEnvironment {
         service.insert(garfield);
     }
 
+    @Ignore
     @Test
     public void updateShouldWork() {
         craig.email = "SomeNewEmail";
