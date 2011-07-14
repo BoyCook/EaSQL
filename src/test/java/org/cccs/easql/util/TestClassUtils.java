@@ -1,5 +1,6 @@
 package org.cccs.easql.util;
 
+import org.cccs.easql.Cardinality;
 import org.cccs.easql.ColumnMapping;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Country;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 
 import static org.cccs.easql.util.ClassUtils.*;
+import static org.cccs.easql.util.ObjectUtils.getRelationFields;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -57,14 +59,31 @@ public class TestClassUtils {
     }
 
     @Test
-    public void hasOneToManyShouldWork() {
-        assertOneToMany(Person.class, true);
-        assertOneToMany(Dog.class, false);
-        assertOneToMany(Cat.class, false);
+    public void getRelationsShouldWork() {
+        assertRelations(Person.class, Cardinality.ONE_TO_MANY, true);
+        assertRelations(Person.class, Cardinality.MANY_TO_ONE, false);
+        assertRelations(Dog.class, Cardinality.ONE_TO_MANY, false);
+        assertRelations(Dog.class, Cardinality.MANY_TO_ONE, true);
+        assertRelations(Cat.class, Cardinality.ONE_TO_MANY, false);
+        assertRelations(Cat.class, Cardinality.MANY_TO_ONE, true);
     }
 
-    private void assertOneToMany(Class c, boolean has) {
-        assertThat(hasOneToMany(c), is(has));
+    private void assertRelations(Class c, Cardinality cardinality, boolean has) {
+        assertThat(hasRelations(c, cardinality), is(has));
+    }
+
+    @Test
+    public void getRelationFieldsShouldWork() {
+        assertRelationFields(Person.class, Cardinality.ONE_TO_MANY, 2);
+        assertRelationFields(Person.class, Cardinality.MANY_TO_ONE, 0);
+        assertRelationFields(Dog.class, Cardinality.ONE_TO_MANY, 0);
+        assertRelationFields(Dog.class, Cardinality.MANY_TO_ONE, 1);
+        assertRelationFields(Cat.class, Cardinality.ONE_TO_MANY, 0);
+        assertRelationFields(Cat.class, Cardinality.MANY_TO_ONE, 1);
+    }
+
+    private void assertRelationFields(Class c, Cardinality cardinality, int cnt) {
+        assertThat(getRelationFields(c, cardinality).length, is(equalTo(cnt)));
     }
 
     @Test

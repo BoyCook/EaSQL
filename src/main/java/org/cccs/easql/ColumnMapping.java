@@ -1,7 +1,7 @@
 package org.cccs.easql;
 
 import java.lang.reflect.Field;
-import static org.cccs.easql.util.ObjectUtils.getObject;
+import static org.cccs.easql.util.ObjectUtils.getNewObject;
 
 
 /**
@@ -17,7 +17,7 @@ public class ColumnMapping {
     public Object object;
 
     public ColumnMapping(Field field, String columnName, String dataType) {
-        this(field, columnName, dataType, getObject(field.getType()));
+        this(field, columnName, dataType, getNewObject(field.getType()));
     }
 
     public ColumnMapping(Field field, String columnName, String dataType, Object object) {

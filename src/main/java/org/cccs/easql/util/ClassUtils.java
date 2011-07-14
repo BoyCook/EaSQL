@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.util.ObjectUtils.getObject;
+import static org.cccs.easql.util.ObjectUtils.getNewObject;
 import static org.cccs.easql.util.ObjectUtils.setObjectValue;
 
 /**
@@ -94,11 +94,11 @@ public final class ClassUtils {
         return null;
     }
 
-    public static boolean hasOneToMany(Class c) {
+    public static boolean hasRelations(Class c, Cardinality cardinality) {
         Field[] fields = c.getFields();
         for (Field field : fields) {
             Relation relation = field.getAnnotation(Relation.class);
-            if (relation != null && relation.cardinality().equals(Cardinality.ONE_TO_MANY)) {
+            if (relation != null && relation.cardinality().equals(cardinality)) {
                 return true;
             }
         }
@@ -137,7 +137,7 @@ public final class ClassUtils {
     public static ColumnMapping[] getExtractionMappings(Class c, boolean loadRelations)  {
         Collection<ColumnMapping> columns = new ArrayList<ColumnMapping>();
         Field[] fields = c.getFields();
-        Object o = getObject(c);
+        Object o = getNewObject(c);
 
         for (Field field : fields) {
             Column column = field.getAnnotation(Column.class);
@@ -152,7 +152,7 @@ public final class ClassUtils {
                 if (relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
                     if (loadRelations) {
                         ColumnMapping[] relatedColumns = getColumns(field.getType());
-                        Object relatedO = getObject(field.getType());
+                        Object relatedO = getNewObject(field.getType());
 
                         for (ColumnMapping relatedColumn : relatedColumns) {
                             columns.add(new ColumnMapping(relatedColumn.field, relation.name() + "_" + relatedColumn.columnName, "", relatedO));

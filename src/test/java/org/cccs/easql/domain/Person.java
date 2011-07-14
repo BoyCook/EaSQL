@@ -46,22 +46,21 @@ public class Person {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Person person = (Person) o;
-        return id == person.id && name.equals(person.name);
+
+        return id == person.id &&
+                !(email != null ? !email.equals(person.email) : person.email != null) &&
+                !(name != null ? !name.equals(person.name) : person.name != null) &&
+                !(phone != null ? !phone.equals(person.phone) : person.phone != null);
     }
 
     @Override
     public int hashCode() {
         int result = (int) (id ^ (id >>> 32));
-        result = 31 * result + name.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        result = 31 * result + (phone != null ? phone.hashCode() : 0);
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Person{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
     }
 }

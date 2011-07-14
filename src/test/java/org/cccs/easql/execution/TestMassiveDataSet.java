@@ -4,16 +4,13 @@ import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
-import org.cccs.easql.execution.Query;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateInsertSQL;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -25,13 +22,13 @@ import static org.junit.Assert.assertThat;
  */
 public class TestMassiveDataSet extends DataDrivenTestEnvironment {
 
-    private Query query;
-    private Service service;
+    private EaSQLQuery query;
+    private EaSQLService service;
 
     @Before
     public void beforeEach() {
-        query = new Query(getDataSource());
-        service = new Service(getDataSource());
+        query = new EaSQLQuery(getDataSource());
+        service = new EaSQLService(getDataSource());
     }
 
     @Test

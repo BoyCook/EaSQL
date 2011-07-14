@@ -15,14 +15,14 @@ import java.util.Collection;
  */
 public class TestService extends DataDrivenTestEnvironment {
 
-    private Service service;
-    private Query query;
+    private EaSQLService service;
+    private EaSQLQuery query;
     private Person craig;
 
     @Before
     public void beforeEach() {
-        service = new Service(getDataSource());
-        query = new Query(getDataSource());
+        service = new EaSQLService(getDataSource());
+        query = new EaSQLQuery(getDataSource());
 
         Collection people = query.execute(Person.class);
         craig = (Person) people.toArray()[0];
@@ -38,5 +38,11 @@ public class TestService extends DataDrivenTestEnvironment {
     public void createWithRelationsShouldWork() {
         Cat garfield = new Cat(2, "garfield", craig);
         service.insert(garfield);
+    }
+
+    @Test
+    public void updateShouldWork() {
+        craig.email = "SomeNewEmail";
+        service.update(craig);
     }
 }

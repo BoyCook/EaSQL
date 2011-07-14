@@ -58,20 +58,32 @@ public final class ObjectUtils {
         }
     }
 
-    public static Object[] getRelations(Object o) {
+    public static Field[] getRelationFields(Class c, Cardinality cardinality) {
+        Collection<Field> relations = new ArrayList<Field>();
+        Field[] fields = c.getFields();
+        for (Field field : fields) {
+            Relation relation = field.getAnnotation(Relation.class);
+            if (relation != null && relation.cardinality().equals(cardinality)) {
+                relations.add(field);
+            }
+        }
+        return relations.toArray(new Field[relations.size()]);
+    }
+
+    public static Object[] getRelations(Object o, Cardinality cardinality) {
         Collection<Object> relations = new ArrayList<Object>();
         Class c = o.getClass();
         Field[] fields = c.getFields();
         for (Field field : fields) {
             Relation relation = field.getAnnotation(Relation.class);
-            if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
+            if (relation != null && relation.cardinality().equals(cardinality)) {
                 relations.add(getFieldValue(field, o));
             }
         }
         return relations.toArray(new Object[relations.size()]);
     }
 
-    public static Object getObject(Class c) {
+    public static Object getNewObject(Class c) {
         Object o = null;
         try {
             o = c.newInstance();

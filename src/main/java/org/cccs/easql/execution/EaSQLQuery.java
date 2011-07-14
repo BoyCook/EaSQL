@@ -26,12 +26,12 @@ import static org.cccs.easql.util.ObjectUtils.setObjectValue;
  * Date: 22/06/2011
  * Time: 14:17
  */
-public class Query {
+public class EaSQLQuery {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private DataSource dataSource;
 
-    public Query(final DataSource dataSource) {
+    public EaSQLQuery(final DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -44,6 +44,7 @@ public class Query {
     }
 
     //TODO: implement a better way of generating where clauses
+    //TODO: throw exception if Class is incorrectly annotated
     public Collection execute(final Class c, boolean loadRelations, Map<String, String> whereClauses)  {
         String sql = generateSelectSQL(c, loadRelations);
         final String where = generateWhere(whereClauses);
@@ -55,7 +56,7 @@ public class Query {
         final GenericQuery query = new GenericQuery(this.dataSource);
         Collection results = query.execute(c, sql, loadRelations);
 
-        if (loadRelations && hasOneToMany(c)) {
+        if (loadRelations && hasRelations(c, Cardinality.ONE_TO_MANY)) {
             loadRelatedEntities(results);
         }
 
