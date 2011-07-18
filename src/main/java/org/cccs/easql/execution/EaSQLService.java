@@ -12,8 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateInsertSQL;
-import static org.cccs.easql.util.ClassUtils.getPrimaryColumn;
-import static org.cccs.easql.util.ClassUtils.hasRelations;
+import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.*;
 
 /**
@@ -70,8 +69,12 @@ public class EaSQLService {
             Field[] fields = getRelationFields(o.getClass(), Cardinality.ONE_TO_MANY);
 
             for (Field field : fields) {
+                System.out.println("Getting values for: " + getColumnName(field));
                 Collection dbList = (Collection) getFieldValue(field, inDB);
                 Collection list = (Collection) getFieldValue(field, o);
+
+//                System.out.println(field.getName() +  " original cnt: " + dbList.size());
+//                System.out.println(field.getName() +  " updated cnt: " + list.size());
             }
 
             //TODO diff items in Collections and create UPDATE SQL from diff

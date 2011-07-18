@@ -122,6 +122,18 @@ public final class ClassUtils {
         return null;
     }
 
+    public static Field[] getRelationFields(Class c, Cardinality cardinality) {
+        Collection<Field> relations = new ArrayList<Field>();
+        Field[] fields = c.getFields();
+        for (Field field : fields) {
+            Relation relation = field.getAnnotation(Relation.class);
+            if (relation != null && relation.cardinality().equals(cardinality)) {
+                relations.add(field);
+            }
+        }
+        return relations.toArray(new Field[relations.size()]);
+    }
+
     @SuppressWarnings({"unchecked"})
     public static String getTableName(Class c) {
         String name = tables.get(c);

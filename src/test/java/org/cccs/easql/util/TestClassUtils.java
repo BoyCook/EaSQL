@@ -11,7 +11,6 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 
 import static org.cccs.easql.util.ClassUtils.*;
-import static org.cccs.easql.util.ObjectUtils.getRelationFields;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;

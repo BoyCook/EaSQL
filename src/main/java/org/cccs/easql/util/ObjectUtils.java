@@ -58,18 +58,6 @@ public final class ObjectUtils {
         }
     }
 
-    public static Field[] getRelationFields(Class c, Cardinality cardinality) {
-        Collection<Field> relations = new ArrayList<Field>();
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
-            Relation relation = field.getAnnotation(Relation.class);
-            if (relation != null && relation.cardinality().equals(cardinality)) {
-                relations.add(field);
-            }
-        }
-        return relations.toArray(new Field[relations.size()]);
-    }
-
     public static Object[] getRelations(Object o, Cardinality cardinality) {
         Collection<Object> relations = new ArrayList<Object>();
         Class c = o.getClass();
