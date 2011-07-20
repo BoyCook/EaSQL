@@ -37,6 +37,10 @@ public final class ObjectUtils {
         }
     }
 
+    public static long getPrimaryValueAsLong(Object o) {
+        return (Long) getPrimaryValue(o);
+    }
+
     public static Object getPrimaryValue(Object o) {
         Class c = o.getClass();
         Field[] fields = c.getFields();

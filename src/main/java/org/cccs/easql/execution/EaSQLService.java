@@ -7,13 +7,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateInsertSQL;
+import static java.lang.String.format;
+import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.*;
+import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
 
 /**
  * User: boycook
@@ -55,43 +58,79 @@ public class EaSQLService {
         - For Many2Many ??? assume link table...
      */
     public void update(Object o) {
+        StringBuilder insertSQL = new StringBuilder();
+        StringBuilder updateSQL = new StringBuilder();
+        StringBuilder deleteSQL = new StringBuilder();
+        long objectKey = getPrimaryValueAsLong(o);
         Object inDB = findInDB(o);
 
         if (!inDB.equals(o)) {
             System.out.println("Objects are different");
             //TODO create UPDATE SQL from diff
+            updateSQL.append(generateUpdateSQL(o));
         }
 
         //Checking Collections
+        //TODO diff items in Collections and create UPDATE SQL from diff
         if (hasRelations(o.getClass(), Cardinality.ONE_TO_MANY)) {
-            System.out.println("Object has Collections, checking...");
-
+            System.out.println("Checking One2Many...");
             Field[] fields = getRelationFields(o.getClass(), Cardinality.ONE_TO_MANY);
 
             for (Field field : fields) {
-                System.out.println("Getting values for: " + getColumnName(field));
-                Collection dbList = (Collection) getFieldValue(field, inDB);
                 Collection list = (Collection) getFieldValue(field, o);
+                Collection dbList = (Collection) getFieldValue(field, inDB);
 
-//                System.out.println(field.getName() +  " original cnt: " + dbList.size());
-//                System.out.println(field.getName() +  " updated cnt: " + list.size());
+                Collection addRelation = new ArrayList();
+                Collection removeRelation = new ArrayList();
+
+                compareLists(dbList, list, addRelation, removeRelation);
+
+                for (Object remove : removeRelation) {
+                    deleteSQL.append(generateDeleteSQL(remove));
+                }
+
+                for (Object add : addRelation) {
+                    if (getPrimaryValueAsLong(add) > 0) {
+                        updateSQL.append(format(generateUpdateSQLForField(add, getRelatedField(o.getClass(), add.getClass())), objectKey));
+                    } else {
+                        insertSQL.append(format(generateInsertSQL(add), objectKey));
+                    }
+                }
             }
-
-            //TODO diff items in Collections and create UPDATE SQL from diff
         }
 
         //Checking Objects
         if (hasRelations(o.getClass(), Cardinality.MANY_TO_ONE)) {
-            System.out.println("Object has relations, checking...");
+            System.out.println("Checking One2One...");
             getRelations(o, Cardinality.MANY_TO_ONE);
             //TODO diff Objects and create UPDATE SQL from diff
         }
 
         //Checking Link tables
         if (hasRelations(o.getClass(), Cardinality.MANY_TO_MANY)) {
-            System.out.println("Object has link table relations, checking...");
+            System.out.println("Checking Many2Many...");
             getRelations(o, Cardinality.MANY_TO_MANY);
             //TODO diff Collections and create UPDATE SQL from diff
+        }
+
+        System.out.println(insertSQL.toString());
+        System.out.println(deleteSQL.toString());
+        System.out.println(updateSQL.toString());
+    }
+
+    private void compareLists(Collection original, Collection updated, Collection addRelation, Collection removeRelation) {
+        for (Object o : original) {
+            if (!updated.contains(o)) {
+                //Remove relation
+                removeRelation.add(o);
+            }
+        }
+
+        for (Object o : updated) {
+            if (!original.contains(o)) {
+                //Add relation
+                addRelation.add(o);
+            }
         }
     }
 
@@ -102,7 +141,8 @@ public class EaSQLService {
     private Object findInDB(Object o) {
         Map<String, String> where = new HashMap<String, String>();
         where.put(getPrimaryColumn(o.getClass()), getPrimaryValue(o).toString());
-        return query.execute(o.getClass(), true, where);
+        Collection results = query.execute(o.getClass(), true, where);
+        return results.toArray()[0];
     }
 
     private void execute(String sql) {

@@ -40,4 +40,12 @@ public class Dog {
         result = 31 * result + name.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Dog{" +
+                "name='" + name + '\'' +
+                ", id=" + id +
+                '}';
+    }
 }

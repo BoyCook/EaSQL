@@ -6,6 +6,7 @@ import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -13,6 +14,7 @@ import java.lang.reflect.Field;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -79,6 +81,15 @@ public class TestClassUtils {
         assertRelationFields(Dog.class, Cardinality.MANY_TO_ONE, 1);
         assertRelationFields(Cat.class, Cardinality.ONE_TO_MANY, 0);
         assertRelationFields(Cat.class, Cardinality.MANY_TO_ONE, 1);
+
+        Field[] fields = getRelationFields(Person.class, Cardinality.ONE_TO_MANY);
+        Field dogs = fields[0];
+        Field cats = fields[1];
+
+        assertThat(dogs, is(notNullValue()));
+        assertThat(dogs.getName(), is(equalTo("dogs")));
+        assertThat(cats, is(notNullValue()));
+        assertThat(cats.getName(), is(equalTo("cats")));
     }
 
     private void assertRelationFields(Class c, Cardinality cardinality, int cnt) {

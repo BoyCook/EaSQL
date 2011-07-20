@@ -9,6 +9,11 @@ import org.junit.Test;
 
 import java.util.Collection;
 
+import static org.cccs.easql.util.ClassUtils.getRelationFields;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.core.Is.is;
+
 /**
  * User: boycook
  * Date: 07/07/2011
@@ -25,7 +30,7 @@ public class TestService extends DataDrivenTestEnvironment {
         service = new EaSQLService(getDataSource());
         query = new EaSQLQuery(getDataSource());
 
-        Collection people = query.execute(Person.class);
+        Collection people = query.execute(Person.class, true);
         craig = (Person) people.toArray()[0];
     }
 
@@ -41,10 +46,18 @@ public class TestService extends DataDrivenTestEnvironment {
         service.insert(garfield);
     }
 
-    @Ignore
     @Test
     public void updateShouldWork() {
         craig.email = "SomeNewEmail";
+        assertThat(craig.cats.size(), is(equalTo(1)));
+        assertThat(craig.dogs.size(), is(equalTo(1)));
+
+        craig.cats.clear();
+        craig.cats.add(new Cat(23, "Daisy", craig));
+        Cat fluffy = new Cat();
+        fluffy.name = "Fluffy";
+        fluffy.owner = craig;
+        craig.cats.add(fluffy);
         service.update(craig);
     }
 }

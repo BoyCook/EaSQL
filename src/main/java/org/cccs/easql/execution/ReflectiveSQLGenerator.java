@@ -11,6 +11,7 @@ import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.getFieldValue;
+import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
 import static org.cccs.easql.util.ObjectUtils.value;
 
 /**
@@ -26,7 +27,7 @@ public final class ReflectiveSQLGenerator {
     private final static String INSERT_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s);";
     private final static String SELECT_TEMPLATE = "SELECT %s FROM %s";
     private final static String SELECT_TEMPLATE_RELATIONS = "SELECT %s FROM %s %s";
-    private final static String UPDATE_TEMPLATE = "UPDATE %s set %s;";
+    private final static String UPDATE_TEMPLATE = "UPDATE %s set %s WHERE %s;";
     private final static String DELETE_TEMPLATE = "DELETE FROM %s WHERE %s;";
     private final static String CREATE_TEMPLATE = "CREATE TABLE %s (%s);";
     private final static String SEQUENCE_TEMPLATE = "(SELECT NEXT VALUE FOR %s FROM %s)";
@@ -135,8 +136,17 @@ public final class ReflectiveSQLGenerator {
                 }
             }
         }
+        String where = getPrimaryColumn(o.getClass()) + " = " + getPrimaryValueAsLong(o);
+        return format(UPDATE_TEMPLATE, getTableName(c), values.toString(), where);
+    }
 
-        return format(UPDATE_TEMPLATE, getTableName(c), values.toString());
+    public static String generateUpdateSQLForField(Object o, Field field) {
+        StringBuilder values = new StringBuilder();
+        values.append(getColumnName(field));
+        values.append(" = ");
+        values.append(" %s ");
+        String where = getPrimaryColumn(o.getClass()) + " = " + getPrimaryValueAsLong(o);
+        return format(UPDATE_TEMPLATE, getTableName(o.getClass()), values.toString(), where);
     }
 
     public static String generateDeleteSQL(Object o) {

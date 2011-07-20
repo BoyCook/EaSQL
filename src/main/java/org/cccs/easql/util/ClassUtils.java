@@ -107,7 +107,7 @@ public final class ClassUtils {
 
     public static String getColumnName(Field field) {
         Column column = field.getAnnotation(Column.class);
-        return isNotEmpty(column.name()) ? column.name() : field.getName();
+        return column != null && isNotEmpty(column.name()) ? column.name() : field.getName();
     }
 
     public static String getColumnType(Field field) {
@@ -132,6 +132,16 @@ public final class ClassUtils {
             }
         }
         return relations.toArray(new Field[relations.size()]);
+    }
+
+    public static Field getRelatedField(Class c, Class r) {
+        Field[] fields = r.getFields();
+        for (Field field : fields) {
+            if (field.getType().equals(c)) {
+                return field;
+            }
+        }
+        return null;
     }
 
     @SuppressWarnings({"unchecked"})

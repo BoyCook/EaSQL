@@ -101,19 +101,19 @@ public class TestSQLGenerator {
 
     @Test
     public void reflectiveSQLBuilderShouldWorkForUpdatesForPerson() throws Exception {
-        String sql = "UPDATE Person set name = 'Craig', email = 'craig@cook.com', phone = '07234123456';";
+        String sql = "UPDATE Person set name = 'Craig', email = 'craig@cook.com', phone = '07234123456' WHERE id = 1;";
         assertThat(generateUpdateSQL(craig), is(equalTo(sql)));
     }
 
     @Test
     public void reflectiveSQLBuilderShouldWorkForUpdatesForDog() throws Exception {
-        String sql = "UPDATE Dog set name = 'Lassie';";
+        String sql = "UPDATE Dog set name = 'Lassie' WHERE id = 1;";
         assertThat(generateUpdateSQL(lassie), is(equalTo(sql)));
     }
 
     @Test
     public void reflectiveSQLBuilderShouldWorkForUpdatesForCat() throws Exception {
-        String sql = "UPDATE Cat set name = 'Bagpuss';";
+        String sql = "UPDATE Cat set name = 'Bagpuss' WHERE id = 1;";
         assertThat(generateUpdateSQL(bagpuss), is(equalTo(sql)));
     }
 

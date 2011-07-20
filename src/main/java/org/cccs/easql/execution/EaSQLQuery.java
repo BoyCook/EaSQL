@@ -27,12 +27,20 @@ import static org.cccs.easql.util.ObjectUtils.setObjectValue;
  * Time: 14:17
  */
 public class EaSQLQuery {
-
+    //TODO: refactor method names
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private DataSource dataSource;
 
     public EaSQLQuery(final DataSource dataSource) {
         this.dataSource = dataSource;
+    }
+
+    //TODO: throw exceptions
+    public Object find(Class c, long id) {
+        Map<String, String> where = new HashMap<String, String>();
+        where.put(getPrimaryColumn(c), String.valueOf(id));
+        Collection results = execute(c, true, where);
+        return results.toArray()[0];
     }
 
     public Collection execute(final Class c)  {
