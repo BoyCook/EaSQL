@@ -3,12 +3,14 @@ package org.cccs.easql.domain;
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.Column;
 import org.cccs.easql.Relation;
+import org.cccs.easql.Table;
 
 /**
  * User: boycook
  * Date: 30/06/2011
  * Time: 17:08
  */
+@Table
 public class Dog {
 
     @Column(primaryKey = true)

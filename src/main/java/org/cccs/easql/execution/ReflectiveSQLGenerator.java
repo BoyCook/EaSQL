@@ -140,9 +140,11 @@ public final class ReflectiveSQLGenerator {
         return format(UPDATE_TEMPLATE, getTableName(c), values.toString(), where);
     }
 
+    //This is for relations
     public static String generateUpdateSQLForField(Object o, Field field) {
         StringBuilder values = new StringBuilder();
-        values.append(getColumnName(field));
+        Relation relation = field.getAnnotation(Relation.class);
+        values.append(relation.key());
         values.append(" = ");
         values.append(" %s ");
         String where = getPrimaryColumn(o.getClass()) + " = " + getPrimaryValueAsLong(o);

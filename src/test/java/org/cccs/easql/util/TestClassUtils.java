@@ -6,7 +6,6 @@ import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.lang.reflect.Field;

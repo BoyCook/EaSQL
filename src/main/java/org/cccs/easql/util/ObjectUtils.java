@@ -77,12 +77,14 @@ public final class ObjectUtils {
 
     public static Object getNewObject(Class c) {
         Object o = null;
-        try {
-            o = c.newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        if (!c.equals(Integer.TYPE) && !c.equals(Long.TYPE)) {
+            try {
+                o = c.newInstance();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
         return o;
     }

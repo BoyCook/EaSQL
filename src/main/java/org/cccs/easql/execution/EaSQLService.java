@@ -62,7 +62,7 @@ public class EaSQLService {
         StringBuilder updateSQL = new StringBuilder();
         StringBuilder deleteSQL = new StringBuilder();
         long objectKey = getPrimaryValueAsLong(o);
-        Object inDB = findInDB(o);
+        Object inDB = query.find(o.getClass(), getPrimaryValueAsLong(o));
 
         if (!inDB.equals(o)) {
             System.out.println("Objects are different");
@@ -113,9 +113,12 @@ public class EaSQLService {
             //TODO diff Collections and create UPDATE SQL from diff
         }
 
-        System.out.println(insertSQL.toString());
-        System.out.println(deleteSQL.toString());
-        System.out.println(updateSQL.toString());
+        StringBuilder sql = new StringBuilder();
+        sql.append(insertSQL.toString());
+        sql.append(deleteSQL.toString());
+        sql.append(updateSQL.toString());
+//        System.out.println(sql.toString());
+        execute(sql.toString());
     }
 
     private void compareLists(Collection original, Collection updated, Collection addRelation, Collection removeRelation) {
@@ -136,13 +139,6 @@ public class EaSQLService {
 
     public void delete(Object o) {
         throw new UnsupportedOperationException();
-    }
-
-    private Object findInDB(Object o) {
-        Map<String, String> where = new HashMap<String, String>();
-        where.put(getPrimaryColumn(o.getClass()), getPrimaryValue(o).toString());
-        Collection results = query.execute(o.getClass(), true, where);
-        return results.toArray()[0];
     }
 
     private void execute(String sql) {

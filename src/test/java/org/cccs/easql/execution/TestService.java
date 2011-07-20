@@ -4,12 +4,8 @@ import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Person;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Collection;
-
-import static org.cccs.easql.util.ClassUtils.getRelationFields;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -24,14 +20,17 @@ public class TestService extends DataDrivenTestEnvironment {
     private EaSQLService service;
     private EaSQLQuery query;
     private Person craig;
+    private Cat daisy;
 
     @Before
     public void beforeEach() {
         service = new EaSQLService(getDataSource());
         query = new EaSQLQuery(getDataSource());
+        craig = (Person) query.find(Person.class, 1);
+        daisy = (Cat) query.find(Cat.class, 2);
 
-        Collection people = query.execute(Person.class, true);
-        craig = (Person) people.toArray()[0];
+        assertThat(craig.name, is(equalTo("Craig")));
+        assertThat(daisy.name, is(equalTo("Daisy")));
     }
 
     @Test
@@ -42,7 +41,7 @@ public class TestService extends DataDrivenTestEnvironment {
 
     @Test
     public void createWithRelationsShouldWork() {
-        Cat garfield = new Cat(2, "garfield", craig);
+        Cat garfield = new Cat(3, "garfield", craig);
         service.insert(garfield);
     }
 
@@ -52,12 +51,21 @@ public class TestService extends DataDrivenTestEnvironment {
         assertThat(craig.cats.size(), is(equalTo(1)));
         assertThat(craig.dogs.size(), is(equalTo(1)));
 
+        craig.dogs.clear();
         craig.cats.clear();
-        craig.cats.add(new Cat(23, "Daisy", craig));
+        craig.cats.add(daisy);
         Cat fluffy = new Cat();
         fluffy.name = "Fluffy";
         fluffy.owner = craig;
         craig.cats.add(fluffy);
         service.update(craig);
+
+        final Person updated = (Person) query.find(Person.class, 1);
+        assertThat(updated.cats.size(), is(equalTo(2)));
+        assertThat(updated.dogs.size(), is(equalTo(0)));
+        assertThat(updated.email, is(equalTo("SomeNewEmail")));
+
+        Cat fluffyDB = (Cat) query.find(Cat.class, 0);
+        assertThat(fluffyDB.name, is(equalTo("Fluffy")));
     }
 }

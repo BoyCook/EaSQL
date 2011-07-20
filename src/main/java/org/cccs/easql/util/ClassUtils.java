@@ -149,7 +149,7 @@ public final class ClassUtils {
         String name = tables.get(c);
         if (name == null) {
             Table table = (Table) c.getAnnotation(Table.class);
-            name = table != null ? table.name() : c.getSimpleName();
+            name = table != null && isNotEmpty(table.name()) ? table.name() : c.getSimpleName();
             tables.put(c, name);
         }
         return name;
