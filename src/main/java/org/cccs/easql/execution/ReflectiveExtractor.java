@@ -1,6 +1,6 @@
 package org.cccs.easql.execution;
 
-import org.cccs.easql.ColumnMapping;
+import org.cccs.easql.domain.ColumnMapping;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 

@@ -1,6 +1,7 @@
 package org.cccs.easql.util;
 
 import org.cccs.easql.*;
+import org.cccs.easql.domain.ColumnMapping;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -23,13 +24,15 @@ public final class ClassUtils {
     private static Map<Class, String[]> columnNames;
     private static Map<Class, ColumnMapping[]> columns;
     private static Map<Class, String> tables;
-    private static Map<Class, String> primaryColumns;
+    private static Map<Class, Column> primaryColumns;
+    private static Map<Class, String> primaryColumnNames;
 
     static {
         columnNames = new HashMap<Class, String[]>();
         columns = new HashMap<Class, ColumnMapping[]>();
         tables = new HashMap<Class, String>();
-        primaryColumns = new HashMap<Class, String>();
+        primaryColumns = new HashMap<Class, Column>();
+        primaryColumnNames = new HashMap<Class, String>();
     }
 
     public static String[] getColumnNames(Class c) {
@@ -43,8 +46,7 @@ public final class ClassUtils {
 
     private static String[] getColumnNamesForClass(Class c) {
         Collection<String> columns = new ArrayList<String>();
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
                 columns.add(getColumnName(field));
@@ -64,8 +66,7 @@ public final class ClassUtils {
 
     private static ColumnMapping[] getColumnsForClass(Class c) {
         Collection<ColumnMapping> columns = new ArrayList<ColumnMapping>();
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
                 columns.add(new ColumnMapping(field, getColumnName(field), ""));
@@ -74,8 +75,17 @@ public final class ClassUtils {
         return columns.toArray(new ColumnMapping[columns.size()]);
     }
 
-    public static String getPrimaryColumn(Class c) {
-        String column = primaryColumns.get(c);
+    public static String getPrimaryColumnName(Class c) {
+        String column = primaryColumnNames.get(c);
+        if (column == null) {
+            column = getPrimaryNameColumnForClass(c);
+            primaryColumnNames.put(c, column);
+        }
+        return column;
+    }
+
+    public static Column getPrimaryColumn(Class c) {
+        Column column = primaryColumns.get(c);
         if (column == null) {
             column = getPrimaryColumnForClass(c);
             primaryColumns.put(c, column);
@@ -83,9 +93,18 @@ public final class ClassUtils {
         return column;
     }
 
-    private static String getPrimaryColumnForClass(Class c) {
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
+    private static Column getPrimaryColumnForClass(Class c) {
+        for (Field field : c.getFields()) {
+            Column column = field.getAnnotation(Column.class);
+            if (column != null && column.primaryKey()) {
+                return column;
+            }
+        }
+        return null;
+    }
+
+    private static String getPrimaryNameColumnForClass(Class c) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null && column.primaryKey()) {
                 return isNotEmpty(column.name()) ? column.name() : field.getName();
@@ -95,8 +114,7 @@ public final class ClassUtils {
     }
 
     public static boolean hasRelations(Class c, Cardinality cardinality) {
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Relation relation = field.getAnnotation(Relation.class);
             if (relation != null && relation.cardinality().equals(cardinality)) {
                 return true;
@@ -124,8 +142,7 @@ public final class ClassUtils {
 
     public static Field[] getRelationFields(Class c, Cardinality cardinality) {
         Collection<Field> relations = new ArrayList<Field>();
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Relation relation = field.getAnnotation(Relation.class);
             if (relation != null && relation.cardinality().equals(cardinality)) {
                 relations.add(field);
@@ -135,8 +152,7 @@ public final class ClassUtils {
     }
 
     public static Field getRelatedField(Class c, Class r) {
-        Field[] fields = r.getFields();
-        for (Field field : fields) {
+        for (Field field : r.getFields()) {
             if (field.getType().equals(c)) {
                 return field;
             }
@@ -158,10 +174,9 @@ public final class ClassUtils {
     //TODO: consider refactor
     public static ColumnMapping[] getExtractionMappings(Class c, boolean loadRelations)  {
         Collection<ColumnMapping> columns = new ArrayList<ColumnMapping>();
-        Field[] fields = c.getFields();
         Object o = getNewObject(c);
 
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             Relation relation = field.getAnnotation(Relation.class);
             if (column != null) {

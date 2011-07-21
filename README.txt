@@ -4,5 +4,5 @@ TODO:
     - Correct annotations
     - Warning when equals not implemented
     - Ensure default constructor
-    - Many2Many must have linkTable and linkedBy specified
+    - Many2Many must have linkTable and linkedBy sp
 - Consider making schema static

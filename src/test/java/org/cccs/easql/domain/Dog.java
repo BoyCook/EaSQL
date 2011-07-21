@@ -15,19 +15,18 @@ import java.util.Collection;
 @Table
 public class Dog {
 
-    @Column(primaryKey = true)
+    @Column(primaryKey = true, sequence = "dog_seq")
     public long id;
     @Column
     public String name;
     @Relation(cardinality = Cardinality.MANY_TO_ONE, key="person_id", name = "person2dog")
     public Person owner;
-    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "dog_countries")
+    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "dog_countries", linkedBy = {"cntId", "dog_id"})
     public Collection<Country> countries;
 
     public Dog() {}
 
-    public Dog(long id, String name, Person owner) {
-        this.id = id;
+    public Dog(String name, Person owner) {
         this.name = name;
         this.owner = owner;
     }

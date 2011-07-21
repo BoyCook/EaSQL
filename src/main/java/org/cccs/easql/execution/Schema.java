@@ -1,66 +1,122 @@
 package org.cccs.easql.execution;
 
+import org.cccs.easql.Cardinality;
+import org.cccs.easql.Column;
+import org.cccs.easql.Relation;
 import org.cccs.easql.Table;
+import org.cccs.easql.domain.LinkTable;
+import org.cccs.easql.domain.Sequence;
 import org.reflections.Reflections;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateCreateSQL;
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
+import static org.cccs.easql.util.ClassUtils.getPrimaryColumn;
 
 /**
  * User: boycook
  * Date: 20/07/2011
  * Time: 22:37
  */
-public class Schema {
+public final class Schema {
     //TODO: consider making this static
-    private final String packageName;
-    private final DataSource dataSource;
-    private Set<Class<?>> tables;
+    public static String packageName;
+    public static DataSource dataSource;
+    private static Set<Class<?>> tables;
+    private static Set<LinkTable> linkTables;
+    private static List<Sequence> sequences;
+    private static boolean generated = false;
 
-    public Schema(String packageName, DataSource dataSource) {
-        this.packageName = packageName;
-        this.dataSource = dataSource;
-    }
-
-    public void generate() {
-        Set<Class<?>> tables = getTables();
-        for (Class<?> table : tables) {
-            createTable(table);
+    public static void generate() {
+        if (!generated) {
+            for (Class<?> table : getTables()) {
+                createTable(table);
+            }
+            for (LinkTable linkTable : getLinkTables()) {
+                createLinkTable(linkTable);
+            }
+//            for (Sequence sequence : getSequences()) {
+//                createSequence(sequence);
+//            }
+            generated = true;
         }
     }
 
-    public Set<Class<?>> getTables() {
-        if (this.tables ==null) {
-            this.tables = gatherTables();
+    public static Set<Class<?>> getTables() {
+        if (tables == null) {
+            tables = gatherTables();
         }
-        return this.tables;
+        return tables;
     }
 
-    private void gatherLinkTables() {
-        for (Class<?> table : tables) {
-            //TODO: find all @Relation's where isNotEmpty(relation.linkTable())
+    public static Set<LinkTable> getLinkTables() {
+        if (linkTables == null) {
+            linkTables = gatherLinkTables();
         }
+        return linkTables;
     }
 
-    private Set<Class<?>> gatherTables() {
+    public static List<Sequence> getSequences() {
+        if (sequences == null) {
+            sequences = gatherSequences();
+        }
+        return sequences;
+    }
+
+    private static List<Sequence> gatherSequences() {
+        List<Sequence> tempSequences = new ArrayList<Sequence>();
+
+        for (Class<?> table : getTables()) {
+            Column column = getPrimaryColumn(table);
+            if (isNotEmpty(column.sequence())) {
+                tempSequences.add(new Sequence(column.sequence(), 0, 1));
+            }
+        }
+
+        return tempSequences;
+    }
+
+    private static Set<LinkTable> gatherLinkTables() {
+        Set<LinkTable> tempLinks = new HashSet<LinkTable>();
+
+        for (Class<?> table : getTables()) {
+            for (Field field : table.getFields()) {
+                Relation relation = field.getAnnotation(Relation.class);
+                if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_MANY)) {
+                    tempLinks.add(new LinkTable(relation.linkTable(), relation.linkedBy()[0], relation.linkedBy()[1]));
+                }
+            }
+        }
+        return tempLinks;
+    }
+
+    private static Set<Class<?>> gatherTables() {
         Reflections reflections = new Reflections(packageName);
         return reflections.getTypesAnnotatedWith(Table.class);
     }
 
-    private void createTable(Class c) {
-        try {
-            execute(generateSelectSQL(c));
-        } catch (BadSqlGrammarException e) {
-            execute(generateCreateSQL(c));
-        }
+    private static void createSequence(Sequence sequence) {
+        execute(generateSequenceSQL(sequence));
     }
 
-    private void execute(String sql) {
+    private static void createLinkTable(LinkTable linkTable) {
+        execute(generateCreateSQL(linkTable));
+    }
+
+    private static void createTable(Class c) {
+        execute(generateCreateSQL(c));
+    }
+
+    private static void execute(String sql) {
+        System.out.println("Executing: " + sql);
         JdbcTemplate db = new JdbcTemplate(dataSource);
         db.execute(sql);
     }

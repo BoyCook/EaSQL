@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static org.cccs.easql.domain.Sequence.setCounter;
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
 import static org.cccs.easql.util.ClassUtils.getColumnNames;
 import static org.hamcrest.Matchers.equalTo;
@@ -28,9 +29,13 @@ public class TestSQLGenerator {
 
     @Before
     public void setup() throws IOException {
-        craig = new Person(1, "Craig", "craig@cook.com", "07234123456");
-        lassie = new Dog(1, "Lassie", craig);
-        bagpuss = new Cat(1, "Bagpuss", craig);
+        craig = new Person("Craig", "craig@cook.com", "07234123456");
+        craig.id = 1;
+        lassie = new Dog("Lassie", craig);
+        lassie.id = 1;
+        bagpuss = new Cat("Bagpuss", craig);
+        bagpuss.id = 1;
+        setCounter(0);
     }
 
     @Test

@@ -4,8 +4,8 @@ import org.cccs.easql.Cardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import javax.sql.DataSource;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +14,6 @@ import static java.lang.String.format;
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.*;
-import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
 
 /**
  * User: boycook
@@ -47,7 +46,7 @@ public class Service {
 
     /*
         TODO handle link tables
-        - Find existing asset in DB (use Class and getPrimaryColumn)
+        - Find existing asset in DB (use Class and getPrimaryColumnName)
         - Diff each @Column field (consider using .equals())
         - For One2Many relations diff Collections
             - Assume create/delete on differences
@@ -69,9 +68,8 @@ public class Service {
 
         if (hasRelations(o.getClass(), Cardinality.ONE_TO_MANY)) {
             System.out.println("Checking One2Many...");
-            Field[] fields = getRelationFields(o.getClass(), Cardinality.ONE_TO_MANY);
 
-            for (Field field : fields) {
+            for (Field field : getRelationFields(o.getClass(), Cardinality.ONE_TO_MANY)) {
                 Collection list = (Collection) getFieldValue(field, o);
                 Collection dbList = (Collection) getFieldValue(field, inDB);
                 Collection addRelation = new ArrayList();

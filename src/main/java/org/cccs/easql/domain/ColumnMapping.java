@@ -1,4 +1,4 @@
-package org.cccs.easql;
+package org.cccs.easql.domain;
 
 import java.lang.reflect.Field;
 import static org.cccs.easql.util.ObjectUtils.getNewObject;

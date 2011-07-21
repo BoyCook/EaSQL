@@ -15,7 +15,7 @@ import java.util.Collection;
 @Table(name = "Person")
 public class Person {
 
-    @Column(primaryKey = true)
+    @Column(primaryKey = true, sequence = "person_seq")
     public long id;
     @Column
     public String name;
@@ -30,13 +30,11 @@ public class Person {
 
     public Person() {}
 
-    public Person(long id, String name) {
-        this.id = id;
+    public Person(String name) {
         this.name = name;
     }
 
-    public Person(long id, String name, String email, String phone) {
-        this.id = id;
+    public Person(String name, String email, String phone) {
         this.name = name;
         this.email = email;
         this.phone = phone;
@@ -62,5 +60,15 @@ public class Person {
         result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + (phone != null ? phone.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", id=" + id +
+                '}';
     }
 }

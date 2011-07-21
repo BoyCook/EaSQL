@@ -1,11 +1,8 @@
 package org.cccs.easql.util;
 
 import org.cccs.easql.Cardinality;
-import org.cccs.easql.ColumnMapping;
-import org.cccs.easql.domain.Cat;
-import org.cccs.easql.domain.Country;
-import org.cccs.easql.domain.Dog;
-import org.cccs.easql.domain.Person;
+import org.cccs.easql.domain.ColumnMapping;
+import org.cccs.easql.domain.*;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -55,7 +52,7 @@ public class TestClassUtils {
     }
 
     private void assertPrimaryColumn(Class c, String name) {
-        assertThat(getPrimaryColumn(c), is(equalTo(name)));
+        assertThat(getPrimaryColumnName(c), is(equalTo(name)));
     }
 
     @Test

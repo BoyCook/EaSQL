@@ -26,18 +26,11 @@ import static org.junit.Assert.assertThat;
 @SuppressWarnings({"unchecked"})
 public class TestQuery extends DataDrivenTestEnvironment {
 
-    private Finder query;
-
-    @Before
-    public void beforeEach() {
-        query = new Finder(getDataSource());
-    }
-
     @Test
     public void executeQueryShouldWorkForJustClassForPerson() throws Exception {
         Collection<Person> results = query.execute(Person.class);
         Person craig = (Person) results.toArray()[0];
-        assertThat(results.size(), is(equalTo(3)));
+        assertThat(results.size(), is(equalTo(2)));
         assertCraig(craig);
     }
 
@@ -45,7 +38,7 @@ public class TestQuery extends DataDrivenTestEnvironment {
     public void executeQueryShouldWorkForOneToManyRelations() throws Exception {
         Collection<Person> results = query.execute(Person.class, true);
         Person craig = (Person) results.toArray()[0];
-        assertThat(results.size(), is(equalTo(3)));
+        assertThat(results.size(), is(equalTo(2)));
         assertCraig(craig);
         assertThat(craig.cats.size(), is(equalTo(1)));
         assertThat(craig.dogs.size(), is(equalTo(1)));
@@ -77,7 +70,7 @@ public class TestQuery extends DataDrivenTestEnvironment {
         Collection<Cat> results = query.execute(Cat.class);
         Cat bagpuss = (Cat) results.toArray()[0];
 
-        assertThat(results.size(), is(equalTo(1)));
+        assertThat(results.size(), is(equalTo(2)));
         assertThat(bagpuss.id, is(equalTo(1l)));
         assertThat(bagpuss.name, is(equalTo("Bagpuss")));
         assertNull(bagpuss.owner);
@@ -88,7 +81,7 @@ public class TestQuery extends DataDrivenTestEnvironment {
         Collection<Cat> results = query.execute(Cat.class, true);
         Cat bagpuss = (Cat) results.toArray()[0];
 
-        assertThat(results.size(), is(equalTo(1)));
+        assertThat(results.size(), is(equalTo(2)));
         assertThat(bagpuss.id, is(equalTo(1l)));
         assertThat(bagpuss.name, is(equalTo("Bagpuss")));
         assertCraig(bagpuss.owner);

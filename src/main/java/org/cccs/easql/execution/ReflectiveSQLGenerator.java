@@ -3,12 +3,15 @@ package org.cccs.easql.execution;
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.Column;
 import org.cccs.easql.Relation;
+import org.cccs.easql.domain.LinkTable;
+import org.cccs.easql.domain.Sequence;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.cccs.easql.domain.Sequence.getCounter;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.getFieldValue;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
@@ -30,7 +33,9 @@ public final class ReflectiveSQLGenerator {
     private final static String UPDATE_TEMPLATE = "UPDATE %s set %s WHERE %s;";
     private final static String DELETE_TEMPLATE = "DELETE FROM %s WHERE %s;";
     private final static String CREATE_TEMPLATE = "CREATE TABLE %s (%s);";
-    private final static String SEQUENCE_TEMPLATE = "(SELECT NEXT VALUE FOR %s FROM %s)";
+    private final static String SELECT_SEQUENCE_TEMPLATE = "SELECT NEXT VALUE FOR %s FROM %s";
+    private final static String CREATE_SEQUENCE_TEMPLATE = "CREATE SEQUENCE %s AS BIGINT START WITH %d INCREMENT BY %d;";
+//    private final static String CREATE_SEQUENCE_TEMPLATE = "CREATE SEQUENCE %s START WITH %d INCREMENT BY %d;";
 
     public static String generateInsertSQL(Object o) {
         Class c = o.getClass();
@@ -39,8 +44,7 @@ public final class ReflectiveSQLGenerator {
         StringBuilder columns = new StringBuilder();
         StringBuilder values = new StringBuilder();
 
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             Relation relation = field.getAnnotation(Relation.class);
 
@@ -52,7 +56,8 @@ public final class ReflectiveSQLGenerator {
                     throw new IllegalArgumentException(columnName + " must be specified");
                 } else if (column.primaryKey()) {
                     if (isNotEmpty(column.sequence())) {
-                        appendInsertValue(columns, values, columnName, format(SEQUENCE_TEMPLATE, column.sequence(), tableName));
+                        appendInsertValue(columns, values, columnName, String.valueOf(getCounter()));
+//                        appendInsertValue(columns, values, columnName, "(" + format(SELECT_SEQUENCE_TEMPLATE, column.sequence(), tableName) + ")");
                     } else if (columnValue == null) {
                         throw new IllegalArgumentException("Primary key for " + columnName + " must be specified");
                     } else {
@@ -71,17 +76,24 @@ public final class ReflectiveSQLGenerator {
         return format(INSERT_TEMPLATE, tableName, columns.toString(), values.toString());
     }
 
+    public static String generateSelectSQL(Sequence sequence) {
+        return format(SELECT_SEQUENCE_TEMPLATE, sequence.name, "person");
+    }
+
+    public static String generateSelectSQL(LinkTable linkTable) {
+        return format(SELECT_TEMPLATE, "*", linkTable.name);
+    }
+
     public static String generateSelectSQL(Class c) {
         return generateSelectSQL(c, false);
     }
 
     public static String generateSelectSQL(Class c, boolean loadRelations) {
-        Field[] fields = c.getFields();
         String tableName = getTableName(c);
         StringBuilder select = new StringBuilder();
         StringBuilder joins = new StringBuilder();
 
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             Relation relation = field.getAnnotation(Relation.class);
 
@@ -95,7 +107,7 @@ public final class ReflectiveSQLGenerator {
                         for (String joinColumn : joinColumns) {
                             appendColumn(select, getJoinColumnName(relation.name(), joinColumn));
                         }
-                        String primaryColumn = getPrimaryColumn(field.getType());
+                        String primaryColumn = getPrimaryColumnName(field.getType());
                         joins.append(format("LEFT OUTER JOIN %s %s ON %s.%s = %s.%s", joinTable, relation.name(), tableName, primaryColumn, relation.name(), primaryColumn));
                     } else {
                         appendColumn(select, relation.key());
@@ -115,8 +127,7 @@ public final class ReflectiveSQLGenerator {
         Class c = o.getClass();
         StringBuilder values = new StringBuilder();
 
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
 
             if (column != null) {
@@ -136,7 +147,7 @@ public final class ReflectiveSQLGenerator {
                 }
             }
         }
-        String where = getPrimaryColumn(o.getClass()) + " = " + getPrimaryValueAsLong(o);
+        String where = getPrimaryColumnName(o.getClass()) + " = " + getPrimaryValueAsLong(o);
         return format(UPDATE_TEMPLATE, getTableName(c), values.toString(), where);
     }
 
@@ -147,15 +158,14 @@ public final class ReflectiveSQLGenerator {
         values.append(relation.key());
         values.append(" = ");
         values.append(" %s ");
-        String where = getPrimaryColumn(o.getClass()) + " = " + getPrimaryValueAsLong(o);
+        String where = getPrimaryColumnName(o.getClass()) + " = " + getPrimaryValueAsLong(o);
         return format(UPDATE_TEMPLATE, getTableName(o.getClass()), values.toString(), where);
     }
 
     public static String generateDeleteSQL(Object o) {
         Class c = o.getClass();
-        Field[] fields = c.getFields();
         String where = "";
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
 
             if (column != null && column.primaryKey()) {
@@ -167,11 +177,23 @@ public final class ReflectiveSQLGenerator {
         return format(DELETE_TEMPLATE, getTableName(c), where);
     }
 
+    public static String generateSequenceSQL(Sequence sequence) {
+        return format(CREATE_SEQUENCE_TEMPLATE, sequence.name, sequence.startsWith, sequence.incrementBy);
+    }
+
+    public static String generateCreateSQL(LinkTable table) {
+        StringBuilder columns = new StringBuilder();
+        columns.append(table.leftKey);
+        columns.append(" INTEGER, ");
+        columns.append(table.rightKey);
+        columns.append(" INTEGER");
+        return format(CREATE_TEMPLATE, table.name, columns.toString());
+    }
+
     public static String generateCreateSQL(Class c) {
-        Field[] fields = c.getFields();
         StringBuilder columns = new StringBuilder();
 
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             Relation relation = field.getAnnotation(Relation.class);
 
