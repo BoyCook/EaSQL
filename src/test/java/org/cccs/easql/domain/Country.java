@@ -1,7 +1,11 @@
 package org.cccs.easql.domain;
 
+import org.cccs.easql.Cardinality;
 import org.cccs.easql.Column;
+import org.cccs.easql.Relation;
 import org.cccs.easql.Table;
+
+import java.util.Collection;
 
 /**
  * User: boycook
@@ -13,5 +17,9 @@ public class Country {
 
     @Column(primaryKey = true, name = "cntId")
     public long id;
+    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "dog_countries")
+    public Collection<Dog> dogs;
+    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "cat_countries")
+    public Collection<Cat> cats;
 
 }

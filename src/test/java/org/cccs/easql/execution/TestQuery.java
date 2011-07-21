@@ -26,11 +26,11 @@ import static org.junit.Assert.assertThat;
 @SuppressWarnings({"unchecked"})
 public class TestQuery extends DataDrivenTestEnvironment {
 
-    private EaSQLQuery query;
+    private FInder query;
 
     @Before
     public void beforeEach() {
-        query = new EaSQLQuery(getDataSource());
+        query = new FInder(getDataSource());
     }
 
     @Test

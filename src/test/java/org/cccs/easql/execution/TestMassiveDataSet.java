@@ -22,13 +22,13 @@ import static org.junit.Assert.assertThat;
  */
 public class TestMassiveDataSet extends DataDrivenTestEnvironment {
 
-    private EaSQLQuery query;
-    private EaSQLService service;
+    private FInder query;
+    private Service service;
 
     @Before
     public void beforeEach() {
-        query = new EaSQLQuery(getDataSource());
-        service = new EaSQLService(getDataSource());
+        query = new FInder(getDataSource());
+        service = new Service(getDataSource());
     }
 
     @Test

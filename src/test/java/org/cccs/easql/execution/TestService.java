@@ -17,15 +17,15 @@ import static org.hamcrest.core.Is.is;
  */
 public class TestService extends DataDrivenTestEnvironment {
 
-    private EaSQLService service;
-    private EaSQLQuery query;
+    private Service service;
+    private FInder query;
     private Person craig;
     private Cat daisy;
 
     @Before
     public void beforeEach() {
-        service = new EaSQLService(getDataSource());
-        query = new EaSQLQuery(getDataSource());
+        service = new Service(getDataSource());
+        query = new FInder(getDataSource());
         craig = (Person) query.find(Person.class, 1);
         daisy = (Cat) query.find(Cat.class, 2);
 

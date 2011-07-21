@@ -26,12 +26,12 @@ import static org.cccs.easql.util.ObjectUtils.setObjectValue;
  * Date: 22/06/2011
  * Time: 14:17
  */
-public class EaSQLQuery {
+public class FInder {
     //TODO: refactor method names
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private DataSource dataSource;
 
-    public EaSQLQuery(final DataSource dataSource) {
+    public FInder(final DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

@@ -5,6 +5,8 @@ import org.cccs.easql.Column;
 import org.cccs.easql.Relation;
 import org.cccs.easql.Table;
 
+import java.util.Collection;
+
 /**
  * User: boycook
  * Date: 30/06/2011
@@ -19,14 +21,16 @@ public class Cat {
     public String name;
     @Relation(cardinality = Cardinality.MANY_TO_ONE, key="person_id", name = "person2cat")
     public Person owner;
+    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "cat_countries")
+    public Collection<Country> countries;
+
+    public Cat() {}
 
     public Cat(long id, String name, Person owner) {
         this.id = id;
         this.name = name;
         this.owner = owner;
     }
-
-    public Cat() {}
 
     @Override
     public boolean equals(Object o) {

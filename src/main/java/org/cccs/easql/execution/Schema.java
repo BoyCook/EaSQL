@@ -17,9 +17,10 @@ import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
  * Time: 22:37
  */
 public class Schema {
-
+    //TODO: consider making this static
     private final String packageName;
     private final DataSource dataSource;
+    private Set<Class<?>> tables;
 
     public Schema(String packageName, DataSource dataSource) {
         this.packageName = packageName;
@@ -27,13 +28,26 @@ public class Schema {
     }
 
     public void generate() {
-        Set<Class<?>> tables = findTables();
+        Set<Class<?>> tables = getTables();
         for (Class<?> table : tables) {
             createTable(table);
         }
     }
 
-    private Set<Class<?>> findTables() {
+    public Set<Class<?>> getTables() {
+        if (this.tables ==null) {
+            this.tables = gatherTables();
+        }
+        return this.tables;
+    }
+
+    private void gatherLinkTables() {
+        for (Class<?> table : tables) {
+            //TODO: find all @Relation's where isNotEmpty(relation.linkTable())
+        }
+    }
+
+    private Set<Class<?>> gatherTables() {
         Reflections reflections = new Reflections(packageName);
         return reflections.getTypesAnnotatedWith(Table.class);
     }

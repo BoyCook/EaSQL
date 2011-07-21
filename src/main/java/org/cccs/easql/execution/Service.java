@@ -9,8 +9,6 @@ import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import static java.lang.String.format;
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
@@ -23,15 +21,15 @@ import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
  * Date: 07/07/2011
  * Time: 10:05
  */
-public class EaSQLService {
+public class Service {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private DataSource dataSource;
-    private EaSQLQuery query;
+    private FInder query;
 
-    public EaSQLService(DataSource dataSource) {
+    public Service(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.query = new EaSQLQuery(this.dataSource);
+        this.query = new FInder(this.dataSource);
     }
 
     public void insert(Object o) {
@@ -66,12 +64,9 @@ public class EaSQLService {
 
         if (!inDB.equals(o)) {
             System.out.println("Objects are different");
-            //TODO create UPDATE SQL from diff
             updateSQL.append(generateUpdateSQL(o));
         }
 
-        //Checking Collections
-        //TODO diff items in Collections and create UPDATE SQL from diff
         if (hasRelations(o.getClass(), Cardinality.ONE_TO_MANY)) {
             System.out.println("Checking One2Many...");
             Field[] fields = getRelationFields(o.getClass(), Cardinality.ONE_TO_MANY);
@@ -79,10 +74,8 @@ public class EaSQLService {
             for (Field field : fields) {
                 Collection list = (Collection) getFieldValue(field, o);
                 Collection dbList = (Collection) getFieldValue(field, inDB);
-
                 Collection addRelation = new ArrayList();
                 Collection removeRelation = new ArrayList();
-
                 compareLists(dbList, list, addRelation, removeRelation);
 
                 for (Object remove : removeRelation) {

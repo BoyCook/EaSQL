@@ -4,6 +4,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
+import org.cccs.easql.execution.Schema;
 import org.junit.After;
 import org.junit.Before;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -24,8 +25,8 @@ import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
 public class DataDrivenTestEnvironment {
 
     private String sqlFile = "src/test/resources/data.sql";
+    private Schema schema;
     private BasicDataSource dataSource;
-    private boolean schemaCreated = false;
 
     @Before
     public void setup() {
@@ -35,10 +36,8 @@ public class DataDrivenTestEnvironment {
         dataSource.setUsername("sa");
         dataSource.setPassword("");
 
-        if (!schemaCreated) {
-            schemaCreated = true;
-            createSchema();
-        }
+        schema = new Schema("org.cccs.easql", dataSource);
+        schema.generate();
 
         installData();
     }
@@ -48,20 +47,6 @@ public class DataDrivenTestEnvironment {
         execute("DELETE FROM DOG;");
         execute("DELETE FROM CAT;");
         execute("DELETE FROM PERSON;");
-    }
-
-    private void createSchema() {
-        createTable(Person.class);
-        createTable(Dog.class);
-        createTable(Cat.class);
-    }
-
-    private void createTable(Class c) {
-        try {
-            execute(generateSelectSQL(c));
-        } catch (BadSqlGrammarException e) {
-            execute(generateCreateSQL(c));
-        }
     }
 
     private void installData() {
