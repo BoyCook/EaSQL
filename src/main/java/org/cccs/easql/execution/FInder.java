@@ -38,7 +38,7 @@ public class Finder {
     //TODO: throw exceptions
     public Object find(Class c, long id) {
         Map<String, String> where = new HashMap<String, String>();
-        where.put(getPrimaryColumn(c), String.valueOf(id));
+        where.put(getPrimaryColumnName(c), String.valueOf(id));
         Collection results = execute(c, true, where);
         return results.toArray()[0];
     }
