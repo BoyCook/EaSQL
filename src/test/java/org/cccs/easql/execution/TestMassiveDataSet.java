@@ -22,12 +22,12 @@ import static org.junit.Assert.assertThat;
  */
 public class TestMassiveDataSet extends DataDrivenTestEnvironment {
 
-    private FInder query;
+    private Finder query;
     private Service service;
 
     @Before
     public void beforeEach() {
-        query = new FInder(getDataSource());
+        query = new Finder(getDataSource());
         service = new Service(getDataSource());
     }
 

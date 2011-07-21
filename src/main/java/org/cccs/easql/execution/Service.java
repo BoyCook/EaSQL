@@ -25,11 +25,11 @@ public class Service {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private DataSource dataSource;
-    private FInder query;
+    private Finder query;
 
     public Service(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.query = new FInder(this.dataSource);
+        this.query = new Finder(this.dataSource);
     }
 
     public void insert(Object o) {
