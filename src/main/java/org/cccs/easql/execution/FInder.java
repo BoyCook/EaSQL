@@ -27,7 +27,6 @@ import static org.cccs.easql.util.ObjectUtils.setObjectValue;
  * Time: 14:17
  */
 public class Finder {
-    //TODO: refactor method names
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private DataSource dataSource;
 
@@ -35,25 +34,41 @@ public class Finder {
         this.dataSource = dataSource;
     }
 
-    //TODO: throw exceptions
-    public Object find(Class c, long id) {
+    public Object findById(Class c, long id) throws EntityNotFoundException {
         Map<String, String> where = new HashMap<String, String>();
         where.put(getPrimaryColumnName(c), String.valueOf(id));
-        Collection results = execute(c, true, where);
+        Collection results = query(c, true, where);
+
+        if (results == null || results.size() == 0) {
+            throw new EntityNotFoundException(format("%s with ID %d not found", getTableName(c), id));
+        }
+
         return results.toArray()[0];
     }
 
-    public Collection execute(final Class c)  {
-        return execute(c, false);
+    public Object findByKey(Class c, String key) throws EntityNotFoundException {
+        Map<String, String> where = new HashMap<String, String>();
+        where.put(format("upper(%s)", getUniqueColumnName(c)), String.valueOf(key).toUpperCase());
+        Collection results = query(c, true, where);
+
+        if (results == null || results.size() == 0) {
+            throw new EntityNotFoundException(format("%s with key %s not found", getTableName(c), key));
+        }
+
+        return results.toArray()[0];
     }
 
-    public Collection execute(final Class c, boolean loadRelations)  {
-        return execute(c, loadRelations, new HashMap<String, String>());
+    public Collection query(final Class c) {
+        return query(c, false);
     }
 
-    //TODO: implement a better way of generating where clauses
+    public Collection query(final Class c, boolean loadRelations) {
+        return query(c, loadRelations, new HashMap<String, String>());
+    }
+
+    //TODO: implement a better way of generating where clauses i.e. search predicate
     //TODO: throw exception if Class is incorrectly annotated
-    public Collection execute(final Class c, boolean loadRelations, Map<String, String> whereClauses)  {
+    public Collection query(final Class c, boolean loadRelations, Map<String, String> whereClauses) {
         String sql = generateSelectSQL(c, loadRelations);
         final String where = generateWhere(whereClauses);
 
@@ -81,7 +96,7 @@ public class Finder {
                     Class relatedClass = getGenericType(field);
                     Map<String, String> where = new HashMap<String, String>();
                     where.put(relation.key(), getPrimaryValue(result).toString());
-                    setObjectValue(field, result, execute(relatedClass, false, where));
+                    setObjectValue(field, result, query(relatedClass, false, where));
                 }
             }
         }
