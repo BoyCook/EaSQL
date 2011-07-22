@@ -2,29 +2,19 @@ package org.cccs.easql.domain;
 
 /**
  * User: boycook
- * Date: 21/07/2011
- * Time: 14:00
+ * Date: 22/07/2011
+ * Time: 12:06
  */
-public class Sequence {
+public interface Sequence {
 
-    public final String name;
-    public final int startsWith;
-    public final int incrementBy;
+    public String getValue();
 
-    private static long counter = 1;
+    public void setCounter(long counter);
 
-    public Sequence(String name, int startsWith, int incrementBy) {
-        this.name = name;
-        this.startsWith = startsWith;
-        this.incrementBy = incrementBy;
-    }
+    public String getName();
 
-    public static long getCounter() {
-        counter++;
-        return counter;
-    }
+    public int getStartsWith();
 
-    public static void setCounter(long counter) {
-        Sequence.counter = counter;
-    }
+    public int getIncrementBy();
+
 }

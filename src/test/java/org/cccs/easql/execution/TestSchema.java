@@ -5,7 +5,7 @@ import org.cccs.easql.domain.Sequence;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,11 +19,8 @@ import static org.hamcrest.core.Is.is;
  */
 public class TestSchema {
 
-//    private Schema schema;
-
     @Before
     public void setup() {
-//        schema = new Schema("org.cccs.easql", null);
         Schema.packageName = "org.cccs.easql";
     }
 
@@ -41,7 +38,7 @@ public class TestSchema {
 
     @Test
     public void getSequencesShouldWork() {
-        List<Sequence> sequences = Schema.getSequences();
+        Map<String, Sequence> sequences = Schema.getSequences();
         assertThat(sequences.size(), is(equalTo(4)));
     }
 }

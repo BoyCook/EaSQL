@@ -1,6 +1,9 @@
 package org.cccs.easql.util;
 
-import org.cccs.easql.*;
+import org.cccs.easql.Cardinality;
+import org.cccs.easql.Column;
+import org.cccs.easql.Relation;
+import org.cccs.easql.Table;
 import org.cccs.easql.domain.ColumnMapping;
 
 import java.lang.reflect.Field;
@@ -26,6 +29,7 @@ public final class ClassUtils {
     private static Map<Class, String> tables;
     private static Map<Class, Column> primaryColumns;
     private static Map<Class, String> primaryColumnNames;
+    private static Map<Class, String> uniqueColumnNames;
 
     static {
         columnNames = new HashMap<Class, String[]>();
@@ -33,6 +37,7 @@ public final class ClassUtils {
         tables = new HashMap<Class, String>();
         primaryColumns = new HashMap<Class, Column>();
         primaryColumnNames = new HashMap<Class, String>();
+        uniqueColumnNames = new HashMap<Class, String>();
     }
 
     public static String[] getColumnNames(Class c) {
@@ -78,8 +83,17 @@ public final class ClassUtils {
     public static String getPrimaryColumnName(Class c) {
         String column = primaryColumnNames.get(c);
         if (column == null) {
-            column = getPrimaryNameColumnForClass(c);
+            column = getPrimaryNameForClass(c);
             primaryColumnNames.put(c, column);
+        }
+        return column;
+    }
+
+    public static String getUniqueColumnName(Class c) {
+        String column = uniqueColumnNames.get(c);
+        if (column == null) {
+            column = getUniqueNameForClass(c);
+            uniqueColumnNames.put(c, column);
         }
         return column;
     }
@@ -103,10 +117,20 @@ public final class ClassUtils {
         return null;
     }
 
-    private static String getPrimaryNameColumnForClass(Class c) {
+    private static String getPrimaryNameForClass(Class c) {
         for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null && column.primaryKey()) {
+                return isNotEmpty(column.name()) ? column.name() : field.getName();
+            }
+        }
+        return null;
+    }
+
+    private static String getUniqueNameForClass(Class c) {
+        for (Field field : c.getFields()) {
+            Column column = field.getAnnotation(Column.class);
+            if (column != null && column.unique()) {
                 return isNotEmpty(column.name()) ? column.name() : field.getName();
             }
         }
@@ -172,7 +196,7 @@ public final class ClassUtils {
     }
 
     //TODO: consider refactor
-    public static ColumnMapping[] getExtractionMappings(Class c, boolean loadRelations)  {
+    public static ColumnMapping[] getExtractionMappings(Class c, boolean loadRelations) {
         Collection<ColumnMapping> columns = new ArrayList<ColumnMapping>();
         Object o = getNewObject(c);
 

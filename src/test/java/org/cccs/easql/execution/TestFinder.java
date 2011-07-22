@@ -4,19 +4,15 @@ import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * User: boycook
@@ -24,19 +20,19 @@ import static org.junit.Assert.assertThat;
  * Time: 19:08
  */
 @SuppressWarnings({"unchecked"})
-public class TestQuery extends DataDrivenTestEnvironment {
+public class TestFinder extends DataDrivenTestEnvironment {
 
     @Test
-    public void executeQueryShouldWorkForJustClassForPerson() throws Exception {
-        Collection<Person> results = query.execute(Person.class);
+    public void finderShouldWorkForJustClassForPerson() throws Exception {
+        Collection<Person> results = finder.query(Person.class);
         Person craig = (Person) results.toArray()[0];
         assertThat(results.size(), is(equalTo(2)));
         assertCraig(craig);
     }
 
     @Test
-    public void executeQueryShouldWorkForOneToManyRelations() throws Exception {
-        Collection<Person> results = query.execute(Person.class, true);
+    public void finderShouldWorkForOneToManyRelations() throws Exception {
+        Collection<Person> results = finder.query(Person.class, true);
         Person craig = (Person) results.toArray()[0];
         assertThat(results.size(), is(equalTo(2)));
         assertCraig(craig);
@@ -45,18 +41,18 @@ public class TestQuery extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void executeQueryShouldWorkForWithWhereClause() throws Exception {
+    public void finderShouldWorkForWithWhereClause() throws Exception {
         Map<String, String> where = new HashMap<String, String>();
         where.put("id", "1");
-        Collection<Person> results = query.execute(Person.class, false, where);
+        Collection<Person> results = finder.query(Person.class, false, where);
         Person craig = (Person) results.toArray()[0];
         assertThat(results.size(), is(equalTo(1)));
         assertCraig(craig);
     }
 
     @Test
-    public void executeQueryShouldWorkForJustClassForDog() throws Exception {
-        Collection<Dog> results = query.execute(Dog.class);
+    public void finderShouldWorkForJustClassForDog() throws Exception {
+        Collection<Dog> results = finder.query(Dog.class);
         Dog lassie = (Dog) results.toArray()[0];
 
         assertThat(results.size(), is(equalTo(1)));
@@ -66,8 +62,8 @@ public class TestQuery extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void executeQueryShouldWorkForJustClassForCat() throws Exception {
-        Collection<Cat> results = query.execute(Cat.class);
+    public void finderShouldWorkForJustClassForCat() throws Exception {
+        Collection<Cat> results = finder.query(Cat.class);
         Cat bagpuss = (Cat) results.toArray()[0];
 
         assertThat(results.size(), is(equalTo(2)));
@@ -77,14 +73,42 @@ public class TestQuery extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void executeQueryShouldWorkWithRelations() throws Exception {
-        Collection<Cat> results = query.execute(Cat.class, true);
+    public void finderShouldWorkWithRelations() throws Exception {
+        Collection<Cat> results = finder.query(Cat.class, true);
         Cat bagpuss = (Cat) results.toArray()[0];
 
         assertThat(results.size(), is(equalTo(2)));
         assertThat(bagpuss.id, is(equalTo(1l)));
         assertThat(bagpuss.name, is(equalTo("Bagpuss")));
         assertCraig(bagpuss.owner);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void finderByIdShouldThrowExceptionForInvalidId() throws EntityNotFoundException {
+        finder.findById(Person.class, -1);
+    }
+
+    @Test
+    public void finderByIdShouldWork() throws EntityNotFoundException {
+        Person p = (Person) finder.findById(Person.class, 1);
+        assertCraig(p);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void finderByKeyShouldThrowExceptionForInvalidKey() throws EntityNotFoundException {
+        finder.findByKey(Person.class, "FOOBAR123");
+    }
+
+    @Test
+    public void finderByKeyShouldWork() throws EntityNotFoundException {
+        Person p = (Person) finder.findByKey(Person.class, "Craig");
+        assertCraig(p);
+    }
+
+    @Test
+    public void finderByKeyShouldWorkCaseInsensitive() throws EntityNotFoundException {
+        Person p = (Person) finder.findByKey(Person.class, "CRAIG");
+        assertCraig(p);
     }
 
     private void assertCraig(Person craig) {

@@ -6,7 +6,6 @@ import org.cccs.easql.domain.Person;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.cccs.easql.domain.Sequence.setCounter;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -25,17 +24,18 @@ public class TestService extends DataDrivenTestEnvironment {
     public void beforeEach() {
         setup();
         service = new Service(getDataSource());
-        query = new Finder(getDataSource());
+        finder = new Finder(getDataSource());
+    }
 
-        craig = (Person) query.find(Person.class, 1);
-        daisy = (Cat) query.find(Cat.class, 2);
+    @Before
+    public void before() throws EntityNotFoundException {
+        craig = (Person) finder.findByKey(Person.class, "Craig");
+        daisy = (Cat) finder.findByKey(Cat.class, "Daisy");
 
         assertThat(craig.name, is(equalTo("Craig")));
         assertThat(daisy.name, is(equalTo("Daisy")));
         assertThat(craig.cats.size(), is(equalTo(1)));
         assertThat(craig.dogs.size(), is(equalTo(1)));
-
-        setCounter(3);
     }
 
     @Test
@@ -54,18 +54,18 @@ public class TestService extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void updateShouldWork() {
+    public void updateShouldWork() throws EntityNotFoundException {
         craig.email = "SomeNewEmail";
         service.update(craig);
 
-        final Person updated = (Person) query.find(Person.class, 1);
+        final Person updated = (Person) finder.findById(Person.class, 1);
         assertThat(updated.cats.size(), is(equalTo(1)));
         assertThat(updated.dogs.size(), is(equalTo(1)));
         assertThat(updated.email, is(equalTo("SomeNewEmail")));
     }
 
     @Test
-    public void updateOne2ManyRelationsShouldWork() {
+    public void updateOne2ManyRelationsShouldWork() throws EntityNotFoundException {
         craig.dogs.clear();
         craig.cats.clear();
         craig.cats.add(daisy);
@@ -75,11 +75,11 @@ public class TestService extends DataDrivenTestEnvironment {
         craig.cats.add(fluffy);
         service.update(craig);
 
-        final Person updated = (Person) query.find(Person.class, 1);
+        final Person updated = (Person) finder.findByKey(Person.class, "Craig");
         assertThat(updated.cats.size(), is(equalTo(2)));
         assertThat(updated.dogs.size(), is(equalTo(0)));
 
-        Cat fluffyDB = (Cat) query.find(Cat.class, 4);
+        Cat fluffyDB = (Cat) finder.findByKey(Cat.class, "Fluffy");
         assertThat(fluffyDB.name, is(equalTo("Fluffy")));
     }
 

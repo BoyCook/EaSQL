@@ -11,11 +11,8 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.domain.Sequence.getCounter;
 import static org.cccs.easql.util.ClassUtils.*;
-import static org.cccs.easql.util.ObjectUtils.getFieldValue;
-import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
-import static org.cccs.easql.util.ObjectUtils.value;
+import static org.cccs.easql.util.ObjectUtils.*;
 
 /**
  * User: boycook
@@ -56,8 +53,7 @@ public final class ReflectiveSQLGenerator {
                     throw new IllegalArgumentException(columnName + " must be specified");
                 } else if (column.primaryKey()) {
                     if (isNotEmpty(column.sequence())) {
-                        appendInsertValue(columns, values, columnName, String.valueOf(getCounter()));
-//                        appendInsertValue(columns, values, columnName, "(" + format(SELECT_SEQUENCE_TEMPLATE, column.sequence(), tableName) + ")");
+                        appendInsertValue(columns, values, columnName, Schema.getSequence(column.sequence()).getValue());
                     } else if (columnValue == null) {
                         throw new IllegalArgumentException("Primary key for " + columnName + " must be specified");
                     } else {
@@ -74,10 +70,6 @@ public final class ReflectiveSQLGenerator {
         }
 
         return format(INSERT_TEMPLATE, tableName, columns.toString(), values.toString());
-    }
-
-    public static String generateSelectSQL(Sequence sequence) {
-        return format(SELECT_SEQUENCE_TEMPLATE, sequence.name, "person");
     }
 
     public static String generateSelectSQL(LinkTable linkTable) {
@@ -170,7 +162,7 @@ public final class ReflectiveSQLGenerator {
 
             if (column != null && column.primaryKey()) {
                 Object columnValue = getFieldValue(field, o);
-                where = getColumnName(field) + " = " + columnValue ;
+                where = getColumnName(field) + " = " + columnValue;
             }
         }
 
@@ -178,7 +170,7 @@ public final class ReflectiveSQLGenerator {
     }
 
     public static String generateSequenceSQL(Sequence sequence) {
-        return format(CREATE_SEQUENCE_TEMPLATE, sequence.name, sequence.startsWith, sequence.incrementBy);
+        return format(CREATE_SEQUENCE_TEMPLATE, sequence.getName(), sequence.getStartsWith(), sequence.getIncrementBy());
     }
 
     public static String generateCreateSQL(LinkTable table) {

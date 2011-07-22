@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.apache.commons.io.FileUtils.readFileToString;
-import static org.cccs.easql.domain.Sequence.setCounter;
 
 /**
  * User: boycook
@@ -24,14 +23,13 @@ public class DataDrivenTestEnvironment {
     private String sqlFile = "src/test/resources/data.sql";
     private BasicDataSource dataSource;
     protected Service service;
-    protected Finder query;
+    protected Finder finder;
 
     @Before
     public void beforeEach() {
         setup();
         service = new Service(getDataSource());
-        query = new Finder(getDataSource());
-        setCounter(3);
+        finder = new Finder(getDataSource());
     }
 
     protected void setup() {

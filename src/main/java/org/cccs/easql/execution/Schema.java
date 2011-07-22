@@ -5,20 +5,21 @@ import org.cccs.easql.Column;
 import org.cccs.easql.Relation;
 import org.cccs.easql.Table;
 import org.cccs.easql.domain.LinkTable;
+import org.cccs.easql.domain.MemorySequence;
 import org.cccs.easql.domain.Sequence;
 import org.reflections.Reflections;
-import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
+import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateCreateSQL;
+import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSequenceSQL;
 import static org.cccs.easql.util.ClassUtils.getPrimaryColumn;
 
 /**
@@ -32,7 +33,7 @@ public final class Schema {
     public static DataSource dataSource;
     private static Set<Class<?>> tables;
     private static Set<LinkTable> linkTables;
-    private static List<Sequence> sequences;
+    private static Map<String, Sequence> sequences;
     private static boolean generated = false;
 
     public static void generate() {
@@ -43,9 +44,6 @@ public final class Schema {
             for (LinkTable linkTable : getLinkTables()) {
                 createLinkTable(linkTable);
             }
-//            for (Sequence sequence : getSequences()) {
-//                createSequence(sequence);
-//            }
             generated = true;
         }
     }
@@ -64,20 +62,25 @@ public final class Schema {
         return linkTables;
     }
 
-    public static List<Sequence> getSequences() {
+    public static Sequence getSequence(String name) {
+        return getSequences().get(name);
+    }
+
+    public static Map<String, Sequence> getSequences() {
         if (sequences == null) {
             sequences = gatherSequences();
         }
         return sequences;
     }
 
-    private static List<Sequence> gatherSequences() {
-        List<Sequence> tempSequences = new ArrayList<Sequence>();
+    //TODO: handle different DB types
+    private static Map<String, Sequence> gatherSequences() {
+        Map<String, Sequence> tempSequences = new HashMap<String, Sequence>();
 
         for (Class<?> table : getTables()) {
             Column column = getPrimaryColumn(table);
             if (isNotEmpty(column.sequence())) {
-                tempSequences.add(new Sequence(column.sequence(), 0, 1));
+                tempSequences.put(column.sequence(), new MemorySequence(column.sequence(), 100, 1));
             }
         }
 

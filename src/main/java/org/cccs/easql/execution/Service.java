@@ -54,12 +54,12 @@ public class Service {
         - For One2One change the ID
         - For Many2Many ??? assume link table...
      */
-    public void update(Object o) {
+    public void update(Object o) throws EntityNotFoundException {
         StringBuilder insertSQL = new StringBuilder();
         StringBuilder updateSQL = new StringBuilder();
         StringBuilder deleteSQL = new StringBuilder();
         long objectKey = getPrimaryValueAsLong(o);
-        Object inDB = query.find(o.getClass(), getPrimaryValueAsLong(o));
+        Object inDB = query.findById(o.getClass(), getPrimaryValueAsLong(o));
 
         if (!inDB.equals(o)) {
             System.out.println("Objects are different");

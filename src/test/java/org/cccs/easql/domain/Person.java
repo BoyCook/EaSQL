@@ -17,7 +17,7 @@ public class Person {
 
     @Column(primaryKey = true, sequence = "person_seq")
     public long id;
-    @Column
+    @Column(unique = true)
     public String name;
     @Column
     public String email;
@@ -28,7 +28,8 @@ public class Person {
     @Relation(cardinality = Cardinality.ONE_TO_MANY, key = "person_id")
     public Collection<Cat> cats;
 
-    public Person() {}
+    public Person() {
+    }
 
     public Person(String name) {
         this.name = name;

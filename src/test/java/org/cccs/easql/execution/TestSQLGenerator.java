@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.cccs.easql.domain.Sequence.setCounter;
 import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
 import static org.cccs.easql.util.ClassUtils.getColumnNames;
 import static org.hamcrest.Matchers.equalTo;
@@ -29,13 +28,13 @@ public class TestSQLGenerator {
 
     @Before
     public void setup() throws IOException {
+        Schema.packageName = "org.cccs.easql";
         craig = new Person("Craig", "craig@cook.com", "07234123456");
         craig.id = 1;
         lassie = new Dog("Lassie", craig);
         lassie.id = 1;
         bagpuss = new Cat("Bagpuss", craig);
         bagpuss.id = 1;
-        setCounter(0);
     }
 
     @Test
@@ -58,19 +57,19 @@ public class TestSQLGenerator {
 
     @Test
     public void reflectiveSQLBuilderShouldWorkForInsertsForPerson() throws Exception {
-        String personSQL = "INSERT INTO Person (id, name, email, phone) VALUES (1, 'Craig', 'craig@cook.com', '07234123456');";
+        String personSQL = "INSERT INTO Person (id, name, email, phone) VALUES (101, 'Craig', 'craig@cook.com', '07234123456');";
         assertThat(generateInsertSQL(craig), is(equalTo(personSQL)));
     }
 
     @Test
     public void reflectiveSQLBuilderShouldWorkForInsertsForDog() throws Exception {
-        String dogSQL = "INSERT INTO Dog (id, name, person_id) VALUES (1, 'Lassie', %s);";
+        String dogSQL = "INSERT INTO Dog (id, name, person_id) VALUES (101, 'Lassie', %s);";
         assertThat(generateInsertSQL(lassie), is(equalTo(dogSQL)));
     }
 
     @Test
     public void reflectiveSQLBuilderShouldWorkForInsertsForCat() throws Exception {
-        String catSQL = "INSERT INTO Cat (id, name, person_id) VALUES (1, 'Bagpuss', %s);";
+        String catSQL = "INSERT INTO Cat (id, name, person_id) VALUES (101, 'Bagpuss', %s);";
         assertThat(generateInsertSQL(bagpuss), is(equalTo(catSQL)));
     }
 

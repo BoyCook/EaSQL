@@ -4,7 +4,6 @@ import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.jdbc.support.incrementer.DB2SequenceMaxValueIncrementer;
 
 /**
  * User: boycook
@@ -19,7 +18,7 @@ public class TestSequences extends DataDrivenTestEnvironment {
         setSqlFile(null);
         setup();
         service = new Service(getDataSource());
-        query = new Finder(getDataSource());
+        finder = new Finder(getDataSource());
     }
 
     @Test
