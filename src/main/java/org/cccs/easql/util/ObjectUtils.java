@@ -15,6 +15,17 @@ import java.util.Collection;
  */
 public final class ObjectUtils {
 
+    public static String arrayAsString(String [] values) {
+        final StringBuilder string = new StringBuilder();
+        for (String value : values) {
+            if (string.length() > 0) {
+                string.append(", ");
+            }
+            string.append(value);
+        }
+        return string.toString();
+    }
+
     public static Object getFieldValue(Field field, Object o) {
         Object value = null;
 

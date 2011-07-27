@@ -15,10 +15,12 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSelectSQL;
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateWhere;
+import static org.cccs.easql.execution.SQLGenerator.generateSelectSQLForManyToMany;
+import static org.cccs.easql.execution.SQLGenerator.generateSelectSQL;
+import static org.cccs.easql.execution.SQLGenerator.generateWhere;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
+import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
 import static org.cccs.easql.util.ObjectUtils.setObjectValue;
 
 /**
@@ -34,7 +36,8 @@ public class Finder {
         this.dataSource = dataSource;
     }
 
-    public Object findById(Class c, long id) throws EntityNotFoundException {
+    @SuppressWarnings({"unchecked"})
+    public <T> T findById(Class<T> c, long id) throws EntityNotFoundException {
         Map<String, String> where = new HashMap<String, String>();
         where.put(getPrimaryColumnName(c), String.valueOf(id));
         Collection results = query(c, true, where);
@@ -43,10 +46,11 @@ public class Finder {
             throw new EntityNotFoundException(format("%s with ID %d not found", getTableName(c), id));
         }
 
-        return results.toArray()[0];
+        return (T) results.toArray()[0];
     }
 
-    public Object findByKey(Class c, String key) throws EntityNotFoundException {
+    @SuppressWarnings({"unchecked"})
+    public <T> T findByKey(Class<T> c, String key) throws EntityNotFoundException {
         Map<String, String> where = new HashMap<String, String>();
         where.put(format("upper(%s)", getUniqueColumnName(c)), String.valueOf(key).toUpperCase());
         Collection results = query(c, true, where);
@@ -55,7 +59,7 @@ public class Finder {
             throw new EntityNotFoundException(format("%s with key %s not found", getTableName(c), key));
         }
 
-        return results.toArray()[0];
+        return (T) results.toArray()[0];
     }
 
     public Collection query(final Class c) {
@@ -76,17 +80,26 @@ public class Finder {
             sql = sql + where;
         }
 
-        final GenericQuery query = new GenericQuery(this.dataSource);
-        Collection results = query.execute(c, sql, loadRelations);
+        Collection results = query(c, sql, loadRelations);
 
         if (loadRelations && hasRelations(c, Cardinality.ONE_TO_MANY)) {
-            loadRelatedEntities(results);
+            loadOneToMany(results);
+        }
+
+        if (loadRelations && hasRelations(c, Cardinality.MANY_TO_MANY)) {
+            loadManyToMany(results);
         }
 
         return results;
     }
 
-    private void loadRelatedEntities(Collection results) {
+    public Collection query(final Class c, final String sql, boolean loadRelations) {
+        final GenericQuery query = new GenericQuery(this.dataSource);
+        return query.execute(c, sql, loadRelations);
+    }
+
+    //TODO: move reflection out of here
+    private void loadOneToMany(Collection results) {
         for (Object result : results) {
             Class c = result.getClass();
             Field[] fields = c.getFields();
@@ -102,6 +115,23 @@ public class Finder {
         }
     }
 
+    //TODO: move reflection out of here
+    private void loadManyToMany(Collection results) {
+        for (Object result : results) {
+            Class c = result.getClass();
+            Field[] fields = c.getFields();
+            for (Field field : fields) {
+                Relation relation = field.getAnnotation(Relation.class);
+                if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_MANY)) {
+                    final Class relatedClass = getGenericType(field);
+                    final String sql = generateSelectSQLForManyToMany(relatedClass, relation, getPrimaryValueAsLong(result));
+                    final Collection relatedResults = query(relatedClass, sql, false);
+                    setObjectValue(field, result, relatedResults);
+                }
+            }
+        }
+    }
+
     class GenericQuery extends JdbcTemplate {
         private StopWatch clock;
 
@@ -112,9 +142,10 @@ public class Finder {
         public Collection execute(final Class c, final String sql, boolean loadRelations) {
             clock = new StopWatch("QueryExecution");
             clock.start();
-            Collection<?> results = query(sql, new ReflectiveExtractor(c, loadRelations));
+            Collection<?> results = query(sql, new Extractor(c, loadRelations));
             clock.stop();
             log.debug(format("Executing SQL [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
+            System.out.println(format("Executing SQL [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
             return results;
         }
     }

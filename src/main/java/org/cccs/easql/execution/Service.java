@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.lang.String.format;
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.*;
+import static org.cccs.easql.execution.SQLGenerator.*;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.*;
 

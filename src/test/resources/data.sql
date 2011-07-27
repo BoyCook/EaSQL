@@ -3,3 +3,13 @@ INSERT INTO Person (id, name, email, phone) VALUES (2, 'Bob', 'bob@cook.com', '0
 INSERT INTO Dog (id, name, person_id) VALUES (1, 'Lassie', (SELECT id FROM Person WHERE name = 'Craig'));
 INSERT INTO Cat (id, name, person_id) VALUES (1, 'Bagpuss', (SELECT id FROM Person WHERE name = 'Craig'));
 INSERT INTO Cat (id, name, person_id) VALUES (2, 'Daisy', (SELECT id FROM Person WHERE name = 'Bob'));
+INSERT INTO countries (cntId, name) VALUES (1, 'England');
+INSERT INTO countries (cntId, name) VALUES (2, 'Ireland');
+INSERT INTO countries (cntId, name) VALUES (3, 'Scotland');
+INSERT INTO countries (cntId, name) VALUES (4, 'Wales');
+INSERT INTO dog_countries (cntId, dog_id) VALUES (1, 1);
+INSERT INTO dog_countries (cntId, dog_id) VALUES (2, 1);
+INSERT INTO cat_countries (cntId, cat_id) VALUES (1, 1);
+INSERT INTO cat_countries (cntId, cat_id) VALUES (1, 2);
+INSERT INTO cat_countries (cntId, cat_id) VALUES (2, 1);
+INSERT INTO cat_countries (cntId, cat_id) VALUES (2, 2);

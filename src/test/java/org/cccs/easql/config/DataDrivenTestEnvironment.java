@@ -51,6 +51,7 @@ public class DataDrivenTestEnvironment {
         execute("DELETE FROM DOG;");
         execute("DELETE FROM CAT;");
         execute("DELETE FROM PERSON;");
+        execute("DELETE FROM COUNTRIES;");
         execute("DELETE FROM CAT_COUNTRIES;");
         execute("DELETE FROM DOG_COUNTRIES;");
     }

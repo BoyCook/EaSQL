@@ -2,8 +2,10 @@ package org.cccs.easql.execution;
 
 import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
+import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -24,36 +26,26 @@ public class TestFinder extends DataDrivenTestEnvironment {
 
     @Test
     public void finderShouldWorkForJustClassForPerson() throws Exception {
-        Collection<Person> results = finder.query(Person.class);
-        Person craig = (Person) results.toArray()[0];
+        final Collection<Person> results = finder.query(Person.class);
+        final Person craig = (Person) results.toArray()[0];
         assertThat(results.size(), is(equalTo(2)));
         assertCraig(craig);
-    }
-
-    @Test
-    public void finderShouldWorkForOneToManyRelations() throws Exception {
-        Collection<Person> results = finder.query(Person.class, true);
-        Person craig = (Person) results.toArray()[0];
-        assertThat(results.size(), is(equalTo(2)));
-        assertCraig(craig);
-        assertThat(craig.cats.size(), is(equalTo(1)));
-        assertThat(craig.dogs.size(), is(equalTo(1)));
     }
 
     @Test
     public void finderShouldWorkForWithWhereClause() throws Exception {
-        Map<String, String> where = new HashMap<String, String>();
+        final Map<String, String> where = new HashMap<String, String>();
         where.put("id", "1");
-        Collection<Person> results = finder.query(Person.class, false, where);
-        Person craig = (Person) results.toArray()[0];
+        final Collection<Person> results = finder.query(Person.class, false, where);
+        final Person craig = (Person) results.toArray()[0];
         assertThat(results.size(), is(equalTo(1)));
         assertCraig(craig);
     }
 
     @Test
     public void finderShouldWorkForJustClassForDog() throws Exception {
-        Collection<Dog> results = finder.query(Dog.class);
-        Dog lassie = (Dog) results.toArray()[0];
+        final Collection<Dog> results = finder.query(Dog.class);
+        final Dog lassie = (Dog) results.toArray()[0];
 
         assertThat(results.size(), is(equalTo(1)));
         assertThat(lassie.id, is(equalTo(1l)));
@@ -63,8 +55,8 @@ public class TestFinder extends DataDrivenTestEnvironment {
 
     @Test
     public void finderShouldWorkForJustClassForCat() throws Exception {
-        Collection<Cat> results = finder.query(Cat.class);
-        Cat bagpuss = (Cat) results.toArray()[0];
+        final Collection<Cat> results = finder.query(Cat.class);
+        final Cat bagpuss = (Cat) results.toArray()[0];
 
         assertThat(results.size(), is(equalTo(2)));
         assertThat(bagpuss.id, is(equalTo(1l)));
@@ -74,8 +66,8 @@ public class TestFinder extends DataDrivenTestEnvironment {
 
     @Test
     public void finderShouldWorkWithRelations() throws Exception {
-        Collection<Cat> results = finder.query(Cat.class, true);
-        Cat bagpuss = (Cat) results.toArray()[0];
+        final Collection<Cat> results = finder.query(Cat.class, true);
+        final Cat bagpuss = (Cat) results.toArray()[0];
 
         assertThat(results.size(), is(equalTo(2)));
         assertThat(bagpuss.id, is(equalTo(1l)));
@@ -90,7 +82,7 @@ public class TestFinder extends DataDrivenTestEnvironment {
 
     @Test
     public void finderByIdShouldWork() throws EntityNotFoundException {
-        Person p = (Person) finder.findById(Person.class, 1);
+        final Person p = finder.findById(Person.class, 1);
         assertCraig(p);
     }
 
@@ -101,14 +93,39 @@ public class TestFinder extends DataDrivenTestEnvironment {
 
     @Test
     public void finderByKeyShouldWork() throws EntityNotFoundException {
-        Person p = (Person) finder.findByKey(Person.class, "Craig");
+        final Person p = finder.findByKey(Person.class, "Craig");
         assertCraig(p);
     }
 
     @Test
     public void finderByKeyShouldWorkCaseInsensitive() throws EntityNotFoundException {
-        Person p = (Person) finder.findByKey(Person.class, "CRAIG");
+        final Person p = finder.findByKey(Person.class, "CRAIG");
         assertCraig(p);
+    }
+
+    @Test
+    public void finderShouldWorkForOneToManyRelations() throws Exception {
+        final Person craig = finder.findByKey(Person.class, "Craig");
+        assertCraig(craig);
+        assertThat(craig.cats.size(), is(equalTo(1)));
+        assertThat(craig.dogs.size(), is(equalTo(1)));
+    }
+
+    @Test
+    public void finderShouldWorkForManyToManyRelationsFromLeft() throws Exception {
+        final Country england = finder.findByKey(Country.class, "England");
+        assertThat(england.name, is(equalTo("England")));
+        assertThat(england.id, is(equalTo(1l)));
+        assertThat(england.dogs.size(), is(equalTo(1)));
+        assertThat(england.cats.size(), is(equalTo(2)));
+    }
+
+    @Test
+    public void finderShouldWorkForManyToManyRelationsFromRight() throws Exception {
+        final Dog lassie = finder.findByKey(Dog.class, "Lassie");
+        assertThat(lassie.name, is(equalTo("Lassie")));
+        assertThat(lassie.id, is(equalTo(1l)));
+        assertThat(lassie.countries.size(), is(equalTo(2)));
     }
 
     private void assertCraig(Person craig) {

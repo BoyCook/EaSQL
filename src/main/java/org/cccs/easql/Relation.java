@@ -15,4 +15,12 @@ public @interface Relation {
     String[] linkedBy() default {};
     String key() default "";
     Cardinality cardinality() default Cardinality.ONE_TO_ONE;
+    //Being a bit lazy here, need to know which ID to foreign key off
+    End end() default End.NA;
+
+    public enum End {
+        LEFT,
+        RIGHT,
+        NA
+    }
 }

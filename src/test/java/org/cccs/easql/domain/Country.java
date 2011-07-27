@@ -17,9 +17,11 @@ public class Country {
 
     @Column(primaryKey = true, name = "cntId", sequence = "cnt_seq")
     public long id;
-    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "dog_countries", linkedBy = {"cntId", "dog_id"})
+    @Column(unique = true)
+    public String name;
+    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "dog_countries", linkedBy = {"cntId", "dog_id"}, end = Relation.End.LEFT)
     public Collection<Dog> dogs;
-    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "cat_countries", linkedBy = {"cntId", "cat_id"})
+    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "cat_countries", linkedBy = {"cntId", "cat_id"}, end = Relation.End.LEFT)
     public Collection<Cat> cats;
 
 }

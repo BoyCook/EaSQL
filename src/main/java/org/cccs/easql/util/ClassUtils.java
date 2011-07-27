@@ -204,11 +204,7 @@ public final class ClassUtils {
             Column column = field.getAnnotation(Column.class);
             Relation relation = field.getAnnotation(Relation.class);
             if (column != null) {
-                if (loadRelations) {
-                    columns.add(new ColumnMapping(field, getColumnName(field), "", o));
-                } else {
-                    columns.add(new ColumnMapping(field, getColumnName(field), "", o));
-                }
+                columns.add(new ColumnMapping(field, getColumnName(field), "", o));
             } else if (relation != null) {
                 if (relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
                     if (loadRelations) {
@@ -219,8 +215,6 @@ public final class ClassUtils {
                             columns.add(new ColumnMapping(relatedColumn.field, relation.name() + "_" + relatedColumn.columnName, "", relatedO));
                             setObjectValue(field, o, relatedO);
                         }
-                    } else {
-                        columns.add(new ColumnMapping(field, relation.key(), "", o));
                     }
                 }
             }

@@ -34,7 +34,7 @@ public final class SQLGenerator {
     private final static String SELECT_SEQUENCE_TEMPLATE = "SELECT NEXT VALUE FOR %s FROM %s";
     private final static String CREATE_SEQUENCE_TEMPLATE = "CREATE SEQUENCE %s AS BIGINT START WITH %d INCREMENT BY %d;";
     private final static String OUTER_JOIN = "LEFT OUTER JOIN %s %s ON %s.%s = %s.%s";
-    private final static String INNER_JOIN = "INNER JOIN %s %s ON %s.%s = %s.%s";
+    private final static String INNER_JOIN = "INNER JOIN %s %s ON %s.%s = %s.%s AND %s.%s = %d";
 
     public static String generateInsertSQL(Object o) {
         Class c = o.getClass();
@@ -88,8 +88,8 @@ public final class SQLGenerator {
         StringBuilder joins = new StringBuilder();
 
         for (Field field : c.getFields()) {
-            Column column = field.getAnnotation(Column.class);
-            Relation relation = field.getAnnotation(Relation.class);
+            final Column column = field.getAnnotation(Column.class);
+            final Relation relation = field.getAnnotation(Relation.class);
 
             if (column != null) {
                 appendColumn(select, getColumnName(field));
@@ -117,13 +117,18 @@ public final class SQLGenerator {
         }
     }
 
-    public static String generateSelectForManyToMany(Class a, Class b) {
-        StringBuilder sql = new StringBuilder();
+    public static String generateSelectSQLForManyToMany(Class aClass, Relation relation, long id) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append(format(SELECT_TEMPLATE, arrayAsString(getColumnNames(aClass)), getTableName(aClass) + " a "));
 
-        //INNER JOIN %s %s ON %s.%s = %s.%s
-        // INNER JOIN dog d ON d.
+        if (relation.end().equals(Relation.End.LEFT)) {
+            sql.append(format(INNER_JOIN, relation.linkTable(), "b", "a", getPrimaryColumnName(aClass), "b", relation.linkedBy()[1], "b", relation.linkedBy()[0], id));
+        } else {
+            sql.append(format(INNER_JOIN, relation.linkTable(), "b", "a", getPrimaryColumnName(aClass), "b", relation.linkedBy()[0], "b", relation.linkedBy()[1], id));
+        }
 
-        return format(INNER_JOIN, getTableName(a), "a", getTableName(b), b);
+        sql.append(";");
+        return sql.toString();
     }
 
     public static String generateUpdateSQL(Object o) {

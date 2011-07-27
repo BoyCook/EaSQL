@@ -18,8 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateCreateSQL;
-import static org.cccs.easql.execution.ReflectiveSQLGenerator.generateSequenceSQL;
+import static org.cccs.easql.execution.SQLGenerator.*;
 import static org.cccs.easql.util.ClassUtils.getPrimaryColumn;
 
 /**
@@ -45,6 +44,13 @@ public final class Schema {
                 createLinkTable(linkTable);
             }
             generated = true;
+        }
+    }
+
+    public static void tearDown() {
+        //TODO: truncate from link tables and truncate in correct order
+        for (Class<?> table : getTables()) {
+            execute(generateDeleteSQL(table));
         }
     }
 
@@ -104,10 +110,6 @@ public final class Schema {
     private static Set<Class<?>> gatherTables() {
         Reflections reflections = new Reflections(packageName);
         return reflections.getTypesAnnotatedWith(Table.class);
-    }
-
-    private static void createSequence(Sequence sequence) {
-        execute(generateSequenceSQL(sequence));
     }
 
     private static void createLinkTable(LinkTable linkTable) {
