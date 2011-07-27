@@ -3,7 +3,6 @@ package org.cccs.easql.execution;
 import org.cccs.easql.Cardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
@@ -133,7 +132,7 @@ public class Service {
     }
 
     private void execute(String sql) {
-        JdbcTemplate db = new JdbcTemplate(this.dataSource);
+        Executor db = new Executor(this.dataSource);
         db.execute(sql);
     }
 }

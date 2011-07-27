@@ -1,12 +1,12 @@
 package org.cccs.easql.config;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.cccs.easql.execution.Executor;
 import org.cccs.easql.execution.Finder;
 import org.cccs.easql.execution.Schema;
 import org.cccs.easql.execution.Service;
 import org.junit.After;
 import org.junit.Before;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class DataDrivenTestEnvironment {
     }
 
     public void execute(String sql) {
-        JdbcTemplate db = new JdbcTemplate(getDataSource());
+        final Executor db = new Executor(getDataSource());
         db.execute(sql);
     }
 

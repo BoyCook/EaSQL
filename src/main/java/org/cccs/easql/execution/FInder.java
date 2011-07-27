@@ -94,8 +94,8 @@ public class Finder {
     }
 
     public Collection query(final Class c, final String sql, boolean loadRelations) {
-        final GenericQuery query = new GenericQuery(this.dataSource);
-        return query.execute(c, sql, loadRelations);
+        final Executor executor = new Executor(this.dataSource);
+        return executor.query(c, sql, loadRelations);
     }
 
     //TODO: move reflection out of here
@@ -129,24 +129,6 @@ public class Finder {
                     setObjectValue(field, result, relatedResults);
                 }
             }
-        }
-    }
-
-    class GenericQuery extends JdbcTemplate {
-        private StopWatch clock;
-
-        GenericQuery(DataSource dataSource) {
-            super(dataSource);
-        }
-
-        public Collection execute(final Class c, final String sql, boolean loadRelations) {
-            clock = new StopWatch("QueryExecution");
-            clock.start();
-            Collection<?> results = query(sql, new Extractor(c, loadRelations));
-            clock.stop();
-            log.debug(format("Executing SQL [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
-            System.out.println(format("Executing SQL [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
-            return results;
         }
     }
 }
