@@ -21,18 +21,20 @@ import static org.cccs.easql.util.ObjectUtils.*;
  */
 //TODO: consider making this a BaseClass
 @SuppressWarnings({"unchecked"})
-public final class ReflectiveSQLGenerator {
+public final class SQLGenerator {
 
     //Template SQL
     private final static String INSERT_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s);";
     private final static String SELECT_TEMPLATE = "SELECT %s FROM %s";
     private final static String SELECT_TEMPLATE_RELATIONS = "SELECT %s FROM %s %s";
     private final static String UPDATE_TEMPLATE = "UPDATE %s set %s WHERE %s;";
-    private final static String DELETE_TEMPLATE = "DELETE FROM %s WHERE %s;";
+    private final static String DELETE_TEMPLATE = "DELETE FROM %s;";
+    private final static String DELETE_OBJECT_TEMPLATE = "DELETE FROM %s WHERE %s;";
     private final static String CREATE_TEMPLATE = "CREATE TABLE %s (%s);";
     private final static String SELECT_SEQUENCE_TEMPLATE = "SELECT NEXT VALUE FOR %s FROM %s";
     private final static String CREATE_SEQUENCE_TEMPLATE = "CREATE SEQUENCE %s AS BIGINT START WITH %d INCREMENT BY %d;";
-//    private final static String CREATE_SEQUENCE_TEMPLATE = "CREATE SEQUENCE %s START WITH %d INCREMENT BY %d;";
+    private final static String OUTER_JOIN = "LEFT OUTER JOIN %s %s ON %s.%s = %s.%s";
+    private final static String INNER_JOIN = "INNER JOIN %s %s ON %s.%s = %s.%s";
 
     public static String generateInsertSQL(Object o) {
         Class c = o.getClass();
@@ -100,7 +102,7 @@ public final class ReflectiveSQLGenerator {
                             appendColumn(select, getJoinColumnName(relation.name(), joinColumn));
                         }
                         String primaryColumn = getPrimaryColumnName(field.getType());
-                        joins.append(format("LEFT OUTER JOIN %s %s ON %s.%s = %s.%s", joinTable, relation.name(), tableName, primaryColumn, relation.name(), primaryColumn));
+                        joins.append(format(OUTER_JOIN, joinTable, relation.name(), tableName, primaryColumn, relation.name(), primaryColumn));
                     } else {
                         appendColumn(select, relation.key());
                     }
@@ -113,6 +115,15 @@ public final class ReflectiveSQLGenerator {
         } else {
             return format(SELECT_TEMPLATE, select.toString(), tableName);
         }
+    }
+
+    public static String generateSelectForManyToMany(Class a, Class b) {
+        StringBuilder sql = new StringBuilder();
+
+        //INNER JOIN %s %s ON %s.%s = %s.%s
+        // INNER JOIN dog d ON d.
+
+        return format(INNER_JOIN, getTableName(a), "a", getTableName(b), b);
     }
 
     public static String generateUpdateSQL(Object o) {
@@ -166,7 +177,11 @@ public final class ReflectiveSQLGenerator {
             }
         }
 
-        return format(DELETE_TEMPLATE, getTableName(c), where);
+        return format(DELETE_OBJECT_TEMPLATE, getTableName(c), where);
+    }
+
+    public static String generateDeleteSQL(Class c) {
+        return format(DELETE_TEMPLATE, getTableName(c));
     }
 
     public static String generateSequenceSQL(Sequence sequence) {

@@ -17,11 +17,11 @@ import static org.cccs.easql.util.ObjectUtils.setObjectValue;
  * Date: 22/06/2011
  * Time: 14:20
  */
-public class ReflectiveExtractor implements ResultSetExtractor<Collection<?>> {
+public class Extractor implements ResultSetExtractor<Collection<?>> {
     private final Class<?> classType;
     private final boolean loadRelations;
 
-    public ReflectiveExtractor(final Class<?> type, boolean loadRelations) {
+    public Extractor(final Class<?> type, boolean loadRelations) {
         this.classType = type;
         this.loadRelations = loadRelations;
     }
