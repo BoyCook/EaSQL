@@ -107,11 +107,19 @@ public class TestSQLGenerator {
     }
 
     @Test
-    public void sqlBuilderShouldWorkForSelectManyToMany() throws NoSuchFieldException {
+    public void sqlBuilderShouldWorkForSelectManyToManyFromLeft() throws NoSuchFieldException {
         final Field dogs = Country.class.getField("dogs");
         final Relation relation = dogs.getAnnotation(Relation.class);
         final String sql = "SELECT id, name FROM Dog a INNER JOIN dog_countries b ON a.id = b.dog_id AND b.cntId = 1;";
         assertThat(generateSelectSQLForManyToMany(Dog.class, relation, 1), is(equalTo(sql)));
+    }
+
+    @Test
+    public void sqlBuilderShouldWorkForSelectManyToManyFromRight() throws NoSuchFieldException {
+        final Field countries = Dog.class.getField("countries");
+        final Relation relation = countries.getAnnotation(Relation.class);
+        final String sql = "SELECT cntId, name FROM countries a INNER JOIN dog_countries b ON a.cntId = b.cntId AND b.dog_id = 1;";
+        assertThat(generateSelectSQLForManyToMany(Country.class, relation, 1), is(equalTo(sql)));
     }
 
     @Test
