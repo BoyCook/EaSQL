@@ -4,6 +4,7 @@ import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Person;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,8 +30,8 @@ public class TestService extends DataDrivenTestEnvironment {
 
     @Before
     public void before() throws EntityNotFoundException {
-        craig = (Person) finder.findByKey(Person.class, "Craig");
-        daisy = (Cat) finder.findByKey(Cat.class, "Daisy");
+        craig = finder.findByKey(Person.class, "Craig");
+        daisy = finder.findByKey(Cat.class, "Daisy");
 
         assertThat(craig.name, is(equalTo("Craig")));
         assertThat(daisy.name, is(equalTo("Daisy")));
@@ -58,7 +59,7 @@ public class TestService extends DataDrivenTestEnvironment {
         craig.email = "SomeNewEmail";
         service.update(craig);
 
-        final Person updated = (Person) finder.findById(Person.class, 1);
+        final Person updated = finder.findById(Person.class, 1);
         assertThat(updated.cats.size(), is(equalTo(1)));
         assertThat(updated.dogs.size(), is(equalTo(1)));
         assertThat(updated.email, is(equalTo("SomeNewEmail")));
@@ -75,16 +76,27 @@ public class TestService extends DataDrivenTestEnvironment {
         craig.cats.add(fluffy);
         service.update(craig);
 
-        final Person updated = (Person) finder.findByKey(Person.class, "Craig");
+        final Person updated = finder.findByKey(Person.class, "Craig");
         assertThat(updated.cats.size(), is(equalTo(2)));
         assertThat(updated.dogs.size(), is(equalTo(0)));
 
-        Cat fluffyDB = (Cat) finder.findByKey(Cat.class, "Fluffy");
+        final Cat fluffyDB = finder.findByKey(Cat.class, "Fluffy");
         assertThat(fluffyDB.name, is(equalTo("Fluffy")));
+    }
+
+    @Ignore
+    @Test
+    public void updateMany2OneRelationsShouldWork() throws EntityNotFoundException {
+        final Person bob = finder.findByKey(Person.class, "Bob");
+        final Cat bagpuss = finder.findByKey(Cat.class, "Bagpuss");
+        bagpuss.owner = bob;
+        service.update(bagpuss);
+
+        final Cat updated = finder.findByKey(Cat.class, "Bagpuss");
+        assertThat(updated.owner, is(equalTo(bob)));
     }
 
     @Test
     public void updateMany2ManyRelationsShouldWork() {
-
     }
 }

@@ -12,7 +12,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
-import static org.cccs.easql.execution.SQLGenerator.*;
+import static org.cccs.easql.execution.SQLUtils.*;
 import static org.cccs.easql.util.ClassUtils.getColumnNames;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;

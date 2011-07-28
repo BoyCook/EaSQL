@@ -4,8 +4,6 @@ import org.cccs.easql.Cardinality;
 import org.cccs.easql.Relation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.StopWatch;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
@@ -15,9 +13,9 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.execution.SQLGenerator.generateSelectSQLForManyToMany;
-import static org.cccs.easql.execution.SQLGenerator.generateSelectSQL;
-import static org.cccs.easql.execution.SQLGenerator.generateWhere;
+import static org.cccs.easql.execution.SQLUtils.generateSelectSQLForManyToMany;
+import static org.cccs.easql.execution.SQLUtils.generateSelectSQL;
+import static org.cccs.easql.execution.SQLUtils.generateWhere;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
