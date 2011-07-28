@@ -25,7 +25,7 @@ public class Executor extends JdbcTemplate {
         clock.start();
         Collection<?> results = query(sql, new Extractor(c, loadRelations));
         clock.stop();
-        System.out.println(format("Executing SQL [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
+        System.out.println(format("Executing Query [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
         return results;
     }
 
@@ -34,6 +34,6 @@ public class Executor extends JdbcTemplate {
         clock.start();
         super.execute(sql);
         clock.stop();
-        System.out.println(format("Executing SQL [%s] took [%d ms]", sql, clock.getLastTaskTimeMillis()));
+        System.out.println(format("Executing Update [%s] took [%d ms]", sql, clock.getLastTaskTimeMillis()));
     }
 }

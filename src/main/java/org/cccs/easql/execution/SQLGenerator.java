@@ -82,7 +82,7 @@ public class SQLGenerator {
 
         //Checking Objects
         if (hasRelations(updated.getClass(), Cardinality.MANY_TO_ONE)) {
-            System.out.println("Checking One2One...");
+            System.out.println("Checking Many2One...");
             for (Field field : getRelationFields(updated.getClass(), Cardinality.MANY_TO_ONE)) {
                 final Object value = getFieldValue(field, updated);
                 updateSQL.append(format(generateUpdateSQLForRelation(updated, field), getPrimaryValue(value)));
@@ -91,9 +91,9 @@ public class SQLGenerator {
 
         //Checking Link tables
         if (hasRelations(updated.getClass(), Cardinality.MANY_TO_MANY)) {
+            //TODO diff Collections and create UPDATE SQL from diff
             System.out.println("Checking Many2Many...");
             getRelations(updated, Cardinality.MANY_TO_MANY);
-            //TODO diff Collections and create UPDATE SQL from diff
         }
 
         StringBuilder sql = new StringBuilder();
@@ -103,6 +103,7 @@ public class SQLGenerator {
         return sql.toString();
     }
 
+    @SuppressWarnings({"unchecked"})
     private void compareLists(Collection original, Collection updated, Collection addRelation, Collection removeRelation) {
         for (Object o : original) {
             if (!updated.contains(o)) {

@@ -20,7 +20,6 @@ import static org.cccs.easql.util.ObjectUtils.*;
  * Time: 15:39
  */
 //TODO: consider making this a BaseClass
-@SuppressWarnings({"unchecked"})
 public final class SQLUtils {
 
     //Template SQL
