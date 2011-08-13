@@ -87,8 +87,11 @@ public class TestService extends DataDrivenTestEnvironment {
     @Ignore //Really not sure why this is not working
     @Test
     public void updateMany2OneRelationsShouldWork() throws EntityNotFoundException {
+        final Person craig = finder.findByKey(Person.class, "Craig");
         final Person bob = finder.findByKey(Person.class, "Bob");
         final Cat bagpuss = finder.findByKey(Cat.class, "Bagpuss");
+        assertThat(bagpuss.owner, is(equalTo(craig)));
+
         bagpuss.owner = bob;
         service.update(bagpuss);
 

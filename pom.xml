@@ -8,15 +8,10 @@
     <name>EaSQL - Easy SQL</name>
     <description>Reflective SQL generation tool</description>
     <parent>
-        <groupId>com.bt.collaborate.build</groupId>
-        <artifactId>parent-pom</artifactId>
-        <version>1.0.5</version>
+    	<groupId>org.cccs.build</groupId>
+    	<artifactId>parent-pom</artifactId>
+	    <version>1.0.1-SNAPSHOT</version>
     </parent>
-    <!--<parent>-->
-    <!--<groupId>org.cccs.build</groupId>-->
-    <!--<artifactId>parent-pom</artifactId>-->
-    <!--<version>1.0.1</version>-->
-    <!--</parent>-->
     <developers>
         <developer>
             <id>Craig Cook</id>
