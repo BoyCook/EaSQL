@@ -95,13 +95,13 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>reflections-repo</id>
-            <name>Reflections Maven2 Repository</name>
-            <url>http://reflections.googlecode.com/svn/repo</url>
-        </repository>
-    </repositories>
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<id>reflections-repo</id>-->
+            <!--<name>Reflections Maven2 Repository</name>-->
+            <!--<url>http://reflections.googlecode.com/svn/repo</url>-->
+        <!--</repository>-->
+    <!--</repositories>-->
 
     <build>
         <finalName>easql</finalName>
