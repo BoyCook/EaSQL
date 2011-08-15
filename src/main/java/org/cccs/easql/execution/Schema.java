@@ -27,7 +27,6 @@ import static org.cccs.easql.util.ClassUtils.getPrimaryColumn;
  * Time: 22:37
  */
 public final class Schema {
-    //TODO: consider making this static
     public static String packageName;
     public static DataSource dataSource;
     private static Set<Class<?>> tables;
@@ -55,17 +54,17 @@ public final class Schema {
     }
 
     public static Set<Class<?>> getTables() {
-        if (tables == null) {
-            tables = gatherTables();
+        if (Schema.tables == null) {
+            Schema.tables = gatherTables();
         }
-        return tables;
+        return Schema.tables;
     }
 
     public static Set<LinkTable> getLinkTables() {
-        if (linkTables == null) {
-            linkTables = gatherLinkTables();
+        if (Schema.linkTables == null) {
+            Schema.linkTables = gatherLinkTables();
         }
-        return linkTables;
+        return Schema.linkTables;
     }
 
     public static Sequence getSequence(String name) {
@@ -73,10 +72,22 @@ public final class Schema {
     }
 
     public static Map<String, Sequence> getSequences() {
-        if (sequences == null) {
-            sequences = gatherSequences();
+        if (Schema.sequences == null) {
+            Schema.sequences = gatherSequences();
         }
-        return sequences;
+        return Schema.sequences;
+    }
+
+    public static void setTables(Set<Class<?>> tables) {
+        Schema.tables = tables;
+    }
+
+    public static void setLinkTables(Set<LinkTable> linkTables) {
+        Schema.linkTables = linkTables;
+    }
+
+    public static void setSequences(Map<String, Sequence> sequences) {
+        Schema.sequences = sequences;
     }
 
     //TODO: handle different DB types

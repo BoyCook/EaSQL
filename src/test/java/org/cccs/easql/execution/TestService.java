@@ -3,6 +3,7 @@ package org.cccs.easql.execution;
 import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Person;
+import org.cccs.easql.util.DummySchema;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

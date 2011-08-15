@@ -6,6 +6,7 @@ import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
+import org.cccs.easql.util.DummySchema;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,6 +32,7 @@ public class TestSQLGenerator {
 
     @Before
     public void setup() throws IOException {
+        DummySchema.setup();
         Schema.packageName = "org.cccs.easql";
         craig = new Person("Craig", "craig@cook.com", "07234123456");
         craig.id = 1;

@@ -5,6 +5,7 @@ import org.cccs.easql.execution.Executor;
 import org.cccs.easql.execution.Finder;
 import org.cccs.easql.execution.Schema;
 import org.cccs.easql.execution.Service;
+import org.cccs.easql.util.DummySchema;
 import org.junit.After;
 import org.junit.Before;
 
@@ -39,6 +40,7 @@ public class DataDrivenTestEnvironment {
         dataSource.setUsername("sa");
         dataSource.setPassword("");
 
+        DummySchema.setup();
         Schema.packageName = "org.cccs.easql";
         Schema.dataSource = dataSource;
         Schema.generate();
