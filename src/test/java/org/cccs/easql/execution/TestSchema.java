@@ -2,6 +2,7 @@ package org.cccs.easql.execution;
 
 import org.cccs.easql.domain.LinkTable;
 import org.cccs.easql.domain.Sequence;
+import org.cccs.easql.util.DummySchema;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,6 +22,7 @@ public class TestSchema {
 
     @Before
     public void setup() {
+        DummySchema.setup();
         Schema.packageName = "org.cccs.easql";
     }
 

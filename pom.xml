@@ -14,8 +14,8 @@
     </parent>
     <developers>
         <developer>
-            <id>Craig Cook</id>
-            <email>boycook@me.com</email>
+            <name>Craig Cook</name>
+            <email>craig@craigcook.co.uk</email>
         </developer>
     </developers>
     <properties>
