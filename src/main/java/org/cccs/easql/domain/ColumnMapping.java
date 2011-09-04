@@ -16,6 +16,10 @@ public class ColumnMapping {
     public final String dataType;
     public Object object;
 
+    public ColumnMapping(Field field, String columnName) {
+        this(field, columnName, null, getNewObject(field.getType()));
+    }
+
     public ColumnMapping(Field field, String columnName, String dataType) {
         this(field, columnName, dataType, getNewObject(field.getType()));
     }

@@ -3,9 +3,7 @@ package org.cccs.easql.execution;
 import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Person;
-import org.cccs.easql.util.DummySchema;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -85,38 +83,29 @@ public class TestService extends DataDrivenTestEnvironment {
         assertThat(fluffyDB.name, is(equalTo("Fluffy")));
     }
 
-    /*
-SELECT
-	id,
-	name,
-	person2cat.id as person2cat_id,
-	person2cat.name as person2cat_name,
-	person2cat.email as person2cat_email,
-	person2cat.phone as person2cat_phone
-FROM Cat
-LEFT OUTER JOIN Person person2cat ON Cat.id = person2cat.id
-WHERE upper(name) = 'BAGPUSS'
-     */
-
-    @Ignore //Really not sure why this is not working
     @Test
     public void updateMany2OneRelationsShouldWork() throws EntityNotFoundException {
         final Person craig = finder.findByKey(Person.class, "Craig");
         final Person bob = finder.findByKey(Person.class, "Bob");
         final Cat bagpuss = finder.findByKey(Cat.class, "Bagpuss");
         assertThat(bagpuss.owner, is(equalTo(craig)));
+        assertThat(bagpuss.owner.id, is(equalTo(1l)));
         assertThat(bob.id, is(equalTo(2l)));
 
         bagpuss.owner = bob;
         service.update(bagpuss);
 
         final Cat updated = finder.findByKey(Cat.class, "Bagpuss");
-
         assertThat(updated.countries.size(), is(equalTo(2)));
         assertThat(updated.owner, is(equalTo(bob)));
     }
 
     @Test
     public void updateMany2ManyRelationsShouldWork() {
+    }
+
+    private void runSql(final Class c, final String sql) {
+        final Executor executor = new Executor(getDataSource());
+        executor.query(Cat.class, sql, false, new SimpleExtractor(c));
     }
 }

@@ -101,7 +101,7 @@ public final class SQLUtils {
                             appendColumn(select, getJoinColumnName(relation.name(), joinColumn));
                         }
                         String primaryColumn = getPrimaryColumnName(field.getType());
-                        joins.append(format(OUTER_JOIN, joinTable, relation.name(), tableName, primaryColumn, relation.name(), primaryColumn));
+                        joins.append(format(OUTER_JOIN, joinTable, relation.name(), tableName, relation.key(), relation.name(), primaryColumn));
                     } else {
                         appendColumn(select, relation.key());
                     }

@@ -26,6 +26,7 @@ public final class ClassUtils {
 
     private static Map<Class, String[]> columnNames;
     private static Map<Class, ColumnMapping[]> columns;
+    private static Map<Class, ColumnMapping[]> allColumns;
     private static Map<Class, String> tables;
     private static Map<Class, Column> primaryColumns;
     private static Map<Class, String> primaryColumnNames;
@@ -34,6 +35,7 @@ public final class ClassUtils {
     static {
         columnNames = new HashMap<Class, String[]>();
         columns = new HashMap<Class, ColumnMapping[]>();
+        allColumns = new HashMap<Class, ColumnMapping[]>();
         tables = new HashMap<Class, String>();
         primaryColumns = new HashMap<Class, Column>();
         primaryColumnNames = new HashMap<Class, String>();
@@ -74,11 +76,36 @@ public final class ClassUtils {
         for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
-                columns.add(new ColumnMapping(field, getColumnName(field), ""));
+                columns.add(new ColumnMapping(field, getColumnName(field)));
             }
         }
         return columns.toArray(new ColumnMapping[columns.size()]);
     }
+
+    public static ColumnMapping[] getAllColumns(Class c) {
+        ColumnMapping[] tempColumns = allColumns.get(c);
+        if (tempColumns == null) {
+            tempColumns = getAllColumnsForClass(c);
+            allColumns.put(c, tempColumns);
+        }
+        return tempColumns;
+    }
+
+    private static ColumnMapping[] getAllColumnsForClass(Class c) {
+        Collection<ColumnMapping> columns = new ArrayList<ColumnMapping>();
+        for (Field field : c.getFields()) {
+            Column column = field.getAnnotation(Column.class);
+            Relation relation = field.getAnnotation(Relation.class);
+            if (column != null) {
+                columns.add(new ColumnMapping(field, getColumnName(field)));
+            }
+            if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
+                columns.add(new ColumnMapping(field, relation.key()));
+            }
+        }
+        return columns.toArray(new ColumnMapping[columns.size()]);
+    }
+
 
     public static String getPrimaryColumnName(Class c) {
         String column = primaryColumnNames.get(c);
