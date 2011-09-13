@@ -1,6 +1,6 @@
 package org.cccs.easql.domain;
 
-import org.cccs.easql.Column;
+import org.cccs.easql.Relation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -8,18 +8,16 @@ import java.lang.reflect.Method;
 /**
  * User: boycook
  * Date: 13/09/2011
- * Time: 15:57
+ * Time: 11:42
  */
-public class ColumnMapping implements Mapping {
+public class RelationMapping implements Mapping {
 
-    public final String name;
-    public final Column column;
+    public final Relation relation;
     private final Field field;
     private final Method method;
 
-    public ColumnMapping(String name, Column column, Field field, Method method) {
-        this.name = name;
-        this.column = column;
+    public RelationMapping(Relation relation, Field field, Method method) {
+        this.relation = relation;
         this.field = field;
         this.method = method;
     }

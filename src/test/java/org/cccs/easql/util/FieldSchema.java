@@ -13,7 +13,7 @@ import java.util.Set;
  * Date: 15/08/2011
  * Time: 11:38
  */
-public final class DummySchema {
+public final class FieldSchema {
     public static void setup() {
         setupTables();
         setupLinkTables();

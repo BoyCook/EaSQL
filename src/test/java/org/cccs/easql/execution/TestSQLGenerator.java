@@ -6,7 +6,7 @@ import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
-import org.cccs.easql.util.DummySchema;
+import org.cccs.easql.util.FieldSchema;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 import static org.cccs.easql.execution.SQLUtils.*;
-import static org.cccs.easql.util.ClassUtils.getColumnNames;
+import static org.cccs.easql.util.ClassCache.getColumnNames;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -32,7 +32,7 @@ public class TestSQLGenerator {
 
     @Before
     public void setup() throws IOException {
-        DummySchema.setup();
+        FieldSchema.setup();
         Schema.packageName = "org.cccs.easql";
         craig = new Person("Craig", "craig@cook.com", "07234123456");
         craig.id = 1;

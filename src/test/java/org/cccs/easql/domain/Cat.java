@@ -17,7 +17,7 @@ public class Cat {
 
     @Column(primaryKey = true, sequence = "cat_seq")
     public long id;
-    @Column(unique = true)
+    @Column(unique = true, mandatory = true)
     public String name;
     @Relation(cardinality = Cardinality.MANY_TO_ONE, key = "person_id", name = "person2cat")
     public Person owner;
@@ -27,7 +27,7 @@ public class Cat {
     public Cat() {
     }
 
-    public Cat(String name, Person owner) {
+    public Cat(final String name, final Person owner) {
         this.name = name;
         this.owner = owner;
     }

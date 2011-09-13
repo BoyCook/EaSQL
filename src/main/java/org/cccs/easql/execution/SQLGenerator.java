@@ -1,6 +1,8 @@
 package org.cccs.easql.execution;
 
 import org.cccs.easql.Cardinality;
+import org.cccs.easql.Relation;
+import org.cccs.easql.domain.RelationMapping;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -8,13 +10,8 @@ import java.util.Collection;
 
 import static java.lang.String.format;
 import static org.cccs.easql.execution.SQLUtils.*;
-import static org.cccs.easql.execution.SQLUtils.generateUpdateSQLForRelation;
-import static org.cccs.easql.util.ClassUtils.getRelatedField;
-import static org.cccs.easql.util.ClassUtils.getRelationFields;
-import static org.cccs.easql.util.ClassUtils.hasRelations;
+import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.*;
-import static org.cccs.easql.util.ObjectUtils.getFieldValue;
-import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
 
 /**
  * User: boycook
@@ -25,7 +22,7 @@ public class SQLGenerator {
 
     public String getInsertSQL(Object o) {
         String sql = generateInsertSQL(o);
-        Object[] relations = getRelations(o, Cardinality.MANY_TO_ONE);
+        Object[] relations = getRelatedValues(o, Cardinality.MANY_TO_ONE);
 
         if (relations.length > 0) {
             for (Object relatedObject : relations) {
@@ -38,7 +35,7 @@ public class SQLGenerator {
     /*
         TODO handle link tables
         - Find existing asset in DB (use Class and getPrimaryColumnName)
-        - Diff each @Column field (consider using .equals())
+        - Diff each @Column member (consider using .equals())
         - For One2Many relations diff Collections
             - Assume create/delete on differences
         - For Many2One change the ID
@@ -59,9 +56,9 @@ public class SQLGenerator {
         if (hasRelations(updated.getClass(), Cardinality.ONE_TO_MANY)) {
             System.out.println("Checking One2Many...");
 
-            for (Field field : getRelationFields(updated.getClass(), Cardinality.ONE_TO_MANY)) {
-                Collection list = (Collection) getFieldValue(field, updated);
-                Collection dbList = (Collection) getFieldValue(field, original);
+            for (RelationMapping mapping : getRelations(updated.getClass(), Cardinality.ONE_TO_MANY)) {
+                Collection list = (Collection) getValue(mapping, updated);
+                Collection dbList = (Collection) getValue(mapping, original);
                 Collection addRelation = new ArrayList();
                 Collection removeRelation = new ArrayList();
                 compareLists(dbList, list, addRelation, removeRelation);
@@ -72,7 +69,8 @@ public class SQLGenerator {
 
                 for (Object add : addRelation) {
                     if (getPrimaryValueAsLong(add) > 0) {
-                        updateSQL.append(format(generateUpdateSQLForRelation(add, getRelatedField(updated.getClass(), add.getClass())), objectKey));
+                        final Field relatedField = getRelatedField(updated.getClass(), add.getClass());
+                        updateSQL.append(format(generateUpdateSQLForRelation(add, relatedField.getAnnotation(Relation.class)), objectKey));
                     } else {
                         insertSQL.append(format(generateInsertSQL(add), objectKey));
                     }
@@ -83,9 +81,10 @@ public class SQLGenerator {
         //Checking Objects
         if (hasRelations(updated.getClass(), Cardinality.MANY_TO_ONE)) {
             System.out.println("Checking Many2One...");
-            for (Field field : getRelationFields(updated.getClass(), Cardinality.MANY_TO_ONE)) {
-                final Object value = getFieldValue(field, updated);
-                updateSQL.append(format(generateUpdateSQLForRelation(updated, field), getPrimaryValue(value)));
+
+            for (RelationMapping mapping : getRelations(updated.getClass(), Cardinality.MANY_TO_ONE)) {
+                final Object value = getValue(mapping, updated);
+                updateSQL.append(format(generateUpdateSQLForRelation(updated, mapping.relation), getPrimaryValue(value)));
             }
         }
 
@@ -93,7 +92,7 @@ public class SQLGenerator {
         if (hasRelations(updated.getClass(), Cardinality.MANY_TO_MANY)) {
             //TODO diff Collections and create UPDATE SQL from diff
             System.out.println("Checking Many2Many...");
-            getRelations(updated, Cardinality.MANY_TO_MANY);
+            getRelatedValues(updated, Cardinality.MANY_TO_MANY);
         }
 
         StringBuilder sql = new StringBuilder();
@@ -103,6 +102,7 @@ public class SQLGenerator {
         return sql.toString();
     }
 
+    //TODO: move to utils class
     @SuppressWarnings({"unchecked"})
     private void compareLists(Collection original, Collection updated, Collection addRelation, Collection removeRelation) {
         for (Object o : original) {

@@ -17,7 +17,7 @@ public class Dog {
 
     @Column(primaryKey = true, sequence = "dog_seq")
     public long id;
-    @Column(unique = true)
+    @Column(unique = true, mandatory = true)
     public String name;
     @Relation(cardinality = Cardinality.MANY_TO_ONE, key = "person_id", name = "person2dog")
     public Person owner;

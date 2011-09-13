@@ -17,7 +17,7 @@ public class Person {
 
     @Column(primaryKey = true, sequence = "person_seq")
     public long id;
-    @Column(unique = true)
+    @Column(unique = true, mandatory = true)
     public String name;
     @Column
     public String email;

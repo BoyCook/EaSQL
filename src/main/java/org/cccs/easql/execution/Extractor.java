@@ -1,6 +1,6 @@
 package org.cccs.easql.execution;
 
-import org.cccs.easql.domain.ColumnMapping;
+import org.cccs.easql.domain.ExtractionMapping;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.cccs.easql.util.ClassUtils.getExtractionMappings;
+import static org.cccs.easql.util.ClassUtils.generateExtractionMappings;
 import static org.cccs.easql.util.ObjectUtils.setObjectValue;
 
 /**
@@ -31,9 +31,9 @@ public class Extractor implements ResultSetExtractor<Collection<?>> {
     public Collection<?> extractData(ResultSet rs) throws SQLException, DataAccessException {
         final Collection results = new ArrayList();
         while (rs.next()) {
-            ColumnMapping[] dbFields = getExtractionMappings(getClassType(), loadRelations);
+            ExtractionMapping[] dbFields = generateExtractionMappings(getClassType(), loadRelations);
 
-            for (ColumnMapping column: dbFields) {
+            for (ExtractionMapping column: dbFields) {
                 setColumnValue(rs, column, column.object);
                 if (getClassType().equals(column.object.getClass()) && !results.contains(column.object)) {
                     results.add(column.object);
@@ -43,8 +43,8 @@ public class Extractor implements ResultSetExtractor<Collection<?>> {
         return results;
     }
 
-    private void setColumnValue(ResultSet rs, ColumnMapping column, Object o) throws SQLException {
-        int index = rs.findColumn(column.columnName);
+    private void setColumnValue(ResultSet rs, ExtractionMapping column, Object o) throws SQLException {
+        int index = rs.findColumn(column.name);
 
         if (column.field.getType().equals(String.class)) {
             setObjectValue(column.field, o, rs.getString(index));

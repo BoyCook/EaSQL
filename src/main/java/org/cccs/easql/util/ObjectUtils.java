@@ -3,8 +3,12 @@ package org.cccs.easql.util;
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.Column;
 import org.cccs.easql.Relation;
+import org.cccs.easql.domain.ColumnMapping;
+import org.cccs.easql.domain.Mapping;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -26,15 +30,35 @@ public final class ObjectUtils {
         return string.toString();
     }
 
+    public static Object getValue(Mapping column, Object o) {
+        if (column.getMethod() != null) {
+            return getMethodValue(column.getMethod(), o);
+        } else if (column.getField() != null) {
+            return getFieldValue(column.getField(), o);
+        } else {
+            return null;
+        }
+    }
+
     public static Object getFieldValue(Field field, Object o) {
         Object value = null;
-
         try {
             value = field.get(o);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+        return value;
+    }
 
+    public static Object getMethodValue(Method method, Object o) {
+        Object value = null;
+        try {
+            value = method.invoke(o);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
         return value;
     }
 
@@ -73,7 +97,7 @@ public final class ObjectUtils {
         }
     }
 
-    public static Object[] getRelations(Object o, Cardinality cardinality) {
+    public static Object[] getRelatedValues(Object o, Cardinality cardinality) {
         Collection<Object> relations = new ArrayList<Object>();
         Class c = o.getClass();
         Field[] fields = c.getFields();
@@ -90,7 +114,11 @@ public final class ObjectUtils {
         Object o = null;
         if (!c.equals(Integer.TYPE) && !c.equals(Long.TYPE)) {
             try {
-                o = c.newInstance();
+                o = c.getConstructor().newInstance();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {

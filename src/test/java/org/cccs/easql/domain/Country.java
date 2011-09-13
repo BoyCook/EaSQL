@@ -17,7 +17,7 @@ public class Country {
 
     @Column(primaryKey = true, name = "cntId", sequence = "cnt_seq")
     public long id;
-    @Column(unique = true)
+    @Column(unique = true, mandatory = true)
     public String name;
     @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "dog_countries", linkedBy = {"cntId", "dog_id"}, end = Relation.End.LEFT)
     public Collection<Dog> dogs;

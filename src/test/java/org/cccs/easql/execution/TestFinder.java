@@ -5,7 +5,6 @@ import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -23,6 +22,14 @@ import static org.junit.Assert.*;
  */
 @SuppressWarnings({"unchecked"})
 public class TestFinder extends DataDrivenTestEnvironment {
+
+//    @Before
+//    public void beforeEach() {
+//        MethodSchema.setup();
+//        setup();
+//        service = new Service(getDataSource());
+//        finder = new Finder(getDataSource());
+//    }
 
     @Test
     public void finderShouldWorkForJustClassForPerson() throws Exception {

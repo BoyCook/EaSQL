@@ -1,12 +1,17 @@
 package org.cccs.easql.util;
 
 import org.cccs.easql.Cardinality;
-import org.cccs.easql.domain.ColumnMapping;
+import org.cccs.easql.Column;
 import org.cccs.easql.domain.*;
+import org.cccs.easql.domain.Cat;
+import org.cccs.easql.domain.Country;
+import org.cccs.easql.domain.Dog;
+import org.cccs.easql.domain.Person;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
 
+import static org.cccs.easql.util.ClassCache.*;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,7 +23,7 @@ import static org.hamcrest.core.Is.is;
  * Date: 12/07/2011
  * Time: 10:02
  */
-public class TestClassUtils {
+public class TestClassUtilsForFields {
 
     @Test
     public void getColumnNamesShouldWork() {
@@ -40,7 +45,7 @@ public class TestClassUtils {
     }
 
     private void assertColumns(Class c, int size) {
-        ColumnMapping[] columns = getColumns(c);
+        ExtractionMapping[] columns = getExtractionColumns(c);
         assertThat(columns.length, is(equalTo(size)));
     }
 
@@ -78,18 +83,18 @@ public class TestClassUtils {
         assertRelationFields(Cat.class, Cardinality.ONE_TO_MANY, 0);
         assertRelationFields(Cat.class, Cardinality.MANY_TO_ONE, 1);
 
-        Field[] fields = getRelationFields(Person.class, Cardinality.ONE_TO_MANY);
-        Field dogs = fields[0];
-        Field cats = fields[1];
+        RelationMapping[] relations = getRelations(Person.class, Cardinality.ONE_TO_MANY);
+        RelationMapping dogs = relations[0];
+        RelationMapping cats = relations[1];
 
         assertThat(dogs, is(notNullValue()));
-        assertThat(dogs.getName(), is(equalTo("dogs")));
+        assertThat(dogs.relation.key(), is(equalTo("person_id")));
         assertThat(cats, is(notNullValue()));
-        assertThat(cats.getName(), is(equalTo("cats")));
+        assertThat(cats.relation.key(), is(equalTo("person_id")));
     }
 
     private void assertRelationFields(Class c, Cardinality cardinality, int cnt) {
-        assertThat(getRelationFields(c, cardinality).length, is(equalTo(cnt)));
+        assertThat(getRelations(c, cardinality).length, is(equalTo(cnt)));
     }
 
     @Test
@@ -102,7 +107,7 @@ public class TestClassUtils {
     }
 
     private void assertColumnName(Field field, String name) {
-        assertThat(getColumnName(field), is(equalTo(name)));
+        assertThat(getColumnName(field.getAnnotation(Column.class), field), is(equalTo(name)));
     }
 
     @Test
@@ -114,7 +119,7 @@ public class TestClassUtils {
     }
 
     private void assertColumnType(Field field, String type) {
-        assertThat(getColumnType(field), is(equalTo(type)));
+        assertThat(getColumnType(field.getType()), is(equalTo(type)));
     }
 
     @Test
@@ -140,7 +145,7 @@ public class TestClassUtils {
         assertGenericType(cats, Cat.class);
     }
 
-    private void assertGenericType(Field field, Class c) {
+    private void assertGenericType(final Field field, final Class c) {
         assertThat(getGenericType(field), is(equalTo(c)));
     }
 }

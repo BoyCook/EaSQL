@@ -1,6 +1,6 @@
 package org.cccs.easql.execution;
 
-import org.cccs.easql.domain.ColumnMapping;
+import org.cccs.easql.domain.ExtractionMapping;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.lang.String.format;
-import static org.cccs.easql.util.ClassUtils.getAllColumns;
+import static org.cccs.easql.util.ClassCache.getAllColumns;
 
 /**
  * User: boycook
@@ -28,23 +28,23 @@ public class SimpleExtractor implements ResultSetExtractor<Collection<?>> {
 
     @Override
     public Collection<?> extractData(ResultSet rs) throws SQLException, DataAccessException {
-        ColumnMapping[] columns = getAllColumns(classType);
+        ExtractionMapping[] columns = getAllColumns(classType);
         System.out.println(format("There are [%d] columns for [%s]", columns.length, classType.getName()));
 
         while (rs.next()) {
-            for (ColumnMapping column : columns) {
-                int index = rs.findColumn(column.columnName);
+            for (ExtractionMapping column : columns) {
+                int index = rs.findColumn(column.name);
 
                 if (column.field.getType().equals(String.class)) {
-                    System.out.println(format("[%s] is [%s]", column.columnName, rs.getString(index)));
+                    System.out.println(format("[%s] is [%s]", column.name, rs.getString(index)));
                 } else if (column.field.getType().equals(Long.TYPE)) {
-                    System.out.println(format("[%s] is [%d]", column.columnName, rs.getLong(index)));
+                    System.out.println(format("[%s] is [%d]", column.name, rs.getLong(index)));
                 } else if (column.field.getType().equals(Integer.TYPE)) {
-                    System.out.println(format("[%s] is [%d]", column.columnName, rs.getInt(index)));
+                    System.out.println(format("[%s] is [%d]", column.name, rs.getInt(index)));
                 } else if (column.field.getType().equals(Boolean.TYPE)) {
-                    System.out.println(format("[%s] is [%b]", column.columnName, rs.getBoolean(index)));
+                    System.out.println(format("[%s] is [%b]", column.name, rs.getBoolean(index)));
                 } else {
-                    System.out.println(format("[%s] is [%d]", column.columnName, rs.getLong(index)));
+                    System.out.println(format("[%s] is [%d]", column.name, rs.getLong(index)));
                 }
             }
         }

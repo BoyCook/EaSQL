@@ -69,9 +69,7 @@ public class TestService extends DataDrivenTestEnvironment {
         craig.dogs.clear();
         craig.cats.clear();
         craig.cats.add(daisy);
-        Cat fluffy = new Cat();
-        fluffy.name = "Fluffy";
-        fluffy.owner = craig;
+        Cat fluffy = new Cat("Fluffy", craig);
         craig.cats.add(fluffy);
         service.update(craig);
 
