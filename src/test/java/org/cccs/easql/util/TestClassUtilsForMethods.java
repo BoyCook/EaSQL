@@ -1,16 +1,20 @@
 package org.cccs.easql.util;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.cccs.easql.Cardinality;
-import org.cccs.easql.Column;
-import org.cccs.easql.domain.ExtractionMapping;
 import org.cccs.easql.domain.RelationMapping;
-import org.cccs.easql.domain.accessors.*;
+import org.cccs.easql.domain.accessors.Cat;
+import org.cccs.easql.domain.accessors.Country;
+import org.cccs.easql.domain.accessors.Dog;
+import org.cccs.easql.domain.accessors.Person;
 import org.junit.Test;
+import org.omg.PortableInterceptor.ObjectReferenceTemplate;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.cccs.easql.util.ClassCache.*;
-import static org.cccs.easql.util.ClassUtils.*;
+import static org.cccs.easql.util.ClassUtils.getRelations;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -21,18 +25,13 @@ import static org.hamcrest.core.Is.is;
  * Date: 13/09/2011
  * Time: 18:03
  */
-public class TestClassUtilsForMethods {
+public class TestClassUtilsForMethods extends BaseTest {
 
     @Test
     public void getColumnNamesShouldWork() {
         assertColumnNames(Person.class, 4);
         assertColumnNames(Dog.class, 2);
         assertColumnNames(Cat.class, 2);
-    }
-
-    private void assertColumnNames(Class c, int size) {
-        String[] columnNames = getColumnNames(c);
-        assertThat(columnNames.length, is(equalTo(size)));
     }
 
     @Test
@@ -42,20 +41,11 @@ public class TestClassUtilsForMethods {
         assertColumns(Cat.class, 2);
     }
 
-    private void assertColumns(Class c, int size) {
-        ExtractionMapping[] columns = getExtractionColumns(c);
-        assertThat(columns.length, is(equalTo(size)));
-    }
-
     @Test
     public void getPrimaryColumnShouldWork() {
         assertPrimaryColumn(Person.class, "id");
         assertPrimaryColumn(Dog.class, "id");
         assertPrimaryColumn(Cat.class, "id");
-    }
-
-    private void assertPrimaryColumn(Class c, String name) {
-        assertThat(getPrimaryColumnName(c), is(equalTo(name)));
     }
 
     @Test
@@ -66,10 +56,6 @@ public class TestClassUtilsForMethods {
         assertRelationsExist(Dog.class, Cardinality.MANY_TO_ONE, true);
         assertRelationsExist(Cat.class, Cardinality.ONE_TO_MANY, false);
         assertRelationsExist(Cat.class, Cardinality.MANY_TO_ONE, true);
-    }
-
-    private void assertRelationsExist(Class c, Cardinality cardinality, boolean has) {
-        assertThat(hasRelations(c, cardinality), is(has));
     }
 
     @Test
@@ -91,10 +77,6 @@ public class TestClassUtilsForMethods {
         assertThat(cats.relation.key(), is(equalTo("person_id")));
     }
 
-    private void assertRelations(Class c, Cardinality cardinality, int cnt) {
-        assertThat(getRelations(c, cardinality).length, is(equalTo(cnt)));
-    }
-
     @Test
     public void getColumnNameShouldWork() throws NoSuchMethodException {
         Method personId = Person.class.getMethod("getId");
@@ -102,10 +84,6 @@ public class TestClassUtilsForMethods {
 
         Method cntId = Country.class.getMethod("getId");
         assertColumnName(cntId, "cntId");
-    }
-
-    private void assertColumnName(Method method, String name) {
-        assertThat(getColumnName(method.getAnnotation(Column.class), method), is(equalTo(name)));
     }
 
     @Test
@@ -116,18 +94,22 @@ public class TestClassUtilsForMethods {
         assertColumnType(personName, "VARCHAR");
     }
 
-    private void assertColumnType(Method method, String type) {
-        assertThat(getColumnType(method.getReturnType()), is(equalTo(type)));
-    }
-
     @Test
     public void getTableNameShouldWork() {
         assertTableName(Person.class, "Person");
         assertTableName(Country.class, "countries");
     }
 
-    private void assertTableName(Class c, String name) {
-        assertThat(getTableName(c), is(equalTo(name)));
+    @Test
+    public void getPropertyDescriptorShouldWork() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        getProperty(new Cat(), "name");
     }
 
+    private void getProperty(final Object object, final String name) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        final PropertyDescriptor property = PropertyUtils.getPropertyDescriptor(object, name);
+        System.out.println("DisplayName: " + property.getDisplayName());
+        System.out.println("Type: " + property.getPropertyType().getName());
+        System.out.println("Getter: " + property.getReadMethod().getName());
+        System.out.println("Setter: " + property.getWriteMethod().getName());
+    }
 }

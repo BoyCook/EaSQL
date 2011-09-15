@@ -21,15 +21,7 @@ import static org.junit.Assert.*;
  * Time: 19:08
  */
 @SuppressWarnings({"unchecked"})
-public class TestFinder extends DataDrivenTestEnvironment {
-
-//    @Before
-//    public void beforeEach() {
-//        MethodSchema.setup();
-//        setup();
-//        service = new Service(getDataSource());
-//        finder = new Finder(getDataSource());
-//    }
+public class TestFinderForFields extends DataDrivenTestEnvironment {
 
     @Test
     public void finderShouldWorkForJustClassForPerson() throws Exception {

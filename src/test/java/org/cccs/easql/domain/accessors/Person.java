@@ -40,17 +40,17 @@ public class Person {
         return id;
     }
 
-    @Column(unique = true)
+    @Column(unique = true, name = "name")
     public String getName() {
         return name;
     }
 
-    @Column
+    @Column(name = "email")
     public String getEmail() {
         return email;
     }
 
-    @Column
+    @Column(name = "phone")
     public String getPhone() {
         return phone;
     }

@@ -65,34 +65,39 @@ public final class ClassUtils {
         for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
-                columns.add(new ExtractionMapping(field, null, getColumnName(column, field)));
+                columns.add(new ExtractionMapping(field, getColumnName(column, field)));
             }
         }
         for (Method method : c.getMethods()) {
             Column column = method.getAnnotation(Column.class);
+//            method.get
+
+            //TODO: get setter
             if (column != null) {
-                columns.add(new ExtractionMapping(null, method, getColumnName(column, method)));
+                columns.add(new ExtractionMapping(method, null, getColumnName(column, method)));
             }
         }
         return columns.toArray(new ExtractionMapping[columns.size()]);
     }
 
+    //TODO: handle methods
     public static ExtractionMapping[] getAllColumnsForClass(Class c) {
         Collection<ExtractionMapping> columns = new ArrayList<ExtractionMapping>();
         for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             Relation relation = field.getAnnotation(Relation.class);
             if (column != null) {
-                columns.add(new ExtractionMapping(field, null, getColumnName(column, field)));
+                columns.add(new ExtractionMapping(field, getColumnName(column, field)));
             }
             if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
-                columns.add(new ExtractionMapping(field, null, relation.key()));
+                columns.add(new ExtractionMapping(field, relation.key()));
             }
         }
         return columns.toArray(new ExtractionMapping[columns.size()]);
     }
 
     //TODO: consider refactor
+    //TODO: consider using getColumns
     public static ExtractionMapping[] generateExtractionMappings(Class c, boolean loadRelations) {
         Collection<ExtractionMapping> columns = new ArrayList<ExtractionMapping>();
         Object o = getNewObject(c);
@@ -101,21 +106,45 @@ public final class ClassUtils {
             Column column = field.getAnnotation(Column.class);
             Relation relation = field.getAnnotation(Relation.class);
             if (column != null) {
-                columns.add(new ExtractionMapping(field, null, getColumnName(column, field), o));
+                columns.add(new ExtractionMapping(field, getColumnName(column, field), o));
             } else if (relation != null) {
                 if (relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
                     if (loadRelations) {
+                        //Get ExtractionMapping for related object
                         ExtractionMapping[] relatedColumns = getExtractionColumns(field.getType());
                         Object relatedO = getNewObject(field.getType());
-
+                        //Add correct object to mapping
                         for (ExtractionMapping relatedColumn : relatedColumns) {
-                            columns.add(new ExtractionMapping(relatedColumn.field, null, relation.name() + "_" + relatedColumn.name, relatedO));
+                            columns.add(new ExtractionMapping(relatedColumn.field, relation.name() + "_" + relatedColumn.name, relatedO));
                             setObjectValue(field, o, relatedO);
                         }
                     }
                 }
             }
         }
+
+        for (Method method : c.getMethods()) {
+            Column column = method.getAnnotation(Column.class);
+            Relation relation = method.getAnnotation(Relation.class);
+            if (column != null) {
+                //TODO: get setter
+                columns.add(new ExtractionMapping(method, null, getColumnName(column, method), o));
+            } else if (relation != null) {
+                if (relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
+                    if (loadRelations) {
+                        //Get ExtractionMapping for related object
+                        ExtractionMapping[] relatedColumns = getExtractionColumns(method.getReturnType());
+                        Object relatedO = getNewObject(method.getReturnType());
+                        //Add correct object to mapping
+                        for (ExtractionMapping relatedColumn : relatedColumns) {
+                            columns.add(new ExtractionMapping(relatedColumn.getter, relatedColumn.setter, relation.name() + "_" + relatedColumn.name, relatedO));
+                            //setObjectValue(getter, o, relatedO);
+                        }
+                    }
+                }
+            }
+        }
+
         return columns.toArray(new ExtractionMapping[columns.size()]);
     }
 

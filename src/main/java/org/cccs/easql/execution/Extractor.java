@@ -31,6 +31,7 @@ public class Extractor implements ResultSetExtractor<Collection<?>> {
     public Collection<?> extractData(ResultSet rs) throws SQLException, DataAccessException {
         final Collection results = new ArrayList();
         while (rs.next()) {
+            //Need to get fresh object per row
             ExtractionMapping[] dbFields = generateExtractionMappings(getClassType(), loadRelations);
 
             for (ExtractionMapping column: dbFields) {
