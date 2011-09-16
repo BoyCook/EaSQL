@@ -35,17 +35,17 @@ public class SimpleExtractor implements ResultSetExtractor<Collection<?>> {
             for (ExtractionMapping column : columns) {
                 int index = rs.findColumn(column.name);
 
-                if (column.field.getType().equals(String.class)) {
-                    System.out.println(format("[%s] is [%s]", column.name, rs.getString(index)));
-                } else if (column.field.getType().equals(Long.TYPE)) {
-                    System.out.println(format("[%s] is [%d]", column.name, rs.getLong(index)));
-                } else if (column.field.getType().equals(Integer.TYPE)) {
-                    System.out.println(format("[%s] is [%d]", column.name, rs.getInt(index)));
-                } else if (column.field.getType().equals(Boolean.TYPE)) {
-                    System.out.println(format("[%s] is [%b]", column.name, rs.getBoolean(index)));
-                } else {
-                    System.out.println(format("[%s] is [%d]", column.name, rs.getLong(index)));
-                }
+//                if (column.field.getType().equals(String.class)) {
+//                    System.out.println(format("[%s] is [%s]", column.name, rs.getString(index)));
+//                } else if (column.field.getType().equals(Long.TYPE)) {
+//                    System.out.println(format("[%s] is [%d]", column.name, rs.getLong(index)));
+//                } else if (column.field.getType().equals(Integer.TYPE)) {
+//                    System.out.println(format("[%s] is [%d]", column.name, rs.getInt(index)));
+//                } else if (column.field.getType().equals(Boolean.TYPE)) {
+//                    System.out.println(format("[%s] is [%b]", column.name, rs.getBoolean(index)));
+//                } else {
+//                    System.out.println(format("[%s] is [%d]", column.name, rs.getLong(index)));
+//                }
             }
         }
 

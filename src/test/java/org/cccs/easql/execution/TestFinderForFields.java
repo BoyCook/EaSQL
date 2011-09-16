@@ -5,6 +5,7 @@ import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -21,6 +22,7 @@ import static org.junit.Assert.*;
  * Time: 19:08
  */
 @SuppressWarnings({"unchecked"})
+@Ignore
 public class TestFinderForFields extends DataDrivenTestEnvironment {
 
     @Test

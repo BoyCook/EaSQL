@@ -8,13 +8,13 @@ import org.cccs.easql.domain.accessors.Country;
 import org.cccs.easql.domain.accessors.Dog;
 import org.cccs.easql.domain.accessors.Person;
 import org.junit.Test;
-import org.omg.PortableInterceptor.ObjectReferenceTemplate;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static org.cccs.easql.util.ClassUtils.getRelations;
+import static org.cccs.easql.util.ClassUtils.stripName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -98,6 +98,15 @@ public class TestClassUtilsForMethods extends BaseTest {
     public void getTableNameShouldWork() {
         assertTableName(Person.class, "Person");
         assertTableName(Country.class, "countries");
+    }
+
+    @Test
+    public void stripNameShouldWork() {
+        assertThat(stripName("getName"), is(equalTo("name")));
+        assertThat(stripName("isName"), is(equalTo("name")));
+        assertThat(stripName("hasName"), is(equalTo("name")));
+        assertThat(stripName("getFooBar"), is(equalTo("fooBar")));
+        assertThat(stripName("fooBarName"), is(equalTo("fooBarName")));
     }
 
     @Test

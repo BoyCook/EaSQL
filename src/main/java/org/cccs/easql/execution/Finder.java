@@ -22,7 +22,7 @@ import static org.cccs.easql.util.ClassCache.getUniqueColumnName;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
-import static org.cccs.easql.util.ObjectUtils.setObjectValue;
+import static org.cccs.easql.util.ObjectUtils.setValue;
 
 /**
  * User: boycook
@@ -110,7 +110,7 @@ public class Finder {
                     Class relatedClass = getGenericType(field);
                     Map<String, String> where = new HashMap<String, String>();
                     where.put(relation.key(), getPrimaryValue(result).toString());
-                    setObjectValue(field, result, query(relatedClass, false, where));
+                    setValue(field, result, query(relatedClass, false, where));
                 }
             }
         }
@@ -127,7 +127,7 @@ public class Finder {
                     final Class relatedClass = getGenericType(field);
                     final String sql = generateSelectSQLForManyToMany(relatedClass, relation, getPrimaryValueAsLong(result));
                     final Collection relatedResults = query(relatedClass, sql, false);
-                    setObjectValue(field, result, relatedResults);
+                    setValue(field, result, relatedResults);
                 }
             }
         }

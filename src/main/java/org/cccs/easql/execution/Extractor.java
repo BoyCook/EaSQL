@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.cccs.easql.util.ClassUtils.generateExtractionMappings;
-import static org.cccs.easql.util.ObjectUtils.setObjectValue;
+import static org.cccs.easql.util.ObjectUtils.setValue;
+import static org.cccs.easql.util.ObjectUtils.setValue;
 
 /**
  * User: boycook
@@ -35,7 +36,7 @@ public class Extractor implements ResultSetExtractor<Collection<?>> {
             ExtractionMapping[] dbFields = generateExtractionMappings(getClassType(), loadRelations);
 
             for (ExtractionMapping column: dbFields) {
-                setColumnValue(rs, column, column.object);
+                setColumnValue(rs, column);
                 if (getClassType().equals(column.object.getClass()) && !results.contains(column.object)) {
                     results.add(column.object);
                 }
@@ -44,17 +45,16 @@ public class Extractor implements ResultSetExtractor<Collection<?>> {
         return results;
     }
 
-    private void setColumnValue(ResultSet rs, ExtractionMapping column, Object o) throws SQLException {
+    private void setColumnValue(ResultSet rs, ExtractionMapping column) throws SQLException {
         int index = rs.findColumn(column.name);
-
-        if (column.field.getType().equals(String.class)) {
-            setObjectValue(column.field, o, rs.getString(index));
-        } else if (column.field.getType().equals(Long.TYPE)) {
-            setObjectValue(column.field, o, rs.getLong(index));
-        } else if (column.field.getType().equals(Integer.TYPE)) {
-            setObjectValue(column.field, o, rs.getInt(index));
-        } else if (column.field.getType().equals(Boolean.TYPE)) {
-            setObjectValue(column.field, o, rs.getBoolean(index));
+        if (column.type.equals(String.class)) {
+            setValue(column, rs.getString(index));
+        } else if (column.type.equals(Long.TYPE)) {
+            setValue(column, rs.getLong(index));
+        } else if (column.type.equals(Integer.TYPE)) {
+            setValue(column, rs.getInt(index));
+        } else if (column.type.equals(Boolean.TYPE)) {
+            setValue(column, rs.getBoolean(index));
         }
     }
 

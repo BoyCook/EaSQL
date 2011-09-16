@@ -1,5 +1,6 @@
 package org.cccs.easql.util;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.Column;
 import org.cccs.easql.Relation;
@@ -8,6 +9,7 @@ import org.cccs.easql.domain.ExtractionMapping;
 import org.cccs.easql.domain.RelationMapping;
 import org.springframework.util.ReflectionUtils;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -17,7 +19,7 @@ import java.util.Collection;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.cccs.easql.util.ClassCache.getExtractionColumns;
 import static org.cccs.easql.util.ObjectUtils.getNewObject;
-import static org.cccs.easql.util.ObjectUtils.setObjectValue;
+import static org.cccs.easql.util.ObjectUtils.setValue;
 
 /**
  * User: boycook
@@ -65,16 +67,13 @@ public final class ClassUtils {
         for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
-                columns.add(new ExtractionMapping(field, getColumnName(column, field)));
+                columns.add(new ExtractionMapping(field.getName(), getColumnName(column, field), field.getType()));
             }
         }
         for (Method method : c.getMethods()) {
             Column column = method.getAnnotation(Column.class);
-//            method.get
-
-            //TODO: get setter
             if (column != null) {
-                columns.add(new ExtractionMapping(method, null, getColumnName(column, method)));
+                columns.add(new ExtractionMapping(stripName(method), getColumnName(column, method), method.getReturnType()));
             }
         }
         return columns.toArray(new ExtractionMapping[columns.size()]);
@@ -87,10 +86,10 @@ public final class ClassUtils {
             Column column = field.getAnnotation(Column.class);
             Relation relation = field.getAnnotation(Relation.class);
             if (column != null) {
-                columns.add(new ExtractionMapping(field, getColumnName(column, field)));
+                columns.add(new ExtractionMapping(field.getName(), getColumnName(column, field), field.getType()));
             }
             if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
-                columns.add(new ExtractionMapping(field, relation.key()));
+                columns.add(new ExtractionMapping(field.getName(), relation.key(), field.getType()));
             }
         }
         return columns.toArray(new ExtractionMapping[columns.size()]);
@@ -106,7 +105,7 @@ public final class ClassUtils {
             Column column = field.getAnnotation(Column.class);
             Relation relation = field.getAnnotation(Relation.class);
             if (column != null) {
-                columns.add(new ExtractionMapping(field, getColumnName(column, field), o));
+                columns.add(new ExtractionMapping(field.getName(), getColumnName(column, field), field.getType(), o));
             } else if (relation != null) {
                 if (relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
                     if (loadRelations) {
@@ -115,8 +114,8 @@ public final class ClassUtils {
                         Object relatedO = getNewObject(field.getType());
                         //Add correct object to mapping
                         for (ExtractionMapping relatedColumn : relatedColumns) {
-                            columns.add(new ExtractionMapping(relatedColumn.field, relation.name() + "_" + relatedColumn.name, relatedO));
-                            setObjectValue(field, o, relatedO);
+                            columns.add(new ExtractionMapping(relatedColumn.property, relation.name() + "_" + relatedColumn.name, relatedColumn.type, relatedO));
+                            setValue(field, o, relatedO);
                         }
                     }
                 }
@@ -127,8 +126,7 @@ public final class ClassUtils {
             Column column = method.getAnnotation(Column.class);
             Relation relation = method.getAnnotation(Relation.class);
             if (column != null) {
-                //TODO: get setter
-                columns.add(new ExtractionMapping(method, null, getColumnName(column, method), o));
+                columns.add(new ExtractionMapping(stripName(method), getColumnName(column, method), method.getReturnType(), o));
             } else if (relation != null) {
                 if (relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
                     if (loadRelations) {
@@ -137,8 +135,8 @@ public final class ClassUtils {
                         Object relatedO = getNewObject(method.getReturnType());
                         //Add correct object to mapping
                         for (ExtractionMapping relatedColumn : relatedColumns) {
-                            columns.add(new ExtractionMapping(relatedColumn.getter, relatedColumn.setter, relation.name() + "_" + relatedColumn.name, relatedO));
-                            //setObjectValue(getter, o, relatedO);
+                            columns.add(new ExtractionMapping(relatedColumn.property, relation.name() + "_" + relatedColumn.name, relatedColumn.type, relatedO));
+                            setValue(stripName(method), o, relatedO);
                         }
                     }
                 }
@@ -292,5 +290,24 @@ public final class ClassUtils {
                         && (!method.getName().equals("getClass"))
                         && (!ReflectionUtils.isHashCodeMethod(method));
         return displayable && method.getParameterTypes().length == 0;
+    }
+
+    public static String stripName(final Method method) {
+        return stripName(method.getName());
+    }
+
+    public static String stripName(final String name) {
+        if (name.indexOf("get") == 0) {
+            return lowerFirst(name.substring(name.indexOf("get") + 3));
+        } else if (name.indexOf("is") == 0) {
+            return lowerFirst(name.substring(name.indexOf("is") + 2));
+        } else if (name.indexOf("has") == 0) {
+            return lowerFirst(name.substring(name.indexOf("has") + 3));
+        }
+        return name;
+    }
+
+    public static String lowerFirst(String word) {
+        return word.substring(0, 1).toLowerCase() + word.substring(1);
     }
 }
