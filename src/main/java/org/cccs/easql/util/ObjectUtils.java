@@ -36,15 +36,15 @@ public final class ObjectUtils {
 
     public static Object getValue(Mapping column, Object o) {
         if (column.getMethod() != null) {
-            return getMethodValue(column.getMethod(), o);
+            return getValue(column.getMethod(), o);
         } else if (column.getField() != null) {
-            return getFieldValue(column.getField(), o);
+            return getValue(column.getField(), o);
         } else {
             return null;
         }
     }
 
-    public static Object getFieldValue(Field field, Object o) {
+    public static Object getValue(Field field, Object o) {
         Object value = null;
         try {
             value = field.get(o);
@@ -54,7 +54,7 @@ public final class ObjectUtils {
         return value;
     }
 
-    public static Object getMethodValue(Method method, Object o) {
+    public static Object getValue(Method method, Object o) {
         Object value = null;
         try {
             value = method.invoke(o);
@@ -86,13 +86,13 @@ public final class ObjectUtils {
         for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null && column.primaryKey()) {
-                primary = getFieldValue(field, o);
+                primary = getValue(field, o);
             }
         }
         for (Method method : c.getMethods()) {
             Column column = method.getAnnotation(Column.class);
             if (column != null && column.primaryKey()) {
-                primary = getMethodValue(method, o);
+                primary = getValue(method, o);
             }
         }
         return primary;
@@ -117,23 +117,19 @@ public final class ObjectUtils {
     }
 
     public static void setValue(ExtractionMapping mapping, Object value) {
-        System.out.println(format("Setting: [%s] as [%s]", mapping.property, value.toString()));
+//        System.out.println(format("Setting: [%s] as [%s]", mapping.property, value.toString()));
         try {
             final PropertyDescriptor property = PropertyUtils.getPropertyDescriptor(mapping.object, mapping.property);
             if (property != null) {
                 property.getWriteMethod().invoke(mapping.object, value);
             } else {
-                System.out.println(mapping.property + " is not a property, trying field");
                 setFieldValue(mapping, value);
             }
         } catch (IllegalAccessException e) {
-            System.out.println(mapping.property + " is not a property, trying field");
             setFieldValue(mapping, value);
         } catch (InvocationTargetException e) {
-            System.out.println(mapping.property + " is not a property, trying field");
             setFieldValue(mapping, value);
         } catch (NoSuchMethodException e) {
-            System.out.println(mapping.property + " is not a property, trying field");
             setFieldValue(mapping, value);
         }
     }
@@ -163,13 +159,20 @@ public final class ObjectUtils {
     public static Object[] getRelatedValues(Object o, Cardinality cardinality) {
         Collection<Object> relations = new ArrayList<Object>();
         Class c = o.getClass();
-        Field[] fields = c.getFields();
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Relation relation = field.getAnnotation(Relation.class);
             if (relation != null && relation.cardinality().equals(cardinality)) {
-                relations.add(getFieldValue(field, o));
+                relations.add(getValue(field, o));
             }
         }
+
+        for (Method method : c.getMethods()) {
+            Relation relation = method.getAnnotation(Relation.class);
+            if (relation != null && relation.cardinality().equals(cardinality)) {
+                relations.add(getValue(method, o));
+            }
+        }
+
         return relations.toArray(new Object[relations.size()]);
     }
 

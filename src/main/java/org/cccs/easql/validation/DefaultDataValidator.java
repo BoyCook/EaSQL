@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.cccs.easql.util.ClassUtils.getColumnName;
-import static org.cccs.easql.util.ObjectUtils.getFieldValue;
+import static org.cccs.easql.util.ObjectUtils.getValue;
 
 /**
  * User: boycook
@@ -22,7 +22,7 @@ public class DefaultDataValidator implements DataValidator {
             final Column column = field.getAnnotation(Column.class);
             if (column != null) {
                 String columnName = getColumnName(column, field);
-                final Object columnValue = getFieldValue(field, o);
+                final Object columnValue = getValue(field, o);
                 if (column.mandatory() && columnValue == null) {
                     throw new ValidationFailureException(columnName + " must have a value");
                 } else if (column.primaryKey() && isEmpty(column.sequence())) {
@@ -39,7 +39,7 @@ public class DefaultDataValidator implements DataValidator {
             final Column column = field.getAnnotation(Column.class);
             if (column != null) {
                 String columnName = getColumnName(column, field);
-                final Object columnValue = getFieldValue(field, o);
+                final Object columnValue = getValue(field, o);
                 if (column.mandatory() && columnValue == null) {
                     throw new ValidationFailureException(columnName + " must have a value");
                 } else if (column.primaryKey()) {

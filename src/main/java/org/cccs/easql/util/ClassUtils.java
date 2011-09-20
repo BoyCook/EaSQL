@@ -1,6 +1,5 @@
 package org.cccs.easql.util;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.Column;
 import org.cccs.easql.Relation;
@@ -9,7 +8,6 @@ import org.cccs.easql.domain.ExtractionMapping;
 import org.cccs.easql.domain.RelationMapping;
 import org.springframework.util.ReflectionUtils;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -17,8 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.apache.commons.lang.StringUtils.uncapitalize;
-import static org.cccs.easql.util.ClassCache.getColumnNames;
 import static org.cccs.easql.util.ClassCache.getExtractionColumns;
 import static org.cccs.easql.util.ObjectUtils.getNewObject;
 import static org.cccs.easql.util.ObjectUtils.setValue;
@@ -274,6 +270,20 @@ public final class ClassUtils {
         for (Field field : r.getFields()) {
             if (field.getType().equals(c)) {
                 return field;
+            }
+        }
+        return null;
+    }
+
+    public static Relation getRelation(Class c, Class r) {
+        for (Field field : r.getFields()) {
+            if (field.getType().equals(c)) {
+                return field.getAnnotation(Relation.class);
+            }
+        }
+        for (Method method : r.getMethods()) {
+            if (method.getReturnType().equals(c)) {
+                return method.getAnnotation(Relation.class);
             }
         }
         return null;

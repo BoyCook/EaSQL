@@ -1,13 +1,10 @@
 package org.cccs.easql.util;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.domain.*;
 import org.junit.Test;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 
 import static org.cccs.easql.util.ClassUtils.getGenericType;
 import static org.cccs.easql.util.ClassUtils.getRelations;

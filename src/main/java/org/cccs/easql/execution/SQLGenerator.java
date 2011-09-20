@@ -69,8 +69,8 @@ public class SQLGenerator {
 
                 for (Object add : addRelation) {
                     if (getPrimaryValueAsLong(add) > 0) {
-                        final Field relatedField = getRelatedField(updated.getClass(), add.getClass());
-                        updateSQL.append(format(generateUpdateSQLForRelation(add, relatedField.getAnnotation(Relation.class)), objectKey));
+                        final Relation relation = getRelation(updated.getClass(), add.getClass());
+                        updateSQL.append(format(generateUpdateSQLForRelation(add, relation), objectKey));
                     } else {
                         insertSQL.append(format(generateInsertSQL(add), objectKey));
                     }
