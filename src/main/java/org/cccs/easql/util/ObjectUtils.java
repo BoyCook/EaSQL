@@ -14,6 +14,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static java.lang.String.format;
+
 /**
  * User: boycook
  * Date: 11/07/2011
@@ -115,6 +117,7 @@ public final class ObjectUtils {
     }
 
     public static void setValue(ExtractionMapping mapping, Object value) {
+        System.out.println(format("Setting: [%s] as [%s]", mapping.property, value.toString()));
         try {
             final PropertyDescriptor property = PropertyUtils.getPropertyDescriptor(mapping.object, mapping.property);
             if (property != null) {
@@ -150,10 +153,10 @@ public final class ObjectUtils {
 
     private static void setFieldValue(ExtractionMapping mapping, Object value) {
         try {
-            Field field = value.getClass().getField(mapping.property);
+            Field field = mapping.object.getClass().getField(mapping.property);
             setValue(field, mapping.object, value);
         } catch (NoSuchFieldException e1) {
-            System.out.println(mapping.property + " is not a field");
+            System.out.println(format("[%s] is not a field of [%s]", mapping.property, value.getClass()));
         }
     }
 
