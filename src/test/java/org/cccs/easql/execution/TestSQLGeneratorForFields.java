@@ -24,7 +24,7 @@ import static org.junit.Assert.assertThat;
  * Date: 17/06/2011
  * Time: 13:04
  */
-public class TestSQLGenerator {
+public class TestSQLGeneratorForFields {
 
     private Person craig;
     private Dog lassie;

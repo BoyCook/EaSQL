@@ -2,6 +2,7 @@ package org.cccs.easql.execution;
 
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.Relation;
+import org.cccs.easql.domain.RelationMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ import static org.cccs.easql.util.ClassCache.getPrimaryColumnName;
 import static org.cccs.easql.util.ClassCache.getTableName;
 import static org.cccs.easql.util.ClassCache.getUniqueColumnName;
 import static org.cccs.easql.util.ClassUtils.*;
+import static org.cccs.easql.util.ClassUtils.getGenericType;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
 import static org.cccs.easql.util.ObjectUtils.setValue;
@@ -99,35 +101,42 @@ public class Finder {
         return executor.query(c, sql, loadRelations);
     }
 
-    //TODO: move reflection out of here
     private void loadOneToMany(Collection results) {
         for (Object result : results) {
-            Class c = result.getClass();
-            Field[] fields = c.getFields();
-            for (Field field : fields) {
-                Relation relation = field.getAnnotation(Relation.class);
-                if (relation != null && relation.cardinality().equals(Cardinality.ONE_TO_MANY)) {
-                    Class relatedClass = getGenericType(field);
+            RelationMapping[] relations = getRelations(result.getClass(), Cardinality.ONE_TO_MANY);
+            for (RelationMapping relation : relations) {
+                //TODO: generify
+                if (relation.getField() != null) {
+                    Class relatedClass = getGenericType(relation.getField());
                     Map<String, String> where = new HashMap<String, String>();
-                    where.put(relation.key(), getPrimaryValue(result).toString());
-                    setValue(field, result, query(relatedClass, false, where));
+                    where.put(relation.relation.key(), getPrimaryValue(result).toString());
+                    setValue(relation.getField(), result, query(relatedClass, false, where));
+                } else if (relation.getMethod() != null) {
+                    Class relatedClass = getGenericType(relation.getMethod());
+                    Map<String, String> where = new HashMap<String, String>();
+                    where.put(relation.relation.key(), getPrimaryValue(result).toString());
+                    setValue(stripName(relation.getMethod()), result, query(relatedClass, false, where));
                 }
             }
+
         }
     }
 
-    //TODO: move reflection out of here
     private void loadManyToMany(Collection results) {
         for (Object result : results) {
-            Class c = result.getClass();
-            Field[] fields = c.getFields();
-            for (Field field : fields) {
-                Relation relation = field.getAnnotation(Relation.class);
-                if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_MANY)) {
-                    final Class relatedClass = getGenericType(field);
-                    final String sql = generateSelectSQLForManyToMany(relatedClass, relation, getPrimaryValueAsLong(result));
+            RelationMapping[] relations = getRelations(result.getClass(), Cardinality.MANY_TO_MANY);
+            for (RelationMapping relation : relations) {
+                //TODO: generify
+                if (relation.getField() != null) {
+                    final Class relatedClass = getGenericType(relation.getField());
+                    final String sql = generateSelectSQLForManyToMany(relatedClass, relation.relation, getPrimaryValueAsLong(result));
                     final Collection relatedResults = query(relatedClass, sql, false);
-                    setValue(field, result, relatedResults);
+                    setValue(relation.getField(), result, relatedResults);
+                } else if (relation.getMethod() != null) {
+                    final Class relatedClass = getGenericType(relation.getMethod());
+                    final String sql = generateSelectSQLForManyToMany(relatedClass, relation.relation, getPrimaryValueAsLong(result));
+                    final Collection relatedResults = query(relatedClass, sql, false);
+                    setValue(stripName(relation.getMethod()), result, relatedResults);
                 }
             }
         }

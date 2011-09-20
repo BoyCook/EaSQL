@@ -88,12 +88,12 @@ public final class SQLUtils {
 
         for (RelationMapping relation : relations) {
             if (loadRelations) {
-                String[] joinColumns = getColumnNames(relation.getField().getType());
-                String joinTable = getTableName(relation.getField().getType());
+                String[] joinColumns = getColumnNames(relation.getType());
+                String joinTable = getTableName(relation.getType());
                 for (String joinColumn : joinColumns) {
                     appendColumn(select, getJoinColumnName(relation.relation.name(), joinColumn));
                 }
-                String primaryColumn = getPrimaryColumnName(relation.getField().getType());
+                String primaryColumn = getPrimaryColumnName(relation.getType());
                 joins.append(format(OUTER_JOIN, joinTable, relation.relation.name(), tableName, relation.relation.key(), relation.relation.name(), primaryColumn));
             } else {
                 appendColumn(select, relation.relation.key());

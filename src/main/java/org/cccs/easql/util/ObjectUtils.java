@@ -80,12 +80,17 @@ public final class ObjectUtils {
 
     public static Object getPrimaryValue(Object o) {
         Class c = o.getClass();
-        Field[] fields = c.getFields();
         Object primary = null;
-        for (Field field : fields) {
+        for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null && column.primaryKey()) {
                 primary = getFieldValue(field, o);
+            }
+        }
+        for (Method method : c.getMethods()) {
+            Column column = method.getAnnotation(Column.class);
+            if (column != null && column.primaryKey()) {
+                primary = getMethodValue(method, o);
             }
         }
         return primary;
@@ -114,6 +119,9 @@ public final class ObjectUtils {
             final PropertyDescriptor property = PropertyUtils.getPropertyDescriptor(mapping.object, mapping.property);
             if (property != null) {
                 property.getWriteMethod().invoke(mapping.object, value);
+            } else {
+                System.out.println(mapping.property + " is not a property, trying field");
+                setFieldValue(mapping, value);
             }
         } catch (IllegalAccessException e) {
             System.out.println(mapping.property + " is not a property, trying field");

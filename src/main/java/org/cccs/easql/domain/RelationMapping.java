@@ -5,6 +5,8 @@ import org.cccs.easql.Relation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import static org.cccs.easql.util.ClassCache.getColumnNames;
+
 /**
  * User: boycook
  * Date: 13/09/2011
@@ -30,5 +32,14 @@ public class RelationMapping implements Mapping {
     @Override
     public Method getMethod() {
         return this.method;
+    }
+
+    public Class getType() {
+        if (getField() != null) {
+            return getField().getType();
+        } else if (getMethod() != null) {
+            return getMethod().getReturnType();
+        }
+        return null;
     }
 }

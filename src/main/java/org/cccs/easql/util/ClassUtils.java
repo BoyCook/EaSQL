@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.uncapitalize;
+import static org.cccs.easql.util.ClassCache.getColumnNames;
 import static org.cccs.easql.util.ClassCache.getExtractionColumns;
 import static org.cccs.easql.util.ObjectUtils.getNewObject;
 import static org.cccs.easql.util.ObjectUtils.setValue;
@@ -279,6 +281,11 @@ public final class ClassUtils {
 
     public static Class getGenericType(Field field) {
         ParameterizedType stringListType = (ParameterizedType) field.getGenericType();
+        return (Class<?>) stringListType.getActualTypeArguments()[0];
+    }
+
+    public static Class getGenericType(Method method) {
+        ParameterizedType stringListType = (ParameterizedType) method.getGenericReturnType();
         return (Class<?>) stringListType.getActualTypeArguments()[0];
     }
 

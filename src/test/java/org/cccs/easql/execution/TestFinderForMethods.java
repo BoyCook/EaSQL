@@ -25,7 +25,6 @@ import static org.junit.Assert.assertThat;
  * Date: 14/09/2011
  * Time: 12:21
  */
-@Ignore
 public class TestFinderForMethods extends DataDrivenTestEnvironment {
 
     @Before

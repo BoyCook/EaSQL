@@ -8,9 +8,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import static org.cccs.easql.util.ClassUtils.generateExtractionMappings;
-import static org.cccs.easql.util.ObjectUtils.setValue;
 import static org.cccs.easql.util.ObjectUtils.setValue;
 
 /**
@@ -31,6 +31,7 @@ public class Extractor implements ResultSetExtractor<Collection<?>> {
     @Override
     public Collection<?> extractData(ResultSet rs) throws SQLException, DataAccessException {
         final Collection results = new ArrayList();
+
         while (rs.next()) {
             //Need to get fresh object per row
             ExtractionMapping[] dbFields = generateExtractionMappings(getClassType(), loadRelations);
