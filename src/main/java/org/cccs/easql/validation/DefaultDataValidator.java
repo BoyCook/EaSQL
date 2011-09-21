@@ -3,6 +3,7 @@ package org.cccs.easql.validation;
 import org.cccs.easql.Column;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.cccs.easql.util.ClassUtils.getColumnName;
@@ -15,6 +16,7 @@ import static org.cccs.easql.util.ObjectUtils.getValue;
  */
 public class DefaultDataValidator implements DataValidator {
 
+    //TODO: do reflection in class utils
     @Override
     public void validateCreate(Object o) throws ValidationFailureException {
         final Class c = o.getClass();
@@ -23,6 +25,19 @@ public class DefaultDataValidator implements DataValidator {
             if (column != null) {
                 String columnName = getColumnName(column, field);
                 final Object columnValue = getValue(field, o);
+                if (column.mandatory() && columnValue == null) {
+                    throw new ValidationFailureException(columnName + " must have a value");
+                } else if (column.primaryKey() && isEmpty(column.sequence())) {
+                    validatePrimaryKey(columnName, columnValue);
+                }
+            }
+        }
+
+        for (Method method : c.getMethods()) {
+            final Column column = method.getAnnotation(Column.class);
+            if (column != null) {
+                String columnName = getColumnName(column, method);
+                final Object columnValue = getValue(method, o);
                 if (column.mandatory() && columnValue == null) {
                     throw new ValidationFailureException(columnName + " must have a value");
                 } else if (column.primaryKey() && isEmpty(column.sequence())) {
@@ -40,6 +55,19 @@ public class DefaultDataValidator implements DataValidator {
             if (column != null) {
                 String columnName = getColumnName(column, field);
                 final Object columnValue = getValue(field, o);
+                if (column.mandatory() && columnValue == null) {
+                    throw new ValidationFailureException(columnName + " must have a value");
+                } else if (column.primaryKey()) {
+                    validatePrimaryKey(columnName, columnValue);
+                }
+            }
+        }
+
+        for (Method method : c.getMethods()) {
+            final Column column = method.getAnnotation(Column.class);
+            if (column != null) {
+                String columnName = getColumnName(column, method);
+                final Object columnValue = getValue(method, o);
                 if (column.mandatory() && columnValue == null) {
                     throw new ValidationFailureException(columnName + " must have a value");
                 } else if (column.primaryKey()) {

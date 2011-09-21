@@ -1,9 +1,12 @@
 package org.cccs.easql.execution;
 
 import org.cccs.easql.config.DataDrivenTestEnvironment;
+import org.cccs.easql.domain.NoSequence;
 import org.cccs.easql.domain.accessors.Cat;
 import org.cccs.easql.domain.accessors.Person;
+import org.cccs.easql.validation.ValidationFailureException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,7 +35,7 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void createWithoutRelationsShouldWork() {
+    public void createWithoutRelationsShouldWork() throws ValidationFailureException {
         service.insert(new Person("Dave"));
         service.insert(new Person("Bob"));
         service.insert(new Person("Jim"));
@@ -41,13 +44,13 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void createWithRelationsShouldWork() {
+    public void createWithRelationsShouldWork() throws ValidationFailureException {
         Cat garfield = new Cat("garfield", craig);
         service.insert(garfield);
     }
 
     @Test
-    public void updateShouldWork() throws EntityNotFoundException {
+    public void updateShouldWork() throws EntityNotFoundException, ValidationFailureException {
         craig.setEmail("SomeNewEmail");
         service.update(craig);
 
@@ -58,7 +61,7 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void updateOne2ManyRelationsShouldWork() throws EntityNotFoundException {
+    public void updateOne2ManyRelationsShouldWork() throws EntityNotFoundException, ValidationFailureException {
         craig.getDogs().clear();
         craig.getCats().clear();
         craig.getCats().add(daisy);
@@ -75,7 +78,7 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void updateMany2OneRelationsShouldWork() throws EntityNotFoundException {
+    public void updateMany2OneRelationsShouldWork() throws EntityNotFoundException, ValidationFailureException {
         final Person craig = finder.findByKey(Person.class, "Craig");
         final Person bob = finder.findByKey(Person.class, "Bob");
         final Cat bagpuss = finder.findByKey(Cat.class, "Bagpuss");
@@ -93,5 +96,24 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
 
     @Test
     public void updateMany2ManyRelationsShouldWork() {
+    }
+
+    @Ignore
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingMandatoryFieldOnCreate() throws ValidationFailureException {
+        final Cat bagpuss = new Cat();
+        service.insert(bagpuss);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingMandatoryFieldOnUpdate() throws ValidationFailureException, EntityNotFoundException {
+        final Cat bagpuss = new Cat();
+        service.update(bagpuss);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingPrimaryKeyOnUpdate() throws ValidationFailureException, EntityNotFoundException {
+        final Cat bagpuss = new Cat("BagPuss", null);
+        service.update(bagpuss);
     }
 }

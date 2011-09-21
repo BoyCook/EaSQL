@@ -6,6 +6,8 @@ import org.cccs.easql.validation.SchemaValidator;
 import org.cccs.easql.validation.ValidationFailureException;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
+
 /**
  * User: boycook
  * Date: 12/09/2011

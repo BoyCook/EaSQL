@@ -4,6 +4,7 @@ import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Dog;
 import org.cccs.easql.domain.Person;
+import org.cccs.easql.validation.ValidationFailureException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ import static org.junit.Assert.assertThat;
 public class TestMassiveDataSet extends DataDrivenTestEnvironment {
 
     @Test
-    public void testDataShouldInstall() {
+    public void testDataShouldInstall() throws ValidationFailureException {
         installMassiveDataSet();
         Collection people = finder.query(Person.class);
         assertThat(people.size(), is(equalTo(9997)));
@@ -36,7 +37,7 @@ public class TestMassiveDataSet extends DataDrivenTestEnvironment {
         assertThat(cats.size(), is(equalTo(9997)));
     }
 
-    private void installMassiveDataSet() {
+    private void installMassiveDataSet() throws ValidationFailureException {
         List<Person> people = new ArrayList<Person>();
 
         for (int i = 5; i < 10000; i++) {

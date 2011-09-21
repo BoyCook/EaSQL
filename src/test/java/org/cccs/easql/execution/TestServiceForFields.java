@@ -2,7 +2,9 @@ package org.cccs.easql.execution;
 
 import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
+import org.cccs.easql.domain.NoSequence;
 import org.cccs.easql.domain.Person;
+import org.cccs.easql.validation.ValidationFailureException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,7 +34,7 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void createWithoutRelationsShouldWork() {
+    public void createWithoutRelationsShouldWork() throws ValidationFailureException {
         service.insert(new Person("Dave"));
         service.insert(new Person("Bob"));
         service.insert(new Person("Jim"));
@@ -41,13 +43,13 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void createWithRelationsShouldWork() {
+    public void createWithRelationsShouldWork() throws ValidationFailureException {
         Cat garfield = new Cat("garfield", craig);
         service.insert(garfield);
     }
 
     @Test
-    public void updateShouldWork() throws EntityNotFoundException {
+    public void updateShouldWork() throws EntityNotFoundException, ValidationFailureException {
         craig.email = "SomeNewEmail";
         service.update(craig);
 
@@ -58,7 +60,7 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void updateOne2ManyRelationsShouldWork() throws EntityNotFoundException {
+    public void updateOne2ManyRelationsShouldWork() throws EntityNotFoundException, ValidationFailureException {
         craig.dogs.clear();
         craig.cats.clear();
         craig.cats.add(daisy);
@@ -75,7 +77,7 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void updateMany2OneRelationsShouldWork() throws EntityNotFoundException {
+    public void updateMany2OneRelationsShouldWork() throws EntityNotFoundException, ValidationFailureException {
         final Person craig = finder.findByKey(Person.class, "Craig");
         final Person bob = finder.findByKey(Person.class, "Bob");
         final Cat bagpuss = finder.findByKey(Cat.class, "Bagpuss");
@@ -93,5 +95,30 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
 
     @Test
     public void updateMany2ManyRelationsShouldWork() {
+    }
+
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingMandatoryFieldOnCreate() throws ValidationFailureException {
+        final Cat bagpuss = new Cat();
+        service.insert(bagpuss);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingMandatoryFieldOnUpdate() throws ValidationFailureException, EntityNotFoundException {
+        final Cat bagpuss = new Cat();
+        service.update(bagpuss);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingPrimaryKeyOnCreate() throws ValidationFailureException {
+        final NoSequence o = new NoSequence("Foo");
+        service.insert(o);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingPrimaryKeyOnUpdate() throws ValidationFailureException, EntityNotFoundException {
+        final Cat bagpuss = new Cat("BagPuss", null);
+        service.update(bagpuss);
     }
 }
