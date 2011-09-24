@@ -27,13 +27,13 @@ public class TestMassiveDataSet extends DataDrivenTestEnvironment {
     @Test
     public void testDataShouldInstall() throws ValidationFailureException {
         installMassiveDataSet();
-        Collection people = finder.query(Person.class);
+        Collection people = finder.all(Person.class);
         assertThat(people.size(), is(equalTo(9997)));
 
-        Collection dogs = finder.query(Dog.class);
+        Collection dogs = finder.all(Dog.class);
         assertThat(dogs.size(), is(equalTo(9996)));
 
-        Collection cats = finder.query(Cat.class);
+        Collection cats = finder.all(Cat.class);
         assertThat(cats.size(), is(equalTo(9997)));
     }
 

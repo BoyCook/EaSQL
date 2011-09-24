@@ -21,19 +21,20 @@ public class Executor extends JdbcTemplate {
         super(dataSource);
     }
 
-    public Collection query(final Class c, final String sql, boolean loadRelations) {
+    public <T> Collection<T> query(final Class<T> c, final String sql, boolean loadRelations) {
         clock = new StopWatch("QueryExecution");
         clock.start();
-        Collection<?> results = query(sql, new Extractor(c, loadRelations));
+        Collection<T> results = query(sql, new Extractor<T>(c, loadRelations));
         clock.stop();
         System.out.println(format("Executing Query [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
         return results;
     }
 
-    public Collection query(final Class c, final String sql, boolean loadRelations, final ResultSetExtractor extractor) {
+    @Deprecated
+    public <T> Collection<T> query(final Class<T> c, final String sql, boolean loadRelations, final ResultSetExtractor<Collection<T>> extractor) {
         clock = new StopWatch("QueryExecution");
         clock.start();
-        Collection<?> results = (Collection<?>) query(sql, extractor);
+        Collection<T> results = query(sql, extractor);
         clock.stop();
         System.out.println(format("Executing Query [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
         return results;

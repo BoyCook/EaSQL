@@ -18,7 +18,7 @@ import static org.cccs.easql.util.ObjectUtils.setValue;
  * Date: 22/06/2011
  * Time: 14:20
  */
-public class Extractor implements ResultSetExtractor<Collection<?>> {
+public class Extractor<T> implements ResultSetExtractor<Collection<T>> {
     private final Class<?> classType;
     private final boolean loadRelations;
 
@@ -29,7 +29,7 @@ public class Extractor implements ResultSetExtractor<Collection<?>> {
 
     @SuppressWarnings({"unchecked"})
     @Override
-    public Collection<?> extractData(ResultSet rs) throws SQLException, DataAccessException {
+    public Collection<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
         final Collection results = new ArrayList();
 
         while (rs.next()) {

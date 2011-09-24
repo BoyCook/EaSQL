@@ -2,11 +2,14 @@ package org.cccs.easql.execution;
 
 import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
+import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.NoSequence;
 import org.cccs.easql.domain.Person;
 import org.cccs.easql.validation.ValidationFailureException;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Collection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -95,8 +98,11 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
 
     @Test
     public void updateMany2ManyRelationsShouldWork() {
-    }
+        Collection<Country> countries = finder.all(Country.class);
 
+        assertThat(daisy.countries.size(), is(equalTo(2)));
+        assertThat(countries.size(), is(equalTo(4)));
+    }
 
     @Test(expected = ValidationFailureException.class)
     public void validatorShouldFailForMissingMandatoryFieldOnCreate() throws ValidationFailureException {

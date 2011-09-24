@@ -25,7 +25,7 @@ public class TestFinderForFields extends DataDrivenTestEnvironment {
 
     @Test
     public void finderShouldWorkForJustClassForPerson() throws Exception {
-        final Collection<Person> results = finder.query(Person.class);
+        final Collection<Person> results = finder.all(Person.class);
         final Person craig = (Person) results.toArray()[0];
         assertThat(results.size(), is(equalTo(2)));
         assertCraig(craig);
@@ -43,7 +43,7 @@ public class TestFinderForFields extends DataDrivenTestEnvironment {
 
     @Test
     public void finderShouldWorkForJustClassForDog() throws Exception {
-        final Collection<Dog> results = finder.query(Dog.class);
+        final Collection<Dog> results = finder.all(Dog.class);
         final Dog lassie = (Dog) results.toArray()[0];
 
         assertThat(results.size(), is(equalTo(1)));
@@ -54,7 +54,7 @@ public class TestFinderForFields extends DataDrivenTestEnvironment {
 
     @Test
     public void finderShouldWorkForJustClassForCat() throws Exception {
-        final Collection<Cat> results = finder.query(Cat.class);
+        final Collection<Cat> results = finder.all(Cat.class);
         final Cat bagpuss = (Cat) results.toArray()[0];
 
         assertThat(results.size(), is(equalTo(2)));
@@ -65,7 +65,7 @@ public class TestFinderForFields extends DataDrivenTestEnvironment {
 
     @Test
     public void finderShouldWorkWithRelations() throws Exception {
-        final Collection<Cat> results = finder.query(Cat.class, true);
+        final Collection<Cat> results = finder.all(Cat.class, true);
         final Cat bagpuss = (Cat) results.toArray()[0];
 
         assertThat(results.size(), is(equalTo(2)));
