@@ -9,7 +9,7 @@ import org.junit.Test;
  * Date: 13/09/2011
  * Time: 15:20
  */
-public class TestDefaultDataValidator {
+public class TestDefaultDataValidatorForFields {
 
     @Test(expected = ValidationFailureException.class)
     public void validatorShouldFailForMissingMandatoryFieldOnCreate() throws ValidationFailureException {

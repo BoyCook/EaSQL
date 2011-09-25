@@ -1,6 +1,7 @@
 package org.cccs.easql.execution;
 
 import org.cccs.easql.config.DataDrivenTestEnvironment;
+import org.cccs.easql.domain.accessors.NoSequence;
 import org.cccs.easql.domain.accessors.Country;
 import org.cccs.easql.domain.accessors.Cat;
 import org.cccs.easql.domain.accessors.Person;
@@ -131,7 +132,6 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
         assertTrue(spain.getCats().contains(updatedDaisy));
     }
 
-    @Ignore
     @Test(expected = ValidationFailureException.class)
     public void validatorShouldFailForMissingMandatoryFieldOnCreate() throws ValidationFailureException {
         final Cat bagpuss = new Cat();
@@ -142,6 +142,12 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
     public void validatorShouldFailForMissingMandatoryFieldOnUpdate() throws ValidationFailureException, EntityNotFoundException {
         final Cat bagpuss = new Cat();
         service.update(bagpuss);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingPrimaryKeyOnCreate() throws ValidationFailureException {
+        final NoSequence o = new NoSequence("Foo");
+        service.insert(o);
     }
 
     @Test(expected = ValidationFailureException.class)

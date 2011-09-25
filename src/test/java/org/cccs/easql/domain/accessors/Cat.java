@@ -33,7 +33,7 @@ public class Cat {
         return id;
     }
 
-    @Column(unique = true, name = "name")
+    @Column(unique = true, name = "name", mandatory = true)
     public String getName() {
         return name;
     }
