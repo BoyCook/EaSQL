@@ -14,6 +14,8 @@ import java.util.Collection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: boycook
@@ -21,20 +23,6 @@ import static org.hamcrest.core.Is.is;
  * Time: 10:25
  */
 public class TestServiceForFields extends DataDrivenTestEnvironment {
-
-    private Person craig;
-    private Cat daisy;
-
-    @Before
-    public void before() throws EntityNotFoundException {
-        craig = finder.findByKey(Person.class, "Craig");
-        daisy = finder.findByKey(Cat.class, "Daisy");
-
-        assertThat(craig.name, is(equalTo("Craig")));
-        assertThat(daisy.name, is(equalTo("Daisy")));
-        assertThat(craig.cats.size(), is(equalTo(1)));
-        assertThat(craig.dogs.size(), is(equalTo(1)));
-    }
 
     @Test
     public void createWithoutRelationsShouldWork() throws ValidationFailureException {
@@ -46,13 +34,15 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void createWithRelationsShouldWork() throws ValidationFailureException {
-        Cat garfield = new Cat("garfield", craig);
+    public void createWithRelationsShouldWork() throws ValidationFailureException, EntityNotFoundException {
+        final Person craig = finder.findByKey(Person.class, "Craig");
+        final Cat garfield = new Cat("garfield", craig);
         service.insert(garfield);
     }
 
     @Test
     public void updateShouldWork() throws EntityNotFoundException, ValidationFailureException {
+        final Person craig = finder.findByKey(Person.class, "Craig");
         craig.email = "SomeNewEmail";
         service.update(craig);
 
@@ -64,10 +54,12 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
 
     @Test
     public void updateOne2ManyRelationsShouldWork() throws EntityNotFoundException, ValidationFailureException {
+        final Person craig = finder.findByKey(Person.class, "Craig");
+        final Cat daisy = finder.findByKey(Cat.class, "Daisy");
         craig.dogs.clear();
         craig.cats.clear();
         craig.cats.add(daisy);
-        Cat fluffy = new Cat("Fluffy", craig);
+        final Cat fluffy = new Cat("Fluffy", craig);
         craig.cats.add(fluffy);
         service.update(craig);
 
@@ -97,12 +89,41 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void updateMany2ManyRelationsShouldWork() {
-        Collection<Country> countries = finder.all(Country.class);
+    public void updateMany2ManyRelationsShouldWork() throws EntityNotFoundException, ValidationFailureException {
+        final Cat daisy = finder.findByKey(Cat.class, "Daisy");
+        final Country england = finder.findByKey(Country.class, "England");
+        final Country ireland = finder.findByKey(Country.class, "Ireland");
+        final Country wales = finder.findByKey(Country.class, "Wales");
 
         assertThat(daisy.countries.size(), is(equalTo(2)));
-        assertThat(countries.size(), is(equalTo(4)));
+        assertTrue(daisy.countries.contains(england));
+        assertTrue(daisy.countries.contains(ireland));
+        assertTrue(england.cats.contains(daisy));
+        assertTrue(ireland.cats.contains(daisy));
+
+        daisy.countries.remove(ireland);
+        daisy.countries.add(wales);
+        daisy.countries.add(new Country("Spain"));
+        service.update(daisy);
+
+        final Cat updatedDaisy = finder.findByKey(Cat.class, "Daisy");
+        final Country updatedEngland = finder.findByKey(Country.class, "England");
+        final Country updatedIreland = finder.findByKey(Country.class, "Ireland");
+        final Country updatedWales = finder.findByKey(Country.class, "Wales");
+        final Country spain = finder.findByKey(Country.class, "Spain");
+
+        assertThat(updatedDaisy.countries.size(), is(equalTo(3)));
+        assertTrue(updatedDaisy.countries.contains(updatedEngland));
+        assertTrue(updatedDaisy.countries.contains(spain));
+        assertFalse(updatedDaisy.countries.contains(updatedIreland));
+        assertTrue(updatedDaisy.countries.contains(updatedWales));
+        assertTrue(updatedEngland.cats.contains(updatedDaisy));
+        assertFalse(updatedIreland.cats.contains(updatedDaisy));
+        assertTrue(updatedWales.cats.contains(updatedDaisy));
+        assertTrue(spain.cats.contains(updatedDaisy));
     }
+
+    //Validation assertions
 
     @Test(expected = ValidationFailureException.class)
     public void validatorShouldFailForMissingMandatoryFieldOnCreate() throws ValidationFailureException {

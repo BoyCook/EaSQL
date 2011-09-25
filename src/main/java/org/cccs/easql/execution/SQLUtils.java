@@ -12,6 +12,7 @@ import java.util.Map;
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.cccs.easql.util.ClassCache.*;
+import static org.cccs.easql.util.ClassCache.getUniqueColumnName;
 import static org.cccs.easql.util.ClassUtils.getColumnType;
 import static org.cccs.easql.util.ClassUtils.getRelations;
 import static org.cccs.easql.util.ObjectUtils.*;
@@ -27,7 +28,7 @@ public final class SQLUtils {
     //Template SQL
     private final static String INSERT_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s);";
     private final static String SELECT_TEMPLATE = "SELECT %s FROM %s";
-    private final static String SELECT_TEMPLATE_RELATIONS = "SELECT %s FROM %s %s";
+    private final static String SELECT_TEMPLATE_WHERE = "SELECT %s FROM %s %s";
     private final static String UPDATE_TEMPLATE = "UPDATE %s set %s WHERE %s;";
     private final static String DELETE_TEMPLATE = "DELETE FROM %s;";
     private final static String DELETE_OBJECT_TEMPLATE = "DELETE FROM %s WHERE %s;";
@@ -66,6 +67,24 @@ public final class SQLUtils {
         return format(INSERT_TEMPLATE, tableName, insertColumns.toString(), values.toString());
     }
 
+    public static String generateInsertSQL(Relation relation, Object left, Object right) {
+        final String columns = relation.linkedBy()[0] + ", " + relation.linkedBy()[1];
+        String values;
+
+        if (relation.end().equals(Relation.End.LEFT)) {
+            values = getPrimaryValueAsLong(left) + "," + getUniqueSelectSQL(right);
+        } else {
+            values = getUniqueSelectSQL(right) + "," + getPrimaryValueAsLong(left);
+        }
+
+        return format(INSERT_TEMPLATE, relation.linkTable(), columns, values);
+    }
+
+    private static String getUniqueSelectSQL(Object o) {
+        final String where = format("WHERE upper(%s) = upper('%s')", getUniqueColumnName(o.getClass()), getUniqueValue(o).toString());
+        return format(SELECT_TEMPLATE_WHERE, getPrimaryColumnName(o.getClass()), getTableName(o.getClass()), where);
+    }
+
     public static String generateSelectSQL(LinkTable linkTable) {
         return format(SELECT_TEMPLATE, "*", linkTable.name);
     }
@@ -101,7 +120,7 @@ public final class SQLUtils {
         }
 
         if (loadRelations) {
-            return format(SELECT_TEMPLATE_RELATIONS, select.toString(), tableName, joins.toString());
+            return format(SELECT_TEMPLATE_WHERE, select.toString(), tableName, joins.toString());
         } else {
             return format(SELECT_TEMPLATE, select.toString(), tableName);
         }
@@ -156,6 +175,13 @@ public final class SQLUtils {
         return format(DELETE_TEMPLATE, getTableName(c));
     }
 
+    public static String generateDeleteSQL(Relation relation, Object left, Object right) {
+        final String where = relation.end().equals(Relation.End.LEFT) ?
+                relation.linkedBy()[0] + " = " + getPrimaryValueAsLong(left) + " and " + relation.linkedBy()[1] + " = " + getPrimaryValueAsLong(right) :
+                relation.linkedBy()[1] + " = " + getPrimaryValueAsLong(left) + " and " + relation.linkedBy()[0] + " = " + getPrimaryValueAsLong(right);
+        return format(DELETE_OBJECT_TEMPLATE, relation.linkTable(), where);
+    }
+
     public static String generateSequenceSQL(Sequence sequence) {
         return format(CREATE_SEQUENCE_TEMPLATE, sequence.getName(), sequence.getStartsWith(), sequence.getIncrementBy());
     }
@@ -195,7 +221,7 @@ public final class SQLUtils {
     }
 
     public static String generateWhere(Map<String, String> whereClauses) {
-        StringBuilder where = new StringBuilder();
+        final StringBuilder where = new StringBuilder();
 
         for (String key : whereClauses.keySet()) {
             String value = whereClauses.get(key);

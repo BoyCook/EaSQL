@@ -23,7 +23,7 @@ import static java.lang.String.format;
  */
 public final class ObjectUtils {
 
-    public static String arrayAsString(String [] values) {
+    public static String arrayAsString(String[] values) {
         final StringBuilder string = new StringBuilder();
         for (String value : values) {
             if (string.length() > 0) {
@@ -92,6 +92,24 @@ public final class ObjectUtils {
         for (Method method : c.getMethods()) {
             Column column = method.getAnnotation(Column.class);
             if (column != null && column.primaryKey()) {
+                primary = getValue(method, o);
+            }
+        }
+        return primary;
+    }
+
+    public static Object getUniqueValue(Object o) {
+        Class c = o.getClass();
+        Object primary = null;
+        for (Field field : c.getFields()) {
+            Column column = field.getAnnotation(Column.class);
+            if (column != null && column.unique()) {
+                primary = getValue(field, o);
+            }
+        }
+        for (Method method : c.getMethods()) {
+            Column column = method.getAnnotation(Column.class);
+            if (column != null && column.unique()) {
                 primary = getValue(method, o);
             }
         }

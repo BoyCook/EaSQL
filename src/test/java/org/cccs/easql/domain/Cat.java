@@ -21,7 +21,7 @@ public class Cat {
     public String name;
     @Relation(cardinality = Cardinality.MANY_TO_ONE, key = "person_id", name = "person2cat")
     public Person owner;
-    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "cat_countries", linkedBy = {"cntId", "cat_id"})
+    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "cat_countries", linkedBy = {"cntId", "cat_id"}, end = Relation.End.RIGHT)
     public Collection<Country> countries;
 
     public Cat() {

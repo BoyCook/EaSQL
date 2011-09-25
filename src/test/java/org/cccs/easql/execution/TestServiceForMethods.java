@@ -1,7 +1,7 @@
 package org.cccs.easql.execution;
 
 import org.cccs.easql.config.DataDrivenTestEnvironment;
-import org.cccs.easql.domain.NoSequence;
+import org.cccs.easql.domain.accessors.Country;
 import org.cccs.easql.domain.accessors.Cat;
 import org.cccs.easql.domain.accessors.Person;
 import org.cccs.easql.validation.ValidationFailureException;
@@ -12,6 +12,8 @@ import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: boycook
@@ -95,7 +97,38 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void updateMany2ManyRelationsShouldWork() {
+    public void updateMany2ManyRelationsShouldWork() throws EntityNotFoundException, ValidationFailureException {
+        final Cat daisy = finder.findByKey(Cat.class, "Daisy");
+        final Country england = finder.findByKey(Country.class, "England");
+        final Country ireland = finder.findByKey(Country.class, "Ireland");
+        final Country wales = finder.findByKey(Country.class, "Wales");
+
+        assertThat(daisy.getCountries().size(), is(equalTo(2)));
+        assertTrue(daisy.getCountries().contains(england));
+        assertTrue(daisy.getCountries().contains(ireland));
+        assertTrue(england.getCats().contains(daisy));
+        assertTrue(ireland.getCats().contains(daisy));
+
+        daisy.getCountries().remove(ireland);
+        daisy.getCountries().add(wales);
+        daisy.getCountries().add(new Country("Spain"));
+        service.update(daisy);
+
+        final Cat updatedDaisy = finder.findByKey(Cat.class, "Daisy");
+        final Country updatedEngland = finder.findByKey(Country.class, "England");
+        final Country updatedIreland = finder.findByKey(Country.class, "Ireland");
+        final Country updatedWales = finder.findByKey(Country.class, "Wales");
+        final Country spain = finder.findByKey(Country.class, "Spain");
+
+        assertThat(updatedDaisy.getCountries().size(), is(equalTo(3)));
+        assertTrue(updatedDaisy.getCountries().contains(updatedEngland));
+        assertTrue(updatedDaisy.getCountries().contains(spain));
+        assertFalse(updatedDaisy.getCountries().contains(updatedIreland));
+        assertTrue(updatedDaisy.getCountries().contains(updatedWales));
+        assertTrue(updatedEngland.getCats().contains(updatedDaisy));
+        assertFalse(updatedIreland.getCats().contains(updatedDaisy));
+        assertTrue(updatedWales.getCats().contains(updatedDaisy));
+        assertTrue(spain.getCats().contains(updatedDaisy));
     }
 
     @Ignore

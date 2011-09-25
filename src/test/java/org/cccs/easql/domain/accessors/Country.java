@@ -20,6 +20,13 @@ public class Country {
     private Collection<Dog> dogs;
     private Collection<Cat> cats;
 
+    public Country() {
+    }
+
+    public Country(String name) {
+        this.name = name;
+    }
+
     @Column(primaryKey = true, name = "cntId", sequence = "cnt_seq")
     public long getId() {
         return id;
