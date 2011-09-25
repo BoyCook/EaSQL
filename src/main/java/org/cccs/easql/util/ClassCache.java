@@ -19,7 +19,7 @@ import static org.cccs.easql.util.ClassUtils.*;
 public class ClassCache {
 
     private static Map<Class, String[]> columnNames;
-    private static Map<Class, ColumnMapping[]> columns;
+    private static Map<Class, ColumnMapping[]> columnMappings;
     private static Map<Class, ExtractionMapping[]> extractionColumns;
     private static Map<Class, ExtractionMapping[]> allExtractionColumns;
     private static Map<Class, String> tables;
@@ -29,7 +29,7 @@ public class ClassCache {
 
     static {
         columnNames = new HashMap<Class, String[]>();
-        columns = new HashMap<Class, ColumnMapping[]>();
+        columnMappings = new HashMap<Class, ColumnMapping[]>();
         extractionColumns = new HashMap<Class, ExtractionMapping[]>();
         allExtractionColumns = new HashMap<Class, ExtractionMapping[]>();
         tables = new HashMap<Class, String>();
@@ -47,11 +47,11 @@ public class ClassCache {
         return columns;
     }
 
-    public static ColumnMapping[] getColumns(Class c) {
-        ColumnMapping[] tempColumns = columns.get(c);
+    public static ColumnMapping[] getColumnMappings(Class c) {
+        ColumnMapping[] tempColumns = columnMappings.get(c);
         if (tempColumns == null) {
-            tempColumns = getColumnsForClass(c);
-            columns.put(c, tempColumns);
+            tempColumns = getColumnMappingsForClass(c);
+            columnMappings.put(c, tempColumns);
         }
         return tempColumns;
     }

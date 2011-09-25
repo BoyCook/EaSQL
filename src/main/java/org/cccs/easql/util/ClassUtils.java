@@ -43,7 +43,7 @@ public final class ClassUtils {
         return columns.toArray(new String[columns.size()]);
     }
 
-    public static ColumnMapping[] getColumnsForClass(Class c) {
+    public static ColumnMapping[] getColumnMappingsForClass(Class c) {
         Collection<ColumnMapping> columns = new ArrayList<ColumnMapping>();
         for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
@@ -94,7 +94,7 @@ public final class ClassUtils {
     }
 
     //TODO: consider refactor
-    //TODO: consider using getColumns
+    //TODO: consider using getColumnMappings
     public static ExtractionMapping[] generateExtractionMappings(Class c, boolean loadRelations) {
         Collection<ExtractionMapping> columns = new ArrayList<ExtractionMapping>();
         Object o = getNewObject(c);
@@ -163,7 +163,7 @@ public final class ClassUtils {
     }
 
     //TODO: consider usage of this
-    private static <T extends java.lang.annotation.Annotation> T[] getAnnotatedFields(final Class c, final Class<T> a) {
+    public static <T extends java.lang.annotation.Annotation> T[] getAnnotatedFields(final Class c, final Class<T> a) {
         Collection<T> annotations = new ArrayList<T>();
         for (Field field : c.getFields()) {
             T annotation = field.getAnnotation(a);

@@ -44,7 +44,7 @@ public final class SQLUtils {
         StringBuilder insertColumns = new StringBuilder();
         StringBuilder values = new StringBuilder();
 
-        final ColumnMapping[] columnMappings = getColumns(o.getClass());
+        final ColumnMapping[] columnMappings = getColumnMappings(o.getClass());
         final RelationMapping[] relations = getRelations(o.getClass(), Cardinality.MANY_TO_ONE);
 
         for (ColumnMapping column : columnMappings) {
@@ -143,7 +143,7 @@ public final class SQLUtils {
     public static String generateUpdateSQL(Object o) {
         Class c = o.getClass();
         StringBuilder values = new StringBuilder();
-        final ColumnMapping[] columnMappings = getColumns(o.getClass());
+        final ColumnMapping[] columnMappings = getColumnMappings(o.getClass());
 
         for (ColumnMapping column : columnMappings) {
             Object columnValue = getValue(column, o);
@@ -198,7 +198,7 @@ public final class SQLUtils {
     public static String generateCreateSQL(Class c) {
         StringBuilder columns = new StringBuilder();
 
-        final ColumnMapping[] columnMappings = getColumns(c);
+        final ColumnMapping[] columnMappings = getColumnMappings(c);
         final RelationMapping[] relations = getRelations(c, Cardinality.MANY_TO_ONE);
 
         for (ColumnMapping column : columnMappings) {
