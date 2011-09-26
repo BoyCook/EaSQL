@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.lang.String.format;
-import static org.cccs.easql.util.ClassCache.getAllColumns;
+import static org.cccs.easql.cache.ClassCache.getAllColumns;
 
 /**
  * User: boycook

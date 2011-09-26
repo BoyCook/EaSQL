@@ -3,7 +3,6 @@ package org.cccs.easql.util;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.domain.ColumnMapping;
-import org.cccs.easql.domain.ExtractionMapping;
 import org.cccs.easql.domain.Mapping;
 import org.cccs.easql.domain.RelationMapping;
 
@@ -14,7 +13,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.cccs.easql.util.ClassCache.getColumnMappings;
+import static org.cccs.easql.cache.ClassCache.getColumnMappings;
 import static org.cccs.easql.util.ClassUtils.getRelations;
 
 /**

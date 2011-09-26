@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.util.ClassCache.getColumnMappings;
-import static org.cccs.easql.util.ClassCache.getExtractionColumns;
+import static org.cccs.easql.cache.ClassCache.getColumnMappings;
+import static org.cccs.easql.cache.ClassCache.getExtractionColumns;
 import static org.cccs.easql.util.ObjectUtils.getNewObject;
 import static org.cccs.easql.util.ObjectUtils.setValue;
 

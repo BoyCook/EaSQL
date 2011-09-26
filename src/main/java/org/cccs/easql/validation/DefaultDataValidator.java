@@ -3,7 +3,7 @@ package org.cccs.easql.validation;
 import org.cccs.easql.domain.ColumnMapping;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.cccs.easql.util.ClassCache.getColumnMappings;
+import static org.cccs.easql.cache.ClassCache.getColumnMappings;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
 import static org.cccs.easql.util.ObjectUtils.getValue;
 

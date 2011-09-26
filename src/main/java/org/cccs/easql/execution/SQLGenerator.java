@@ -4,13 +4,11 @@ import org.cccs.easql.Cardinality;
 import org.cccs.easql.Relation;
 import org.cccs.easql.domain.RelationMapping;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.lang.String.format;
 import static org.cccs.easql.execution.SQLUtils.*;
-import static org.cccs.easql.util.ClassCache.getUniqueColumnName;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.*;
 

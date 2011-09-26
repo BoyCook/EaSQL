@@ -11,8 +11,8 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.util.ClassCache.*;
-import static org.cccs.easql.util.ClassCache.getUniqueColumnName;
+import static org.cccs.easql.cache.ClassCache.*;
+import static org.cccs.easql.cache.ClassCache.getUniqueColumnName;
 import static org.cccs.easql.util.ClassUtils.getColumnType;
 import static org.cccs.easql.util.ClassUtils.getRelations;
 import static org.cccs.easql.util.ObjectUtils.*;

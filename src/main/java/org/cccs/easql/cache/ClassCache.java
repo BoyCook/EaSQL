@@ -1,4 +1,4 @@
-package org.cccs.easql.util;
+package org.cccs.easql.cache;
 
 import org.cccs.easql.Column;
 import org.cccs.easql.Table;

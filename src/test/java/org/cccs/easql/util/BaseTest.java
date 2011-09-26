@@ -7,7 +7,7 @@ import org.cccs.easql.domain.ExtractionMapping;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import static org.cccs.easql.util.ClassCache.*;
+import static org.cccs.easql.cache.ClassCache.*;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ClassUtils.getColumnType;
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -19,7 +19,7 @@ import java.util.Set;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.cccs.easql.execution.SQLUtils.generateCreateSQL;
 import static org.cccs.easql.execution.SQLUtils.generateDeleteSQL;
-import static org.cccs.easql.util.ClassCache.getPrimaryColumn;
+import static org.cccs.easql.cache.ClassCache.getPrimaryColumn;
 
 /**
  * User: boycook

@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import static org.cccs.easql.execution.SQLUtils.*;
-import static org.cccs.easql.util.ClassCache.getColumnNames;
+import static org.cccs.easql.cache.ClassCache.getColumnNames;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
