@@ -148,7 +148,7 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>instrument</id>
+                        <id>cobertura</id>
                         <phase>package</phase>
                         <goals>
                             <goal>cobertura</goal>
