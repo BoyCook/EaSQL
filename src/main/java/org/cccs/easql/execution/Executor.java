@@ -1,5 +1,7 @@
 package org.cccs.easql.execution;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.util.StopWatch;
@@ -15,6 +17,7 @@ import static java.lang.String.format;
  * Time: 16:05
  */
 public class Executor extends JdbcTemplate {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private StopWatch clock;
 
     public Executor(DataSource dataSource) {
@@ -26,7 +29,7 @@ public class Executor extends JdbcTemplate {
         clock.start();
         Collection<T> results = query(sql, new Extractor<T>(c, loadRelations));
         clock.stop();
-        System.out.println(format("Executing Query [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
+        log.debug(format("Executing Query [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
         return results;
     }
 
@@ -36,7 +39,7 @@ public class Executor extends JdbcTemplate {
         clock.start();
         Collection<T> results = query(sql, extractor);
         clock.stop();
-        System.out.println(format("Executing Query [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
+        log.debug(format("Executing Query [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
         return results;
     }
 
@@ -45,6 +48,6 @@ public class Executor extends JdbcTemplate {
         clock.start();
         super.execute(sql);
         clock.stop();
-        System.out.println(format("Executing Update [%s] took [%d ms]", sql, clock.getLastTaskTimeMillis()));
+        log.debug(format("Executing Update [%s] took [%d ms]", sql, clock.getLastTaskTimeMillis()));
     }
 }

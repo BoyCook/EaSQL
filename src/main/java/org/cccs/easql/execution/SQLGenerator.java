@@ -3,6 +3,8 @@ package org.cccs.easql.execution;
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.Relation;
 import org.cccs.easql.domain.RelationMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +20,7 @@ import static org.cccs.easql.util.ObjectUtils.*;
  * Time: 11:09
  */
 public class SQLGenerator {
-
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     public String getInsertSQL(Object o) {
         String sql = generateInsertSQL(o);
         Object[] relations = getRelatedValues(o, Cardinality.MANY_TO_ONE);
@@ -38,14 +40,12 @@ public class SQLGenerator {
         long objectKey = getPrimaryValueAsLong(updated);
 
         if (!original.equals(updated)) {
-            System.out.println("Objects are different");
+            log.debug(format("%s [%d] has been updated", original.getClass(), objectKey));
             updateSQL.append(generateUpdateSQL(updated));
         }
 
         //Checking One2Many collections (without link tables)
         if (hasRelations(updated.getClass(), Cardinality.ONE_TO_MANY)) {
-            System.out.println("Checking One2Many...");
-
             for (RelationMapping mapping : getRelations(updated.getClass(), Cardinality.ONE_TO_MANY)) {
                 Collection list = (Collection) getValue(mapping, updated);
                 Collection dbList = (Collection) getValue(mapping, original);
@@ -73,7 +73,6 @@ public class SQLGenerator {
 
         //Checking Many2Many collections (with link tables)
         if (hasRelations(updated.getClass(), Cardinality.MANY_TO_MANY)) {
-            System.out.println("Checking Many2Many...");
             for (RelationMapping mapping : getRelations(updated.getClass(), Cardinality.MANY_TO_MANY)) {
                 Collection list = (Collection) getValue(mapping, updated);
                 Collection dbList = (Collection) getValue(mapping, original);
@@ -98,7 +97,6 @@ public class SQLGenerator {
 
         //Checking Many2One foreign key relations (Objects)
         if (hasRelations(updated.getClass(), Cardinality.MANY_TO_ONE)) {
-            System.out.println("Checking Many2One...");
             //Update foreign key of table
             for (RelationMapping mapping : getRelations(updated.getClass(), Cardinality.MANY_TO_ONE)) {
                 final Object value = getValue(mapping, updated);

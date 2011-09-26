@@ -1,5 +1,8 @@
 package org.cccs.easql.validation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -8,28 +11,28 @@ import java.lang.reflect.InvocationTargetException;
  * Time: 11:07
  */
 public class SchemaValidator {
-
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     public void validate(final Class c) throws ValidationFailureException {
         final String errMessage = "Error invoking constructor";
         try {
             if (c.getConstructor().newInstance() == null) {
-                System.out.println("Constructor not found for: " + c.getName());
+                log.error("Constructor not found for: " + c.getName());
                 throw new ValidationFailureException(c.getName() +  " must have a constructor");
             }
         } catch (InstantiationException e) {
-            System.out.println(errMessage);
+            log.debug(errMessage);
             e.printStackTrace();
             throw new ValidationFailureException(c.getName() +  " must have a constructor");
         } catch (IllegalAccessException e) {
-            System.out.println(errMessage);
+            log.debug(errMessage);
             e.printStackTrace();
             throw new ValidationFailureException(c.getName() +  " must have a constructor");
         } catch (InvocationTargetException e) {
-            System.out.println(errMessage);
+            log.debug(errMessage);
             e.printStackTrace();
             throw new ValidationFailureException(c.getName() +  " must have a constructor");
         } catch (NoSuchMethodException e) {
-            System.out.println(errMessage);
+            log.debug(errMessage);
             e.printStackTrace();
             throw new ValidationFailureException(c.getName() +  " must have a constructor");
         }
