@@ -141,13 +141,6 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                    <execution>
                         <id>cobertura</id>
                         <phase>package</phase>
                         <goals>
