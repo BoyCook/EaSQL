@@ -12,17 +12,11 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.execution.SQLUtils.generateSelectSQLForManyToMany;
-import static org.cccs.easql.execution.SQLUtils.generateSelectSQL;
-import static org.cccs.easql.execution.SQLUtils.generateWhere;
-import static org.cccs.easql.cache.ClassCache.getPrimaryColumnName;
-import static org.cccs.easql.cache.ClassCache.getTableName;
-import static org.cccs.easql.cache.ClassCache.getUniqueColumnName;
-import static org.cccs.easql.util.ClassUtils.*;
-import static org.cccs.easql.util.ClassUtils.getGenericType;
-import static org.cccs.easql.util.ObjectUtils.getPrimaryValue;
-import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
-import static org.cccs.easql.util.ObjectUtils.setValue;
+import static org.cccs.easql.cache.ClassCache.*;
+import static org.cccs.easql.execution.SQLUtils.*;
+import static org.cccs.easql.util.ClassUtils.getRelations;
+import static org.cccs.easql.util.ClassUtils.hasRelations;
+import static org.cccs.easql.util.ObjectUtils.*;
 
 /**
  * User: boycook

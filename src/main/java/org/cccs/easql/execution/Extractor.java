@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 import static org.cccs.easql.util.ClassUtils.generateExtractionMappings;
 import static org.cccs.easql.util.ObjectUtils.setValue;
