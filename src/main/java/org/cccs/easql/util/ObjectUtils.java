@@ -4,8 +4,10 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.cccs.easql.Cardinality;
 import org.cccs.easql.Column;
 import org.cccs.easql.Relation;
+import org.cccs.easql.domain.ColumnMapping;
 import org.cccs.easql.domain.ExtractionMapping;
 import org.cccs.easql.domain.Mapping;
+import org.cccs.easql.domain.RelationMapping;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -15,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.lang.String.format;
+import static org.cccs.easql.util.ClassCache.getColumnMappings;
+import static org.cccs.easql.util.ClassUtils.getRelations;
 
 /**
  * User: boycook
@@ -81,39 +85,25 @@ public final class ObjectUtils {
     }
 
     public static Object getPrimaryValue(Object o) {
-        Class c = o.getClass();
-        Object primary = null;
-        for (Field field : c.getFields()) {
-            Column column = field.getAnnotation(Column.class);
-            if (column != null && column.primaryKey()) {
-                primary = getValue(field, o);
+        Object value = null;
+        ColumnMapping[] columns = getColumnMappings(o.getClass());
+        for (ColumnMapping column : columns) {
+            if (column.column.primaryKey()) {
+                value = getValue(column, o);
             }
         }
-        for (Method method : c.getMethods()) {
-            Column column = method.getAnnotation(Column.class);
-            if (column != null && column.primaryKey()) {
-                primary = getValue(method, o);
-            }
-        }
-        return primary;
+        return value;
     }
 
     public static Object getUniqueValue(Object o) {
-        Class c = o.getClass();
-        Object primary = null;
-        for (Field field : c.getFields()) {
-            Column column = field.getAnnotation(Column.class);
-            if (column != null && column.unique()) {
-                primary = getValue(field, o);
+        Object value = null;
+        ColumnMapping[] columns = getColumnMappings(o.getClass());
+        for (ColumnMapping column : columns) {
+            if (column.column.unique()) {
+                value = getValue(column, o);
             }
         }
-        for (Method method : c.getMethods()) {
-            Column column = method.getAnnotation(Column.class);
-            if (column != null && column.unique()) {
-                primary = getValue(method, o);
-            }
-        }
-        return primary;
+        return value;
     }
 
     public static void setValue(Field field, Object o, Object value) {
@@ -135,7 +125,6 @@ public final class ObjectUtils {
     }
 
     public static void setValue(ExtractionMapping mapping, Object value) {
-//        System.out.println(format("Setting: [%s] as [%s]", mapping.property, value.toString()));
         try {
             final PropertyDescriptor property = PropertyUtils.getPropertyDescriptor(mapping.object, mapping.property);
             if (property != null) {
@@ -169,33 +158,23 @@ public final class ObjectUtils {
         try {
             Field field = mapping.object.getClass().getField(mapping.property);
             setValue(field, mapping.object, value);
-        } catch (NoSuchFieldException e1) {
-            System.out.println(format("[%s] is not a field of [%s]", mapping.property, value.getClass()));
+        } catch (NoSuchFieldException e) {
+//            System.out.println(format("[%s] is not a field of [%s]", mapping.property, value.getClass()));
         }
     }
 
     public static Object[] getRelatedValues(Object o, Cardinality cardinality) {
-        Collection<Object> relations = new ArrayList<Object>();
-        Class c = o.getClass();
-        for (Field field : c.getFields()) {
-            Relation relation = field.getAnnotation(Relation.class);
-            if (relation != null && relation.cardinality().equals(cardinality)) {
-                relations.add(getValue(field, o));
-            }
+        Collection<Object> values = new ArrayList<Object>();
+        RelationMapping[] relations = getRelations(o.getClass(), cardinality);
+        for (RelationMapping relation : relations) {
+            values.add(getValue(relation, o));
         }
-
-        for (Method method : c.getMethods()) {
-            Relation relation = method.getAnnotation(Relation.class);
-            if (relation != null && relation.cardinality().equals(cardinality)) {
-                relations.add(getValue(method, o));
-            }
-        }
-
-        return relations.toArray(new Object[relations.size()]);
+        return values.toArray(new Object[values.size()]);
     }
 
     public static Object getNewObject(Class c) {
         Object o = null;
+        //Not for primitives
         if (!c.equals(Integer.TYPE) && !c.equals(Long.TYPE)) {
             try {
                 o = c.getConstructor().newInstance();

@@ -1,15 +1,11 @@
 package org.cccs.easql.validation;
 
-import org.cccs.easql.Column;
 import org.cccs.easql.domain.ColumnMapping;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.cccs.easql.util.ClassCache.getColumnMappings;
-import static org.cccs.easql.util.ClassUtils.getColumnName;
-import static org.cccs.easql.util.ObjectUtils.*;
+import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
+import static org.cccs.easql.util.ObjectUtils.getValue;
 
 /**
  * User: boycook
