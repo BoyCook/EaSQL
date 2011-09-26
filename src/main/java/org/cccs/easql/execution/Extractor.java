@@ -49,13 +49,13 @@ public class Extractor<T> implements ResultSetExtractor<Collection<T>> {
     private void setColumnValue(ResultSet rs, ExtractionMapping column) throws SQLException {
         int index = rs.findColumn(column.name);
         if (column.type.equals(String.class)) {
-            setValue(column, rs.getString(index));
+            setValue(column.property, column.object, rs.getString(index));
         } else if (column.type.equals(Long.TYPE)) {
-            setValue(column, rs.getLong(index));
+            setValue(column.property, column.object, rs.getLong(index));
         } else if (column.type.equals(Integer.TYPE)) {
-            setValue(column, rs.getInt(index));
+            setValue(column.property, column.object, rs.getInt(index));
         } else if (column.type.equals(Boolean.TYPE)) {
-            setValue(column, rs.getBoolean(index));
+            setValue(column.property, column.object, rs.getBoolean(index));
         }
     }
 

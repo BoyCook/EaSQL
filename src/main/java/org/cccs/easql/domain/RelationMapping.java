@@ -14,11 +14,13 @@ import static org.cccs.easql.util.ClassCache.getColumnNames;
  */
 public class RelationMapping implements Mapping {
 
+    public final String property;
     public final Relation relation;
     private final Field field;
     private final Method method;
 
-    public RelationMapping(Relation relation, Field field, Method method) {
+    public RelationMapping(String property, Relation relation, Field field, Method method) {
+        this.property = property;
         this.relation = relation;
         this.field = field;
         this.method = method;
@@ -34,6 +36,7 @@ public class RelationMapping implements Mapping {
         return this.method;
     }
 
+    @Override
     public Class getType() {
         if (getField() != null) {
             return getField().getType();

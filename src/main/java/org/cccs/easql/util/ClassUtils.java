@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.cccs.easql.util.ClassCache.getColumnMappings;
 import static org.cccs.easql.util.ClassCache.getExtractionColumns;
 import static org.cccs.easql.util.ObjectUtils.getNewObject;
 import static org.cccs.easql.util.ObjectUtils.setValue;
@@ -48,13 +49,13 @@ public final class ClassUtils {
         for (Field field : c.getFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
-                columns.add(new ColumnMapping(getColumnName(column, field), column, field, null));
+                columns.add(new ColumnMapping(field.getName(), getColumnName(column, field), column, field, null));
             }
         }
         for (Method method : c.getMethods()) {
             Column column = method.getAnnotation(Column.class);
             if (column != null) {
-                columns.add(new ColumnMapping(getColumnName(column, method), column, null, method));
+                columns.add(new ColumnMapping(stripName(method), getColumnName(column, method), column, null, method));
             }
         }
         return columns.toArray(new ColumnMapping[columns.size()]);
@@ -93,50 +94,26 @@ public final class ClassUtils {
         return columns.toArray(new ExtractionMapping[columns.size()]);
     }
 
-    //TODO: consider refactor
-    //TODO: consider using getColumnMappings
     public static ExtractionMapping[] generateExtractionMappings(Class c, boolean loadRelations) {
         Collection<ExtractionMapping> columns = new ArrayList<ExtractionMapping>();
         Object o = getNewObject(c);
 
-        for (Field field : c.getFields()) {
-            Column column = field.getAnnotation(Column.class);
-            Relation relation = field.getAnnotation(Relation.class);
-            if (column != null) {
-                columns.add(new ExtractionMapping(field.getName(), getColumnName(column, field), field.getType(), o));
-            } else if (relation != null) {
-                if (relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
-                    if (loadRelations) {
-                        //Get ExtractionMapping for related object
-                        ExtractionMapping[] relatedColumns = getExtractionColumns(field.getType());
-                        Object relatedO = getNewObject(field.getType());
-                        //Add correct object to mapping
-                        for (ExtractionMapping relatedColumn : relatedColumns) {
-                            columns.add(new ExtractionMapping(relatedColumn.property, relation.name() + "_" + relatedColumn.name, relatedColumn.type, relatedO));
-                            setValue(field, o, relatedO);
-                        }
-                    }
-                }
-            }
+        ColumnMapping[] columnMappings = getColumnMappings(c);
+        RelationMapping[] relationMappings = getRelations(c, Cardinality.MANY_TO_ONE);
+
+        for (ColumnMapping mapping : columnMappings) {
+            columns.add(new ExtractionMapping(mapping.property, mapping.name, mapping.getType(), o));
         }
 
-        for (Method method : c.getMethods()) {
-            Column column = method.getAnnotation(Column.class);
-            Relation relation = method.getAnnotation(Relation.class);
-            if (column != null) {
-                columns.add(new ExtractionMapping(stripName(method), getColumnName(column, method), method.getReturnType(), o));
-            } else if (relation != null) {
-                if (relation.cardinality().equals(Cardinality.MANY_TO_ONE)) {
-                    if (loadRelations) {
-                        //Get ExtractionMapping for related object
-                        ExtractionMapping[] relatedColumns = getExtractionColumns(method.getReturnType());
-                        Object relatedO = getNewObject(method.getReturnType());
-                        //Add correct object to mapping
-                        for (ExtractionMapping relatedColumn : relatedColumns) {
-                            columns.add(new ExtractionMapping(relatedColumn.property, relation.name() + "_" + relatedColumn.name, relatedColumn.type, relatedO));
-                            setValue(stripName(method), o, relatedO);
-                        }
-                    }
+        if (loadRelations) {
+            for (RelationMapping mapping : relationMappings) {
+                //Get ExtractionMapping for related object
+                ExtractionMapping[] relatedColumns = getExtractionColumns(mapping.getType());
+                Object relatedO = getNewObject(mapping.getType());
+                //Add correct object to mapping
+                for (ExtractionMapping relatedColumn : relatedColumns) {
+                    columns.add(new ExtractionMapping(relatedColumn.property, mapping.relation.name() + "_" + relatedColumn.name, relatedColumn.type, relatedO));
+                    setValue(mapping.property, o, relatedO);
                 }
             }
         }
@@ -150,13 +127,13 @@ public final class ClassUtils {
         for (Field field : c.getFields()) {
             Relation relation = field.getAnnotation(Relation.class);
             if (relation != null && relation.cardinality().equals(cardinality)) {
-                relations.add(new RelationMapping(relation, field, null));
+                relations.add(new RelationMapping(field.getName(), relation, field, null));
             }
         }
         for (Method method : c.getMethods()) {
             Relation relation = method.getAnnotation(Relation.class);
             if (relation != null && relation.cardinality().equals(cardinality)) {
-                relations.add(new RelationMapping(relation, null, method));
+                relations.add(new RelationMapping(stripName(method), relation, null, method));
             }
         }
         return relations.toArray(new RelationMapping[relations.size()]);

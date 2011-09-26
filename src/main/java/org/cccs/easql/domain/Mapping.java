@@ -11,4 +11,5 @@ import java.lang.reflect.Method;
 public interface Mapping {
     public Field getField();
     public Method getMethod();
+    public Class getType();
 }

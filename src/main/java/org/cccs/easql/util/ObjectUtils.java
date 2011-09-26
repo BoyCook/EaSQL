@@ -2,8 +2,6 @@ package org.cccs.easql.util;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.cccs.easql.Cardinality;
-import org.cccs.easql.Column;
-import org.cccs.easql.Relation;
 import org.cccs.easql.domain.ColumnMapping;
 import org.cccs.easql.domain.ExtractionMapping;
 import org.cccs.easql.domain.Mapping;
@@ -16,7 +14,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static java.lang.String.format;
 import static org.cccs.easql.util.ClassCache.getColumnMappings;
 import static org.cccs.easql.util.ClassUtils.getRelations;
 
@@ -124,42 +121,30 @@ public final class ObjectUtils {
         }
     }
 
-    public static void setValue(ExtractionMapping mapping, Object value) {
-        try {
-            final PropertyDescriptor property = PropertyUtils.getPropertyDescriptor(mapping.object, mapping.property);
-            if (property != null) {
-                property.getWriteMethod().invoke(mapping.object, value);
-            } else {
-                setFieldValue(mapping, value);
-            }
-        } catch (IllegalAccessException e) {
-            setFieldValue(mapping, value);
-        } catch (InvocationTargetException e) {
-            setFieldValue(mapping, value);
-        } catch (NoSuchMethodException e) {
-            setFieldValue(mapping, value);
-        }
-    }
-
     public static void setValue(String name, Object object, Object value) {
         try {
-            final PropertyDescriptor property = PropertyUtils.getPropertyDescriptor(object, name);
-            property.getWriteMethod().invoke(object, value);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            setPropertyValue(name, object, value);
+        } catch (NullPointerException e) {
+            setFieldValue(name, object, value);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            setFieldValue(name, object, value);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            setFieldValue(name, object, value);
+        } catch (IllegalAccessException e) {
+            setFieldValue(name, object, value);
         }
     }
 
-    private static void setFieldValue(ExtractionMapping mapping, Object value) {
+    public static void setPropertyValue(String name, Object object, Object value) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        final PropertyDescriptor property = PropertyUtils.getPropertyDescriptor(object, name);
+        property.getWriteMethod().invoke(object, value);
+    }
+
+    private static void setFieldValue(String name, Object object, Object value) {
         try {
-            Field field = mapping.object.getClass().getField(mapping.property);
-            setValue(field, mapping.object, value);
-        } catch (NoSuchFieldException e) {
-//            System.out.println(format("[%s] is not a field of [%s]", mapping.property, value.getClass()));
+            Field field = object.getClass().getField(name);
+            setValue(field, object, value);
+        } catch (NoSuchFieldException ignored) {
         }
     }
 
