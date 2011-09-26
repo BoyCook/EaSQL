@@ -31,16 +31,6 @@ public class SQLGenerator {
         return sql;
     }
 
-    /*
-        TODO handle link tables
-        - Find existing asset in DB (use Class and getPrimaryColumnName)
-        - Diff each @Column member (consider using .equals())
-        - For One2Many relations diff Collections
-            - Assume create/delete on differences
-        - For Many2One change the ID
-        - For One2One change the ID
-        - For Many2Many ??? assume link table...
-     */
     public String getUpdateSQL(Object original, Object updated) {
         StringBuilder insertSQL = new StringBuilder();
         StringBuilder updateSQL = new StringBuilder();
@@ -121,23 +111,5 @@ public class SQLGenerator {
         sql.append(deleteSQL.toString());
         sql.append(updateSQL.toString());
         return sql.toString();
-    }
-
-    //TODO: move to utils class
-    @SuppressWarnings({"unchecked"})
-    private void compareLists(Collection original, Collection updated, Collection addRelation, Collection removeRelation) {
-        for (Object o : original) {
-            if (!updated.contains(o)) {
-                //Remove relation
-                removeRelation.add(o);
-            }
-        }
-
-        for (Object o : updated) {
-            if (!original.contains(o)) {
-                //Add relation
-                addRelation.add(o);
-            }
-        }
     }
 }

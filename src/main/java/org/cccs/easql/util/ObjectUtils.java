@@ -174,4 +174,21 @@ public final class ObjectUtils {
         }
         return o;
     }
+
+    @SuppressWarnings({"unchecked"})
+    public static void compareLists(Collection original, Collection updated, Collection addRelation, Collection removeRelation) {
+        for (Object o : original) {
+            if (!updated.contains(o)) {
+                //Remove relation
+                removeRelation.add(o);
+            }
+        }
+
+        for (Object o : updated) {
+            if (!original.contains(o)) {
+                //Add relation
+                addRelation.add(o);
+            }
+        }
+    }
 }
