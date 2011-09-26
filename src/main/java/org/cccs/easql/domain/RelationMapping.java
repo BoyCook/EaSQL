@@ -20,4 +20,13 @@ public class RelationMapping extends BaseMapping implements Mapping {
         this.property = property;
         this.relation = relation;
     }
+
+    public Class getGenericType() {
+        if (getField() != null) {
+            return org.cccs.easql.util.ClassUtils.getGenericType(getField());
+        } else if (getMethod() != null) {
+            return org.cccs.easql.util.ClassUtils.getGenericType(getMethod());
+        }
+        return null;
+    }
 }

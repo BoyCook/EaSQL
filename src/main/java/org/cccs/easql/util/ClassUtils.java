@@ -199,6 +199,7 @@ public final class ClassUtils {
         return null;
     }
 
+    //TODO: cache
     public static boolean hasRelations(Class c, Cardinality cardinality) {
         for (Field field : c.getFields()) {
             Relation relation = field.getAnnotation(Relation.class);

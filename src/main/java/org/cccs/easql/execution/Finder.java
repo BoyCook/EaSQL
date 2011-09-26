@@ -99,43 +99,28 @@ public class Finder {
         return executor.query(c, sql, loadRelations);
     }
 
+    @SuppressWarnings({"unchecked"})
     private void loadOneToMany(Collection results) {
         for (Object result : results) {
             RelationMapping[] relations = getRelations(result.getClass(), Cardinality.ONE_TO_MANY);
             for (RelationMapping relation : relations) {
-                //TODO: generify
-                if (relation.getField() != null) {
-                    Class relatedClass = getGenericType(relation.getField());
-                    Map<String, String> where = new HashMap<String, String>();
-                    where.put(relation.relation.key(), getPrimaryValue(result).toString());
-                    setValue(relation.getField(), result, query(relatedClass, false, where));
-                } else if (relation.getMethod() != null) {
-                    Class relatedClass = getGenericType(relation.getMethod());
-                    Map<String, String> where = new HashMap<String, String>();
-                    where.put(relation.relation.key(), getPrimaryValue(result).toString());
-                    setValue(stripName(relation.getMethod()), result, query(relatedClass, false, where));
-                }
+                Class relatedClass = relation.getGenericType();
+                Map<String, String> where = new HashMap<String, String>();
+                where.put(relation.relation.key(), getPrimaryValue(result).toString());
+                setValue(relation.property, result, query(relatedClass, false, where));
             }
-
         }
     }
 
+    @SuppressWarnings({"unchecked"})
     private void loadManyToMany(Collection results) {
         for (Object result : results) {
             RelationMapping[] relations = getRelations(result.getClass(), Cardinality.MANY_TO_MANY);
             for (RelationMapping relation : relations) {
-                //TODO: generify
-                if (relation.getField() != null) {
-                    final Class relatedClass = getGenericType(relation.getField());
-                    final String sql = generateSelectSQLForManyToMany(relatedClass, relation.relation, getPrimaryValueAsLong(result));
-                    final Collection relatedResults = query(relatedClass, sql, false);
-                    setValue(relation.getField(), result, relatedResults);
-                } else if (relation.getMethod() != null) {
-                    final Class relatedClass = getGenericType(relation.getMethod());
-                    final String sql = generateSelectSQLForManyToMany(relatedClass, relation.relation, getPrimaryValueAsLong(result));
-                    final Collection relatedResults = query(relatedClass, sql, false);
-                    setValue(stripName(relation.getMethod()), result, relatedResults);
-                }
+                final Class relatedClass = relation.getGenericType();
+                final String sql = generateSelectSQLForManyToMany(relatedClass, relation.relation, getPrimaryValueAsLong(result));
+                final Collection relatedResults = query(relatedClass, sql, false);
+                setValue(relation.property, result, relatedResults);
             }
         }
     }
