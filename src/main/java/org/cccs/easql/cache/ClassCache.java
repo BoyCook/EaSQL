@@ -12,7 +12,7 @@ import static org.cccs.easql.util.ClassUtils.getTableForClass;
  * Date: 13/09/2011
  * Time: 17:49
  */
-public class ClassCache {
+public final class ClassCache {
 
     private static Map<Class, DBTable> tables;
 
@@ -28,5 +28,4 @@ public class ClassCache {
         }
         return table;
     }
-
 }
