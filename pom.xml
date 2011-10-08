@@ -26,6 +26,12 @@
     </properties>
 
     <dependencies>
+        <!--JPA -->
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0.2</version>
+        </dependency>
         <!-- Common -->
         <dependency>
             <groupId>commons-lang</groupId>

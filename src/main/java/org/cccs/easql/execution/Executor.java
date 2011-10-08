@@ -3,7 +3,6 @@ package org.cccs.easql.execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.util.StopWatch;
 
 import javax.sql.DataSource;
@@ -27,17 +26,12 @@ public class Executor extends JdbcTemplate {
     public <T> Collection<T> query(final Class<T> c, final String sql, boolean loadRelations) {
         clock = new StopWatch("QueryExecution");
         clock.start();
-        Collection<T> results = query(sql, new Extractor<T>(c, loadRelations));
-        clock.stop();
-        log.debug(format("Executing Query [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
-        return results;
-    }
-
-    @Deprecated
-    public <T> Collection<T> query(final Class<T> c, final String sql, boolean loadRelations, final ResultSetExtractor<Collection<T>> extractor) {
-        clock = new StopWatch("QueryExecution");
-        clock.start();
-        Collection<T> results = query(sql, extractor);
+        Collection<T> results;
+        if (loadRelations) {
+            results = query(sql, new Extractor<T>(c, new RelationsMappingsGenerator()));
+        } else {
+            results = query(sql, new Extractor<T>(c, new BasicMappingsGenerator()));
+        }
         clock.stop();
         log.debug(format("Executing Query [%s] took [%d ms] and returned [%d] result(s)", sql, clock.getLastTaskTimeMillis(), results.size()));
         return results;

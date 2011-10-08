@@ -1,10 +1,6 @@
 package org.cccs.easql.domain.accessors;
 
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.Column;
-import org.cccs.easql.Relation;
-import org.cccs.easql.Table;
-
+import javax.persistence.*;
 import java.util.Collection;
 
 /**
@@ -35,7 +31,9 @@ public class Person {
         this.phone = phone;
     }
 
-    @Column(primaryKey = true, sequence = "person_seq", name = "id")
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(generator = "person_seq")
     public long getId() {
         return id;
     }
@@ -55,12 +53,14 @@ public class Person {
         return phone;
     }
 
-    @Relation(cardinality = Cardinality.ONE_TO_MANY, key = "person_id")
+    @OneToMany
+    @Column(name = "person_id")
     public Collection<Dog> getDogs() {
         return dogs;
     }
 
-    @Relation(cardinality = Cardinality.ONE_TO_MANY, key = "person_id")
+    @OneToMany
+    @Column(name = "person_id")
     public Collection<Cat> getCats() {
         return cats;
     }

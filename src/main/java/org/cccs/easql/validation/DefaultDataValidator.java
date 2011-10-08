@@ -1,11 +1,9 @@
 package org.cccs.easql.validation;
 
-import org.cccs.easql.domain.ColumnMapping;
+import org.cccs.easql.domain.DBTable;
+import org.cccs.easql.domain.TableColumn;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.cccs.easql.cache.ClassCache.getColumnMappings;
-import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
-import static org.cccs.easql.util.ObjectUtils.getValue;
+import static org.cccs.easql.cache.ClassCache.getTable;
 
 /**
  * User: boycook
@@ -16,26 +14,26 @@ public class DefaultDataValidator implements DataValidator {
 
     @Override
     public void validateCreate(Object o) throws ValidationFailureException {
-        final ColumnMapping[] columns = getColumnMappings(o.getClass());
-        for (ColumnMapping column : columns) {
-            final Object columnValue = getValue(column, o);
-            if (column.column.mandatory() && columnValue == null) {
-                throw new ValidationFailureException(column.name + " must have a value");
-            } else if (column.column.primaryKey() && isEmpty(column.column.sequence()) && getPrimaryValueAsLong(o) == 0) {
-                throw new ValidationFailureException("Primary key for " + column.name + " must be specified");
+        final DBTable table = getTable(o.getClass());
+        if (table.id != null && table.id.getGeneratedValue() == null && Long.valueOf(table.id.getValue(o).toString()) == 0) {
+            throw new ValidationFailureException("Primary key " + table.id.getName() + " for " + table.getName() + " must be specified");
+        }
+        for (TableColumn column : table.columns) {
+            if (!column.getColumn().nullable() && column.getValue(o) == null) {
+                throw new ValidationFailureException(column.getName() + " must have a value");
             }
         }
     }
 
     @Override
     public void validateUpdate(Object o) throws ValidationFailureException {
-        final ColumnMapping[] columns = getColumnMappings(o.getClass());
-        for (ColumnMapping column : columns) {
-            final Object columnValue = getValue(column, o);
-            if (column.column.mandatory() && columnValue == null) {
-                throw new ValidationFailureException(column.name + " must have a value");
-            } else if (column.column.primaryKey() && getPrimaryValueAsLong(o) == 0) {
-                throw new ValidationFailureException("Primary key for " + column.name + " must be specified");
+        final DBTable table = getTable(o.getClass());
+        if (table.id != null && Long.valueOf(table.id.getValue(o).toString()) == 0) {
+            throw new ValidationFailureException("Primary key " + table.id.getName() + " for " + table.getName() + " must be specified");
+        }
+        for (TableColumn column : table.columns) {
+            if (!column.getColumn().nullable() && column.getValue(o) == null) {
+                throw new ValidationFailureException(column.getName() + " must have a value");
             }
         }
     }

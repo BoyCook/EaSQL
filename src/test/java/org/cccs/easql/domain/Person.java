@@ -1,10 +1,6 @@
 package org.cccs.easql.domain;
 
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.Column;
-import org.cccs.easql.Relation;
-import org.cccs.easql.Table;
-
+import javax.persistence.*;
 import java.util.Collection;
 
 /**
@@ -14,18 +10,21 @@ import java.util.Collection;
  */
 @Table(name = "Person")
 public class Person {
-
-    @Column(primaryKey = true, sequence = "person_seq")
+    @Id
+    @Column
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "person_seq")
     public long id;
-    @Column(unique = true, mandatory = true)
+    @Column(nullable = false, unique = true)
     public String name;
     @Column
     public String email;
     @Column
     public String phone;
-    @Relation(cardinality = Cardinality.ONE_TO_MANY, key = "person_id")
+    @OneToMany
+    @Column(name = "person_id")
     public Collection<Dog> dogs;
-    @Relation(cardinality = Cardinality.ONE_TO_MANY, key = "person_id")
+    @OneToMany
+    @Column(name = "person_id")
     public Collection<Cat> cats;
 
     public Person() {

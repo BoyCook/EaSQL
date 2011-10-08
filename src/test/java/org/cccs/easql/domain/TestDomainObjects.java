@@ -3,7 +3,6 @@ package org.cccs.easql.domain;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -37,15 +36,5 @@ public class TestDomainObjects {
     public void equalsAndHashCodeShouldFailForLinkTableWhenClassTypesAreDifferent() {
         final LinkTable table1 = new LinkTable("link1", "left", "right");
         assertFalse(table1.equals(Cat.class));
-    }
-
-    @Test
-    public void mappingGetTypeShouldReturnNullForNullFieldAndMethod() {
-        assertNull(new BaseMapping(null, null).getField());
-    }
-
-    @Test
-    public void relationMappingGetTypeShouldReturnNullForNullFieldAndMethod() {
-        assertNull(new RelationMapping(null, null, null, null).getGenericType());
     }
 }

@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.cccs.easql.util.ClassUtils.generateExtractionMappings;
 import static org.cccs.easql.util.ObjectUtils.setValue;
 
 /**
@@ -19,23 +18,21 @@ import static org.cccs.easql.util.ObjectUtils.setValue;
  */
 public class Extractor<T> implements ResultSetExtractor<Collection<T>> {
     private final Class<?> classType;
-    private final boolean loadRelations;
+    private final MappingsGenerator mappingsGenerator;
 
-    public Extractor(final Class<?> type, boolean loadRelations) {
+    public Extractor(final Class<?> type, final MappingsGenerator mappingsGenerator) {
         this.classType = type;
-        this.loadRelations = loadRelations;
+        this.mappingsGenerator = mappingsGenerator;
     }
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Collection<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
         final Collection results = new ArrayList();
-
         while (rs.next()) {
-            //Need to get fresh object per row
-            ExtractionMapping[] dbFields = generateExtractionMappings(getClassType(), loadRelations);
-
-            for (ExtractionMapping column: dbFields) {
+            //Need to create new object per row via generator
+            ExtractionMapping[] dbFields = mappingsGenerator.generate(classType);
+            for (ExtractionMapping column : dbFields) {
                 setColumnValue(rs, column);
                 if (getClassType().equals(column.object.getClass()) && !results.contains(column.object)) {
                     results.add(column.object);

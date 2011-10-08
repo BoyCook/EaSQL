@@ -1,14 +1,14 @@
 package org.cccs.easql.execution;
 
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.Column;
-import org.cccs.easql.Relation;
-import org.cccs.easql.Table;
+import org.cccs.easql.domain.DBTable;
 import org.cccs.easql.domain.LinkTable;
 import org.cccs.easql.domain.MemorySequence;
 import org.cccs.easql.domain.Sequence;
 import org.reflections.Reflections;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.JoinTable;
+import javax.persistence.Table;
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -16,10 +16,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.cccs.easql.cache.ClassCache.getTable;
 import static org.cccs.easql.execution.SQLUtils.generateCreateSQL;
 import static org.cccs.easql.execution.SQLUtils.generateDeleteSQL;
-import static org.cccs.easql.cache.ClassCache.getPrimaryColumn;
 
 /**
  * User: boycook
@@ -93,25 +92,23 @@ public final class Schema {
     //TODO: handle different DB types
     private static Map<String, Sequence> gatherSequences() {
         Map<String, Sequence> tempSequences = new HashMap<String, Sequence>();
-
         for (Class<?> table : getTables()) {
-            Column column = getPrimaryColumn(table);
-            if (isNotEmpty(column.sequence())) {
-                tempSequences.put(column.sequence(), new MemorySequence(column.sequence(), 100, 1));
+            DBTable dbTable = getTable(table);
+            GeneratedValue seq = dbTable.id.getGeneratedValue();
+            if (seq != null) {
+                tempSequences.put(seq.generator(), new MemorySequence(seq.generator(), 100, 1));
             }
         }
-
         return tempSequences;
     }
 
     private static Set<LinkTable> gatherLinkTables() {
         Set<LinkTable> tempLinks = new HashSet<LinkTable>();
-
         for (Class<?> table : getTables()) {
             for (Field field : table.getFields()) {
-                Relation relation = field.getAnnotation(Relation.class);
-                if (relation != null && relation.cardinality().equals(Cardinality.MANY_TO_MANY)) {
-                    tempLinks.add(new LinkTable(relation.linkTable(), relation.linkedBy()[0], relation.linkedBy()[1]));
+                JoinTable joinTable = field.getAnnotation(JoinTable.class);
+                if (joinTable != null) {
+                    tempLinks.add(new LinkTable(joinTable.name(), joinTable.joinColumns()[0].name(), joinTable.inverseJoinColumns()[0].name()));
                 }
             }
         }

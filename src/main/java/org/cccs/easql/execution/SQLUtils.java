@@ -1,21 +1,17 @@
 package org.cccs.easql.execution;
 
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.Relation;
-import org.cccs.easql.domain.ColumnMapping;
+import org.cccs.easql.domain.DBTable;
 import org.cccs.easql.domain.LinkTable;
-import org.cccs.easql.domain.RelationMapping;
 import org.cccs.easql.domain.Sequence;
+import org.cccs.easql.domain.TableColumn;
 
+import javax.persistence.JoinTable;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.cccs.easql.cache.ClassCache.*;
-import static org.cccs.easql.cache.ClassCache.getUniqueColumnName;
-import static org.cccs.easql.util.ClassUtils.getColumnType;
-import static org.cccs.easql.util.ClassUtils.getRelations;
-import static org.cccs.easql.util.ObjectUtils.*;
+import static org.cccs.easql.cache.ClassCache.getTable;
+import static org.cccs.easql.util.ObjectUtils.arrayAsString;
+import static org.cccs.easql.util.ObjectUtils.value;
 
 /**
  * User: boycook
@@ -39,147 +35,152 @@ public final class SQLUtils {
     private final static String INNER_JOIN = "INNER JOIN %s %s ON %s.%s = %s.%s AND %s.%s = %d";
 
     public static String generateInsertSQL(Object o) {
-        String tableName = getTableName(o.getClass());
-
         StringBuilder insertColumns = new StringBuilder();
         StringBuilder values = new StringBuilder();
+        final DBTable table = getTable(o.getClass());
 
-        final ColumnMapping[] columnMappings = getColumnMappings(o.getClass());
-        final RelationMapping[] relations = getRelations(o.getClass(), Cardinality.MANY_TO_ONE);
-
-        for (ColumnMapping column : columnMappings) {
-            Object columnValue = getValue(column, o);
-            if (column.column.primaryKey()) {
-                if (isNotEmpty(column.column.sequence())) {
-                    appendInsertValue(insertColumns, values, column.name, Schema.getSequence(column.column.sequence()).getValue());
-                } else {
-                    appendInsertValue(insertColumns, values, column.name, value(columnValue));
-                }
-            } else if (columnValue != null) {
-                appendInsertValue(insertColumns, values, column.name, value(columnValue));
+        //Set the ID value
+        if (table.id != null) {
+            if (table.id.getGeneratedValue() != null) {
+                appendInsertValue(insertColumns, values, table.id.getName(), Schema.getSequence(table.id.getGeneratedValue().generator()).getValue());
+            } else {
+                appendInsertValue(insertColumns, values, table.id.getName(), value(table.id.getValue(o)));
             }
         }
 
-        for (RelationMapping relation : relations) {
-            appendInsertValue(insertColumns, values, relation.relation.key(), "%s");
+        //Set column values
+        for (TableColumn column : table.columns) {
+            Object columnValue = column.getValue(o);
+            if (columnValue != null) {
+                appendInsertValue(insertColumns, values, column.getName(), value(columnValue));
+            }
         }
 
-        return format(INSERT_TEMPLATE, tableName, insertColumns.toString(), values.toString());
+        //Set foreign key values
+        for (TableColumn relation : table.many2one) {
+            appendInsertValue(insertColumns, values, relation.getColumn().name(), "%s");
+        }
+
+        return format(INSERT_TEMPLATE, table.getName(), insertColumns.toString(), values.toString());
     }
 
-    public static String generateInsertSQL(Relation relation, Object left, Object right) {
-        final String columns = relation.linkedBy()[0] + ", " + relation.linkedBy()[1];
-        String values;
-
-        if (relation.end().equals(Relation.End.LEFT)) {
-            values = getPrimaryValueAsLong(left) + "," + getUniqueSelectSQL(right);
-        } else {
-            values = getUniqueSelectSQL(right) + "," + getPrimaryValueAsLong(left);
-        }
-
-        return format(INSERT_TEMPLATE, relation.linkTable(), columns, values);
+    public static String generateInsertSQL(TableColumn column, Object left, Object right) {
+        final JoinTable joinTable = column.getJoinTable();
+        final DBTable leftTable = getTable(left.getClass());
+        final String columns = joinTable.joinColumns()[0].name() + ", " + joinTable.inverseJoinColumns()[0].name();
+        final String values = leftTable.id.getValue(left) + "," + getUniqueSelectSQL(right);
+        return format(INSERT_TEMPLATE, joinTable.name(), columns, values);
     }
 
     private static String getUniqueSelectSQL(Object o) {
-        final String where = format("WHERE upper(%s) = upper('%s')", getUniqueColumnName(o.getClass()), getUniqueValue(o).toString());
-        return format(SELECT_TEMPLATE_WHERE, getPrimaryColumnName(o.getClass()), getTableName(o.getClass()), where);
+        final DBTable table = getTable(o.getClass());
+        final String where = format("WHERE upper(%s) = upper('%s')", table.key.getName(), table.key.getValue(o));
+        return format(SELECT_TEMPLATE_WHERE, table.id.getName(), table.getName(), where);
     }
 
     public static String generateSelectSQL(LinkTable linkTable) {
         return format(SELECT_TEMPLATE, "*", linkTable.name);
     }
 
-    public static String generateSelectSQL(Class c) {
-        return generateSelectSQL(c, false);
+    public static String generateSelectSQL(final Class c) {
+        final DBTable table = getTable(c);
+        StringBuilder select = new StringBuilder();
+        if (table.id != null) {
+            appendColumn(select, table.id.getName());
+        }
+        for (String column : table.columnNames) {
+            appendColumn(select, column);
+        }
+        for (TableColumn relation : table.many2one) {
+            appendColumn(select, relation.getColumn().name());
+        }
+        return format(SELECT_TEMPLATE, select.toString(), table.getName());
     }
 
-    public static String generateSelectSQL(final Class c, boolean loadRelations) {
-        String tableName = getTableName(c);
+    public static String generateSelectSQLForOneToMany(final Class c) {
+        final DBTable table = getTable(c);
         StringBuilder select = new StringBuilder();
         StringBuilder joins = new StringBuilder();
 
-        final String[] columns = getColumnNames(c);
-        final RelationMapping[] relations = getRelations(c, Cardinality.MANY_TO_ONE);
+        if (table.id != null) {
+            appendColumn(select, table.id.getName());
+        }
 
-        for (String column : columns) {
+        for (String column : table.columnNames) {
             appendColumn(select, column);
         }
 
-        for (RelationMapping relation : relations) {
-            if (loadRelations) {
-                String[] joinColumns = getColumnNames(relation.getType());
-                String joinTable = getTableName(relation.getType());
-                for (String joinColumn : joinColumns) {
-                    appendColumn(select, getJoinColumnName(relation.relation.name(), joinColumn));
-                }
-                String primaryColumn = getPrimaryColumnName(relation.getType());
-                joins.append(format(OUTER_JOIN, joinTable, relation.relation.name(), tableName, relation.relation.key(), relation.relation.name(), primaryColumn));
-            } else {
-                appendColumn(select, relation.relation.key());
+        for (TableColumn relation : table.many2one) {
+            final DBTable relatedTable = getTable(relation.getType());
+            final String joinName = getJoinTableName(relatedTable, table);
+            if (relatedTable.id != null) {
+                appendColumn(select, getJoinColumnName(joinName, relatedTable.id.getName()));
             }
+            for (String joinColumn : relatedTable.columnNames) {
+                appendColumn(select, getJoinColumnName(joinName, joinColumn));
+            }
+            joins.append(format(OUTER_JOIN, relatedTable.getName(), joinName, table.getName(), relation.getColumn().name(), joinName, relatedTable.id.getName()));
         }
 
-        if (loadRelations) {
-            return format(SELECT_TEMPLATE_WHERE, select.toString(), tableName, joins.toString());
-        } else {
-            return format(SELECT_TEMPLATE, select.toString(), tableName);
-        }
+        return format(SELECT_TEMPLATE_WHERE, select.toString(), table.getName(), joins.toString());
     }
 
-    public static String generateSelectSQLForManyToMany(Class aClass, Relation relation, long id) {
+    public static String generateSelectSQLForManyToMany(Class c, TableColumn column, long id) {
+        final DBTable table = getTable(c);
+        JoinTable joinTable = column.getJoinTable();
         final StringBuilder sql = new StringBuilder();
-        sql.append(format(SELECT_TEMPLATE, arrayAsString(getColumnNames(aClass)), getTableName(aClass) + " a "));
-
-        if (relation.end().equals(Relation.End.LEFT)) {
-            sql.append(format(INNER_JOIN, relation.linkTable(), "b", "a", getPrimaryColumnName(aClass), "b", relation.linkedBy()[1], "b", relation.linkedBy()[0], id));
-        } else {
-            sql.append(format(INNER_JOIN, relation.linkTable(), "b", "a", getPrimaryColumnName(aClass), "b", relation.linkedBy()[0], "b", relation.linkedBy()[1], id));
-        }
-
+        final String columns = table.id.getName() + ", " + arrayAsString(table.columnNames);
+        sql.append(format(SELECT_TEMPLATE, columns, table.getName() + " a "));
+        sql.append(format(INNER_JOIN, joinTable.name(), "b", "a", table.id.getName(), "b", joinTable.inverseJoinColumns()[0].name(), "b", joinTable.joinColumns()[0].name(), id));
         sql.append(";");
         return sql.toString();
     }
 
     public static String generateUpdateSQL(Object o) {
-        Class c = o.getClass();
+        final DBTable table = getTable(o.getClass());
         StringBuilder values = new StringBuilder();
-        final ColumnMapping[] columnMappings = getColumnMappings(o.getClass());
 
-        for (ColumnMapping column : columnMappings) {
-            Object columnValue = getValue(column, o);
-            if (columnValue != null && !column.column.primaryKey()) {
-                appendUpdateValue(values, column.name, value(columnValue));
+        for (TableColumn column : table.columns) {
+            Object columnValue = column.getValue(o);
+            if (columnValue != null) {
+                appendUpdateValue(values, column.getName(), value(columnValue));
             }
         }
 
-        String where = getPrimaryColumnName(o.getClass()) + " = " + getPrimaryValueAsLong(o);
-        return format(UPDATE_TEMPLATE, getTableName(c), values.toString(), where);
+        String where = table.id.getName() + " = " + table.id.getValue(o);
+        return format(UPDATE_TEMPLATE, table.getName(), values.toString(), where);
     }
 
-    public static String generateUpdateSQLForRelation(Object o, Relation relation) {
+    public static String generateUpdateSQLForRelation(Object o, TableColumn column) {
+        final DBTable table = getTable(o.getClass());
         StringBuilder values = new StringBuilder();
-        values.append(relation.key());
+        values.append(column.getName());
         values.append(" = ");
         values.append("%s");
-        String where = getPrimaryColumnName(o.getClass()) + " = " + getPrimaryValueAsLong(o);
-        return format(UPDATE_TEMPLATE, getTableName(o.getClass()), values.toString(), where);
+        String where = table.id.getName() + " = " + table.id.getValue(o);
+        return format(UPDATE_TEMPLATE, table.getName(), values.toString(), where);
     }
 
     public static String generateDeleteSQL(Object o) {
-        Class c = o.getClass();
-        String where = getPrimaryColumnName(o.getClass()) + " = " + getPrimaryValue(o);
-        return format(DELETE_OBJECT_TEMPLATE, getTableName(c), where);
+        final DBTable table = getTable(o.getClass());
+        String where = table.id.getName() + " = " + table.id.getValue(o);
+        return format(DELETE_OBJECT_TEMPLATE, table.getName(), where);
     }
 
     public static String generateDeleteSQL(Class c) {
-        return format(DELETE_TEMPLATE, getTableName(c));
+        final DBTable table = getTable(c);
+        return format(DELETE_TEMPLATE, table.getName());
     }
 
-    public static String generateDeleteSQL(Relation relation, Object left, Object right) {
-        final String where = relation.end().equals(Relation.End.LEFT) ?
-                relation.linkedBy()[0] + " = " + getPrimaryValueAsLong(left) + " and " + relation.linkedBy()[1] + " = " + getPrimaryValueAsLong(right) :
-                relation.linkedBy()[1] + " = " + getPrimaryValueAsLong(left) + " and " + relation.linkedBy()[0] + " = " + getPrimaryValueAsLong(right);
-        return format(DELETE_OBJECT_TEMPLATE, relation.linkTable(), where);
+    public static String generateDeleteSQL(TableColumn column, Object left, Object right) {
+        JoinTable joinTable = column.getJoinTable();
+        final DBTable leftTable = getTable(left.getClass());
+        final DBTable rightTable = getTable(right.getClass());
+
+        final String where = joinTable.joinColumns()[0].name() + " = " + leftTable.id.getValue(left) + " and " +
+                joinTable.inverseJoinColumns()[0].name() + " = " + rightTable.id.getValue(right);
+
+        return format(DELETE_OBJECT_TEMPLATE, joinTable.name(), where);
     }
 
     public static String generateSequenceSQL(Sequence sequence) {
@@ -196,24 +197,22 @@ public final class SQLUtils {
     }
 
     public static String generateCreateSQL(Class c) {
+        final DBTable table = getTable(c);
         StringBuilder columns = new StringBuilder();
 
-        final ColumnMapping[] columnMappings = getColumnMappings(c);
-        final RelationMapping[] relations = getRelations(c, Cardinality.MANY_TO_ONE);
-
-        for (ColumnMapping column : columnMappings) {
-            if (column.column.primaryKey()) {
-                appendColumn(columns, format("%s identity NOT NULL PRIMARY KEY", column.name));
-            } else {
-                appendColumn(columns, format("%s %s", column.name, getColumnType(column)));
-            }
+        if (table.id != null) {
+            appendColumn(columns, format("%s identity NOT NULL PRIMARY KEY", table.id.getName()));
         }
 
-        for (RelationMapping relation : relations) {
-            appendColumn(columns, format("%s %s", relation.relation.key(), "INTEGER"));
+        for (TableColumn column : table.columns) {
+            appendColumn(columns, format("%s %s", column.getName(), column.getDBType()));
         }
 
-        return format(CREATE_TEMPLATE, getTableName(c), columns.toString());
+        for (TableColumn relation : table.many2one) {
+            appendColumn(columns, format("%s %s", relation.getColumn().name(), "INTEGER"));
+        }
+
+        return format(CREATE_TEMPLATE, table.getName(), columns.toString());
     }
 
     public static String generateDropSQL(Object o) {
@@ -241,8 +240,12 @@ public final class SQLUtils {
         return where.toString();
     }
 
-    private static String getJoinColumnName(String joinTable, String joinColumn) {
-        return joinTable + "." + joinColumn + " as " + joinTable + "_" + joinColumn;
+    public static String getJoinTableName(DBTable left, DBTable right) {
+        return left.getName().toLowerCase() + "2" + right.getName().toLowerCase();
+    }
+
+    public static String getJoinColumnName(String table, String column) {
+        return table + "." + column + " as " + table + "_" + column;
     }
 
     private static void appendColumn(StringBuilder select, String column) {

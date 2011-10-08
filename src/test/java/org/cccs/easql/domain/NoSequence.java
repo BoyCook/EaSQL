@@ -1,9 +1,6 @@
 package org.cccs.easql.domain;
 
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.Column;
-import org.cccs.easql.Relation;
-
+import javax.persistence.*;
 import java.util.Collection;
 
 /**
@@ -13,13 +10,16 @@ import java.util.Collection;
  */
 public class NoSequence {
 
-    @Column(primaryKey = true)
+    @Id
+    @Column
     public long id;
-    @Column(unique = true, mandatory = true)
+    @Column
     public String name;
-    @Relation(cardinality = Cardinality.MANY_TO_ONE, key = "person_id", name = "person2cat")
+    @ManyToOne
+    @Column(name = "person_id")
     public Person owner;
-    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "cat_countries", linkedBy = {"cntId", "cat_id"})
+    @ManyToMany
+    @JoinTable(name = "cat_countries", joinColumns = {@JoinColumn(name = "cat_id")}, inverseJoinColumns = @JoinColumn(name = "cntId"))
     public Collection<Country> countries;
 
     public NoSequence(String name) {

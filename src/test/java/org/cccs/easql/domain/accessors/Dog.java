@@ -1,10 +1,6 @@
 package org.cccs.easql.domain.accessors;
 
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.Column;
-import org.cccs.easql.Relation;
-import org.cccs.easql.Table;
-
+import javax.persistence.*;
 import java.util.Collection;
 
 /**
@@ -28,7 +24,9 @@ public class Dog {
         this.owner = owner;
     }
 
-    @Column(primaryKey = true, sequence = "dog_seq", name = "id")
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dog_seq")
     public long getId() {
         return id;
     }
@@ -38,12 +36,14 @@ public class Dog {
         return name;
     }
 
-    @Relation(cardinality = Cardinality.MANY_TO_ONE, key = "person_id", name = "person2dog")
+    @ManyToOne
+    @Column(name = "person_id")
     public Person getOwner() {
         return owner;
     }
 
-    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "dog_countries", linkedBy = {"cntId", "dog_id"}, end = Relation.End.RIGHT)
+    @ManyToMany
+    @JoinTable(name = "dog_countries", joinColumns = {@JoinColumn(name = "dog_id")}, inverseJoinColumns = @JoinColumn(name = "cntId"))
     public Collection<Country> getCountries() {
         return countries;
     }

@@ -1,6 +1,7 @@
 package org.cccs.easql.execution;
 
 import org.cccs.easql.config.DataDrivenTestEnvironment;
+import org.cccs.easql.domain.NoDefaultConstructor;
 import org.cccs.easql.domain.accessors.Cat;
 import org.cccs.easql.domain.accessors.Country;
 import org.cccs.easql.domain.accessors.Dog;
@@ -15,9 +16,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * User: boycook
@@ -136,6 +135,31 @@ public class TestFinderForMethods extends DataDrivenTestEnvironment {
         assertThat(lassie.getName(), is(equalTo("Lassie")));
         assertThat(lassie.getId(), is(equalTo(1l)));
         assertThat(lassie.getCountries().size(), is(equalTo(2)));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void findByIdShouldFailForNoId() throws EntityNotFoundException {
+        finder.findById(NoDefaultConstructor.class, 1);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void findByIdShouldFailForIdNotSpecified() throws EntityNotFoundException {
+        finder.findById(NoDefaultConstructor.class, 0);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void findByKeyShouldFailForNoKey() throws EntityNotFoundException {
+        finder.findByKey(NoDefaultConstructor.class, "foo");
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void findByKeyShouldFailForEmptyKey() throws EntityNotFoundException {
+        finder.findByKey(NoDefaultConstructor.class, "");
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void findByKeyShouldFailForNullKey() throws EntityNotFoundException {
+        finder.findByKey(NoDefaultConstructor.class, null);
     }
 
     private void assertCraig(Person craig) {

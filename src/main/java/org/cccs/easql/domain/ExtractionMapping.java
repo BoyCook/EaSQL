@@ -12,10 +12,6 @@ public class ExtractionMapping {
     public final Class type;
     public Object object;
 
-    public ExtractionMapping(String property, String name, Class type) {
-        this(property, name, type, null);
-    }
-
     public ExtractionMapping(String property, String name, Class type, Object object) {
         this.property = property;
         this.name = name;

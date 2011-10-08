@@ -1,11 +1,9 @@
 package org.cccs.easql.domain.accessors;
 
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.Column;
-import org.cccs.easql.Relation;
 import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Person;
 
+import javax.persistence.*;
 import java.util.Collection;
 
 /**
@@ -24,7 +22,8 @@ public class NoSequence {
         this.name = name;
     }
 
-    @Column(primaryKey = true)
+    @Id
+    @Column(name = "id")
     public long getId() {
         return id;
     }
@@ -33,7 +32,7 @@ public class NoSequence {
         this.id = id;
     }
 
-    @Column(unique = true, mandatory = true)
+    @Column(unique = true)
     public String getName() {
         return name;
     }
@@ -42,7 +41,8 @@ public class NoSequence {
         this.name = name;
     }
 
-    @Relation(cardinality = Cardinality.MANY_TO_ONE, key = "person_id", name = "person2cat")
+    @ManyToOne
+    @Column(name = "person_id")
     public Person getOwner() {
         return owner;
     }
@@ -51,7 +51,8 @@ public class NoSequence {
         this.owner = owner;
     }
 
-    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "cat_countries", linkedBy = {"cntId", "cat_id"})
+    @ManyToMany
+    @JoinTable(name = "cat_countries", joinColumns = {@JoinColumn(name = "cat_id")}, inverseJoinColumns = @JoinColumn(name = "cntId"))
     public Collection<Country> getCountries() {
         return countries;
     }

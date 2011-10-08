@@ -1,15 +1,18 @@
 package org.cccs.easql.execution;
 
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.Relation;
-import org.cccs.easql.domain.RelationMapping;
+import org.cccs.easql.domain.DBTable;
+import org.cccs.easql.domain.TableColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.lang.String.format;
+import static org.cccs.easql.cache.ClassCache.getTable;
 import static org.cccs.easql.execution.SQLUtils.*;
 import static org.cccs.easql.util.ClassUtils.*;
 import static org.cccs.easql.util.ObjectUtils.*;
@@ -21,23 +24,25 @@ import static org.cccs.easql.util.ObjectUtils.*;
  */
 public class SQLGenerator {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    public String getInsertSQL(Object o) {
-        String sql = generateInsertSQL(o);
-        Object[] relations = getRelatedValues(o, Cardinality.MANY_TO_ONE);
 
-        if (relations.length > 0) {
-            for (Object relatedObject : relations) {
-                sql = sql.replaceFirst("%s", String.valueOf(getPrimaryValue(relatedObject)));
-            }
+    public String getInsertSQL(Object o) {
+        final DBTable table = getTable(o.getClass());
+        String sql = generateInsertSQL(o);
+        for (TableColumn column : table.many2one) {
+            final Object relatedObject = column.getValue(o);
+            final DBTable relatedTable = getTable(relatedObject.getClass());
+            sql = sql.replaceFirst("%s", relatedTable.id.getValue(relatedObject).toString());
         }
         return sql;
     }
 
     public String getUpdateSQL(Object original, Object updated) {
+        final DBTable table = getTable(original.getClass());
         StringBuilder insertSQL = new StringBuilder();
         StringBuilder updateSQL = new StringBuilder();
         StringBuilder deleteSQL = new StringBuilder();
-        long objectKey = getPrimaryValueAsLong(updated);
+
+        long objectKey = Long.valueOf(table.id.getValue(updated).toString());
 
         if (!original.equals(updated)) {
             log.debug(format("%s [%d] has been updated", original.getClass(), objectKey));
@@ -45,8 +50,8 @@ public class SQLGenerator {
         }
 
         //Checking One2Many collections (without link tables)
-        if (hasRelations(updated.getClass(), Cardinality.ONE_TO_MANY)) {
-            for (RelationMapping mapping : getRelations(updated.getClass(), Cardinality.ONE_TO_MANY)) {
+        if (hasRelations(updated.getClass(), OneToMany.class)) {
+            for (TableColumn mapping : getRelations(updated.getClass(), OneToMany.class)) {
                 Collection list = (Collection) getValue(mapping, updated);
                 Collection dbList = (Collection) getValue(mapping, original);
                 Collection addRelation = new ArrayList();
@@ -61,7 +66,7 @@ public class SQLGenerator {
                 for (Object add : addRelation) {
                     //If item already exists update the foreign key
                     if (getPrimaryValueAsLong(add) > 0) {
-                        final Relation relation = getRelation(updated.getClass(), add.getClass());
+                        TableColumn relation = getRelation(updated.getClass(), add.getClass());
                         updateSQL.append(format(generateUpdateSQLForRelation(add, relation), objectKey));
                     } else {
                         //If item doesn't exist create new
@@ -72,17 +77,18 @@ public class SQLGenerator {
         }
 
         //Checking Many2Many collections (with link tables)
-        if (hasRelations(updated.getClass(), Cardinality.MANY_TO_MANY)) {
-            for (RelationMapping mapping : getRelations(updated.getClass(), Cardinality.MANY_TO_MANY)) {
-                Collection list = (Collection) getValue(mapping, updated);
-                Collection dbList = (Collection) getValue(mapping, original);
+        if (hasRelations(updated.getClass(), ManyToMany.class)) {
+
+            for (TableColumn mapping : getRelations(updated.getClass(), ManyToMany.class)) {
+                Collection list = (Collection) mapping.getValue(updated);
+                Collection dbList = (Collection) mapping.getValue(original);
                 Collection addRelation = new ArrayList();
                 Collection removeRelation = new ArrayList();
                 compareLists(dbList, list, addRelation, removeRelation);
 
                 //Delete items removed from list
                 for (Object remove : removeRelation) {
-                    deleteSQL.append(generateDeleteSQL(mapping.relation, updated, remove));
+                    deleteSQL.append(generateDeleteSQL(mapping, updated, remove));
                 }
 
                 for (Object add : addRelation) {
@@ -90,17 +96,17 @@ public class SQLGenerator {
                     if ((getPrimaryValueAsLong(add) < 1)) {
                         insertSQL.append(format(generateInsertSQL(add), objectKey));
                     }
-                    insertSQL.append(generateInsertSQL(mapping.relation, updated, add));
+                    insertSQL.append(generateInsertSQL(mapping, updated, add));
                 }
             }
         }
 
         //Checking Many2One foreign key relations (Objects)
-        if (hasRelations(updated.getClass(), Cardinality.MANY_TO_ONE)) {
+        if (hasRelations(updated.getClass(), ManyToOne.class)) {
             //Update foreign key of table
-            for (RelationMapping mapping : getRelations(updated.getClass(), Cardinality.MANY_TO_ONE)) {
+            for (TableColumn mapping : getRelations(updated.getClass(), ManyToOne.class)) {
                 final Object value = getValue(mapping, updated);
-                updateSQL.append(format(generateUpdateSQLForRelation(updated, mapping.relation), getPrimaryValue(value)));
+                updateSQL.append(format(generateUpdateSQLForRelation(updated, mapping), getPrimaryValue(value)));
             }
         }
 

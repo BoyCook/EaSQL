@@ -1,10 +1,6 @@
 package org.cccs.easql.domain;
 
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.Column;
-import org.cccs.easql.Relation;
-import org.cccs.easql.Table;
-
+import javax.persistence.*;
 import java.util.Collection;
 
 /**
@@ -15,13 +11,17 @@ import java.util.Collection;
 @Table(name = "countries")
 public class Country {
 
-    @Column(primaryKey = true, name = "cntId", sequence = "cnt_seq")
+    @Id
+    @Column(name = "cntId")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cnt_seq")
     public long id;
-    @Column(unique = true, mandatory = true)
+    @Column(nullable = false, unique = true)
     public String name;
-    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "dog_countries", linkedBy = {"cntId", "dog_id"}, end = Relation.End.LEFT)
+    @ManyToMany
+    @JoinTable(name = "dog_countries", joinColumns = {@JoinColumn(name = "cntId")}, inverseJoinColumns = @JoinColumn(name = "dog_id"))
     public Collection<Dog> dogs;
-    @Relation(cardinality = Cardinality.MANY_TO_MANY, linkTable = "cat_countries", linkedBy = {"cntId", "cat_id"}, end = Relation.End.LEFT)
+    @ManyToMany
+    @JoinTable(name = "cat_countries", joinColumns = {@JoinColumn(name = "cntId")}, inverseJoinColumns = @JoinColumn(name = "cat_id"))
     public Collection<Cat> cats;
 
     public Country() {

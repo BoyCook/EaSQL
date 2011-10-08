@@ -1,20 +1,15 @@
 package org.cccs.easql.util;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.cccs.easql.Cardinality;
-import org.cccs.easql.domain.ColumnMapping;
-import org.cccs.easql.domain.Mapping;
-import org.cccs.easql.domain.RelationMapping;
+import org.cccs.easql.domain.TableColumn;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.cccs.easql.cache.ClassCache.getColumnMappings;
-import static org.cccs.easql.util.ClassUtils.getRelations;
+import static org.cccs.easql.util.ClassUtils.getIdColumn;
 
 /**
  * User: boycook
@@ -34,11 +29,11 @@ public final class ObjectUtils {
         return string.toString();
     }
 
-    public static Object getValue(Mapping column, Object o) {
-        if (column.getMethod() != null) {
-            return getValue(column.getMethod(), o);
-        } else if (column.getField() != null) {
-            return getValue(column.getField(), o);
+    public static Object getValue(TableColumn column, Object o) {
+        if (column.getObject().getClass().equals(Method.class)) {
+            return getValue((Method) column.getObject(), o);
+        } else if (column.getObject().getClass().equals(Field.class)) {
+            return getValue((Field) column.getObject(), o);
         } else {
             return null;
         }
@@ -81,41 +76,13 @@ public final class ObjectUtils {
     }
 
     public static Object getPrimaryValue(Object o) {
-        Object value = null;
-        ColumnMapping[] columns = getColumnMappings(o.getClass());
-        for (ColumnMapping column : columns) {
-            if (column.column.primaryKey()) {
-                value = getValue(column, o);
-            }
-        }
-        return value;
-    }
-
-    public static Object getUniqueValue(Object o) {
-        Object value = null;
-        ColumnMapping[] columns = getColumnMappings(o.getClass());
-        for (ColumnMapping column : columns) {
-            if (column.column.unique()) {
-                value = getValue(column, o);
-            }
-        }
-        return value;
+        return getValue(getIdColumn(o.getClass()), o);
     }
 
     public static void setValue(Field field, Object o, Object value) {
         try {
             field.set(o, value);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void setValue(Method method, Object o, Object value) {
-        try {
-            method.invoke(o, value);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }
@@ -147,15 +114,6 @@ public final class ObjectUtils {
         }
     }
 
-    public static Object[] getRelatedValues(Object o, Cardinality cardinality) {
-        Collection<Object> values = new ArrayList<Object>();
-        RelationMapping[] relations = getRelations(o.getClass(), cardinality);
-        for (RelationMapping relation : relations) {
-            values.add(getValue(relation, o));
-        }
-        return values.toArray(new Object[values.size()]);
-    }
-
     public static Object getNewObject(Class c) {
         Object o = null;
         //Not for primitives
@@ -183,7 +141,6 @@ public final class ObjectUtils {
                 removeRelation.add(o);
             }
         }
-
         for (Object o : updated) {
             if (!original.contains(o)) {
                 //Add relation
