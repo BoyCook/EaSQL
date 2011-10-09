@@ -2,8 +2,9 @@ package org.cccs.easql.domain;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.*;
 
 /**
  * User: boycook
@@ -56,5 +57,28 @@ public class TestDomainObjects {
     public void equalsAndHashCodeShouldFailForLinkTableWhenClassTypesAreDifferent() {
         final LinkTable table1 = new LinkTable("link1", "left", "right");
         assertFalse(table1.equals(Cat.class));
+    }
+
+    @Test
+    public void constructingMemorySequenceShouldWork() {
+        final MemorySequence seq = new MemorySequence("seq", 0, 1);
+        assertThat(seq.getName(), is(equalTo("seq")));
+        assertThat(seq.getStartsWith(), is(equalTo(0)));
+        assertThat(seq.getIncrementBy(), is(equalTo(1)));
+    }
+
+    @Test
+    public void memorySequenceGetValueShouldWork() {
+        final MemorySequence seq = new MemorySequence("seq", 0, 1);
+        assertThat(seq.getValue(), is(equalTo("1")));
+        assertThat(seq.getValue(), is(equalTo("2")));
+    }
+
+    @Test
+    public void memorySequenceSetCounterShouldWork() {
+        final MemorySequence seq = new MemorySequence("seq", 0, 1);
+        assertThat(seq.getValue(), is(equalTo("1")));
+        seq.setCounter(0);
+        assertThat(seq.getValue(), is(equalTo("1")));
     }
 }
