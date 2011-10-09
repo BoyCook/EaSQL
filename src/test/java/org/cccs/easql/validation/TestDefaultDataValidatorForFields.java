@@ -1,6 +1,7 @@
 package org.cccs.easql.validation;
 
 import org.cccs.easql.domain.Cat;
+import org.cccs.easql.domain.NoDefaultConstructor;
 import org.cccs.easql.domain.NoSequence;
 import org.junit.Test;
 
@@ -12,14 +13,28 @@ import org.junit.Test;
 public class TestDefaultDataValidatorForFields {
 
     @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingIdOnCreate() throws ValidationFailureException {
+        final Cat bagpuss = new Cat();
+        getValidator().validateCreate(bagpuss);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingIdOnUpdate() throws ValidationFailureException {
+        final Cat bagpuss = new Cat();
+        getValidator().validateUpdate(bagpuss);
+    }
+
+    @Test(expected = ValidationFailureException.class)
     public void validatorShouldFailForMissingMandatoryFieldOnCreate() throws ValidationFailureException {
         final Cat bagpuss = new Cat();
+        bagpuss.id = 1;
         getValidator().validateCreate(bagpuss);
     }
 
     @Test(expected = ValidationFailureException.class)
     public void validatorShouldFailForMissingMandatoryFieldOnUpdate() throws ValidationFailureException {
         final Cat bagpuss = new Cat();
+        bagpuss.id = 1;
         getValidator().validateUpdate(bagpuss);
     }
 
@@ -46,6 +61,18 @@ public class TestDefaultDataValidatorForFields {
         final Cat bagpuss = new Cat("BagPuss", null);
         bagpuss.id = 1;
         getValidator().validateUpdate(bagpuss);
+    }
+
+    @Test
+    public void validatorShouldDoNothingForNoIdOnCreate() throws ValidationFailureException {
+        final NoDefaultConstructor object = new NoDefaultConstructor(true, true);
+        getValidator().validateCreate(object);
+    }
+
+    @Test
+    public void validatorShouldDoNothingForNoIdOnUpdate() throws ValidationFailureException {
+        final NoDefaultConstructor object = new NoDefaultConstructor(true, true);
+        getValidator().validateUpdate(object);
     }
 
     private DefaultDataValidator getValidator() {
