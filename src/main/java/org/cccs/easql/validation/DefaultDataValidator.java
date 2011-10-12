@@ -40,5 +40,11 @@ public class DefaultDataValidator implements DataValidator {
 
     @Override
     public void validateDelete(Object o) throws ValidationFailureException {
+        final DBTable table = getTable(o.getClass());
+        if (table.id == null) {
+            throw new ValidationFailureException("Primary key for " + table.getName() + " must be specified to delete");
+        } else if (Long.valueOf(table.id.getValue(o).toString()) == 0) {
+            throw new ValidationFailureException("Primary key " + table.id.getName() + " for " + table.getName() + " must be specified to delete");
+        }
     }
 }

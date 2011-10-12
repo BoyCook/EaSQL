@@ -35,6 +35,18 @@ public class TestDefaultDataValidatorForMethods {
         getValidator().validateUpdate(bagpuss);
     }
 
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForNoPrimaryKeyOnDelete() throws ValidationFailureException {
+        final NoSequence o = new NoSequence("Foo");
+        getValidator().validateDelete(o);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingPrimaryKeyOnDelete() throws ValidationFailureException {
+        final Cat bagpuss = new Cat("BagPuss", null);
+        getValidator().validateDelete(bagpuss);
+    }
+
     @Test
     public void validatorShouldWorkOnCreateForCorrectCat() throws ValidationFailureException {
         final Cat bagpuss = new Cat("BagPuss", null);
@@ -46,6 +58,13 @@ public class TestDefaultDataValidatorForMethods {
         final Cat bagpuss = new Cat("BagPuss", null);
         bagpuss.setId(1);
         getValidator().validateUpdate(bagpuss);
+    }
+
+    @Test
+    public void validatorShouldWorkOnDeleteForCorrectCat() throws ValidationFailureException {
+        final Cat bagpuss = new Cat("BagPuss", null);
+        bagpuss.setId(1);
+        getValidator().validateDelete(bagpuss);
     }
 
     private DefaultDataValidator getValidator() {
