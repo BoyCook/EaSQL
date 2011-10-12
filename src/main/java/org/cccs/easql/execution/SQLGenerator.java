@@ -10,8 +10,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.cccs.easql.cache.ClassCache.getTable;
 import static org.cccs.easql.execution.SQLUtils.*;
 import static org.cccs.easql.util.ClassUtils.*;
@@ -24,6 +26,22 @@ import static org.cccs.easql.util.ObjectUtils.*;
  */
 public class SQLGenerator {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    public String getSelectSQL(final Class c, boolean loadRelations, final Map<String, String> where) {
+        String sql;
+        if (loadRelations) {
+            sql = generateSelectSQLForOneToMany(c);
+        } else {
+            sql = generateSelectSQL(c);
+        }
+
+        final String whereSQL = generateWhere(where);
+
+        if (isNotEmpty(whereSQL)) {
+            sql = sql + whereSQL;
+        }
+        return sql;
+    }
 
     public String getInsertSQL(Object o) {
         final DBTable table = getTable(o.getClass());
