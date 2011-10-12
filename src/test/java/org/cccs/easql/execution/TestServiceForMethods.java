@@ -27,7 +27,7 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
     private Cat daisy;
 
     @Before
-    public void before() throws EntityNotFoundException {
+    public void before() throws EntityNotFoundException, ValidationFailureException {
         craig = finder.findByKey(Person.class, "Craig");
         daisy = finder.findByKey(Cat.class, "Daisy");
 

@@ -3,6 +3,7 @@ package org.cccs.easql.execution;
 import org.cccs.easql.domain.DBTable;
 import org.cccs.easql.domain.TableColumn;
 import org.cccs.easql.validation.SchemaValidator;
+import org.cccs.easql.validation.ValidationFailureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +35,15 @@ public class Finder {
     }
 
     @SuppressWarnings({"unchecked"})
-    public <T> T findById(final Class<T> c, long id) throws EntityNotFoundException {
+    public <T> T findById(final Class<T> c, long id) throws EntityNotFoundException, ValidationFailureException {
         log.debug(format("Searching for [%s] with id [%d]", c.getSimpleName(), id));
         final DBTable table = getTable(c);
-        if (table.id == null) {
-            throw new UnsupportedOperationException(format("[%s] has no key to search by", c.getSimpleName()));
-        } else if (id == 0) {
+        //Validate
+        getValidator(c).validateId();
+        if (id == 0) {
             throw new IllegalArgumentException(format("Search id for [%s] must not be specified", c.getSimpleName()));
         }
+        //Execute
         Collection<T> results = query(c, true, getWhere(table.id.getName(), String.valueOf(id)));
         if (results == null || results.size() == 0) {
             throw new EntityNotFoundException(format("%s with ID %d not found", table.getName(), id));
@@ -50,14 +52,15 @@ public class Finder {
     }
 
     @SuppressWarnings({"unchecked"})
-    public <T> T findByKey(final Class<T> c, String key) throws EntityNotFoundException {
+    public <T> T findByKey(final Class<T> c, String key) throws EntityNotFoundException, ValidationFailureException {
         log.debug(format("Searching for [%s] with key [%s]", c.getSimpleName(), key));
         final DBTable table = getTable(c);
-        if (table.key == null) {
-            throw new UnsupportedOperationException(format("[%s] has no key to search by", c.getSimpleName()));
-        } else if (isEmpty(key)) {
+        //Validate
+        getValidator(c).validateKey();
+        if (isEmpty(key)) {
             throw new IllegalArgumentException(format("Search key for [%s] must not be null", c.getSimpleName()));
         }
+        //Execute
         Collection<T> results = query(c, true, getWhere(format("upper(%s)", table.key.getName()), String.valueOf(key).toUpperCase()));
         if (results == null || results.size() == 0) {
             throw new EntityNotFoundException(format("%s with key %s not found", table.getName(), key));
@@ -65,18 +68,18 @@ public class Finder {
         return (T) results.toArray()[0];
     }
 
-    public <T> Collection<T> all(final Class<T> c) {
+    public <T> Collection<T> all(final Class<T> c) throws ValidationFailureException {
         return all(c, false);
     }
 
-    public <T> Collection<T> all(final Class<T> c, boolean loadRelations) {
+    public <T> Collection<T> all(final Class<T> c, boolean loadRelations) throws ValidationFailureException {
         return query(c, loadRelations, new HashMap<String, String>());
     }
 
     //TODO: implement a better way of generating where clauses i.e. search predicate
-    //TODO: throw exception if Class is incorrectly annotated
-    public <T> Collection<T> query(final Class<T> c, boolean loadRelations, Map<String, String> where) {
+    public <T> Collection<T> query(final Class<T> c, boolean loadRelations, Map<String, String> where) throws ValidationFailureException {
         log.debug(format("Searching for [%s]", c.getSimpleName()));
+        getValidator(c).validateConstructor();
         final SQLGenerator gen = new SQLGenerator();
         Collection<T> results = query(c, gen.getSelectSQL(c, loadRelations, where), loadRelations);
         if (loadRelations && hasRelations(c, OneToMany.class)) {
@@ -94,11 +97,12 @@ public class Finder {
     }
 
     @SuppressWarnings({"unchecked"})
-    private void loadOneToMany(Collection results) {
+    private void loadOneToMany(Collection results) throws ValidationFailureException {
         log.debug("Loading One2Many foreign key (object) relations");
         for (Object result : results) {
             final DBTable table = getTable(result.getClass());
             for (TableColumn column : table.one2many) {
+                getValidator(column.getGenericType()).validateId();
                 Map<String, String> where = new HashMap<String, String>();
                 where.put(column.getName(), table.id.getValue(result).toString());
                 setValue(column.getProperty(), result, query(column.getGenericType(), false, where));
@@ -112,6 +116,7 @@ public class Finder {
         for (Object result : results) {
             final DBTable table = getTable(result.getClass());
             for (TableColumn column : table.many2many) {
+                getValidator(column.getGenericType()).validateId();
                 final String sql = generateSelectSQLForManyToMany(column.getGenericType(), column, Long.valueOf(table.id.getValue(result).toString()));
                 final Collection relatedResults = query(column.getGenericType(), sql, false);
                 setValue(column.getProperty(), result, relatedResults);
