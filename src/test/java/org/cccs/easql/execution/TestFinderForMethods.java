@@ -1,6 +1,5 @@
 package org.cccs.easql.execution;
 
-import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.NoDefaultConstructor;
 import org.cccs.easql.domain.accessors.Cat;
 import org.cccs.easql.domain.accessors.Country;
@@ -16,14 +15,16 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 /**
  * User: boycook
  * Date: 14/09/2011
  * Time: 12:21
  */
-public class TestFinderForMethods extends DataDrivenTestEnvironment {
+@SuppressWarnings({"ALL"})
+public class TestFinderForMethods extends BaseFinderTest {
 
     @Before
     public void beforeEach() {
@@ -34,54 +35,33 @@ public class TestFinderForMethods extends DataDrivenTestEnvironment {
     }
 
     @Test
-    public void finderShouldWorkForJustClassForPerson() throws Exception {
-        final Collection<Person> results = finder.all(Person.class);
-        final Person craig = (Person) results.toArray()[0];
-        assertThat(results.size(), is(equalTo(2)));
-        assertCraig(craig);
+    public void finderShouldWorkForAllPersons() throws Exception {
+        assertAll(Person.class, false, 2);
     }
 
     @Test
-    public void finderShouldWorkForWithWhereClause() throws Exception {
-        final Map<String, String> where = new HashMap<String, String>();
-        where.put("id", "1");
-        final Collection<Person> results = finder.query(Person.class, false, where);
-        final Person craig = (Person) results.toArray()[0];
-        assertThat(results.size(), is(equalTo(1)));
-        assertCraig(craig);
+    public void finderShouldWorkForAllDogs() throws Exception {
+        assertAll(Dog.class, false, 1);
     }
 
     @Test
-    public void finderShouldWorkForJustClassForDog() throws Exception {
-        final Collection<Dog> results = finder.all(Dog.class);
-        final Dog lassie = (Dog) results.toArray()[0];
-
-        assertThat(results.size(), is(equalTo(1)));
-        assertThat(lassie.getId(), is(equalTo(1l)));
-        assertThat(lassie.getName(), is(equalTo("Lassie")));
-        assertNull(lassie.getOwner());
+    public void finderShouldWorkForAllCats() throws Exception {
+        assertAll(Cat.class, false, 2);
     }
 
     @Test
-    public void finderShouldWorkForJustClassForCat() throws Exception {
-        final Collection<Cat> results = finder.all(Cat.class);
-        final Cat bagpuss = (Cat) results.toArray()[0];
-
-        assertThat(results.size(), is(equalTo(2)));
-        assertThat(bagpuss.getId(), is(equalTo(1l)));
-        assertThat(bagpuss.getName(), is(equalTo("Bagpuss")));
-        assertNull(bagpuss.getOwner());
+    public void finderShouldWorkForAllPersonsWithRelations() throws Exception {
+        assertAll(Person.class, true, 2);
     }
 
     @Test
-    public void finderShouldWorkWithRelations() throws Exception {
-        final Collection<Cat> results = finder.all(Cat.class, true);
-        final Cat bagpuss = (Cat) results.toArray()[0];
+    public void finderShouldWorkForAllDogsWithRelations() throws Exception {
+        assertAll(Dog.class, true, 1);
+    }
 
-        assertThat(results.size(), is(equalTo(2)));
-        assertThat(bagpuss.getId(), is(equalTo(1l)));
-        assertThat(bagpuss.getName(), is(equalTo("Bagpuss")));
-        assertCraig(bagpuss.getOwner());
+    @Test
+    public void finderShouldWorkForAllCatsWithRelations() throws Exception {
+        assertAll(Cat.class, true, 2);
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -162,7 +142,18 @@ public class TestFinderForMethods extends DataDrivenTestEnvironment {
         finder.findByKey(NoDefaultConstructor.class, null);
     }
 
-    private void assertCraig(Person craig) {
+    @Test
+    public void finderShouldWorkForWithWhereClause() throws Exception {
+        final Map<String, String> where = new HashMap<String, String>();
+        where.put("id", "1");
+        final Collection<Person> results = assertWhere(Person.class, where, 1);
+        final Person craig = (Person) results.toArray()[0];
+        assertCraig(craig);
+    }
+
+    @Override
+    protected void assertCraig(Object object) {
+        Person craig = (Person) object;
         assertNotNull(craig);
         assertThat(craig.getId(), is(equalTo(1l)));
         assertThat(craig.getName(), is(equalTo("Craig")));

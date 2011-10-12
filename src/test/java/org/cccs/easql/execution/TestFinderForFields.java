@@ -1,6 +1,5 @@
 package org.cccs.easql.execution;
 
-import org.cccs.easql.config.DataDrivenTestEnvironment;
 import org.cccs.easql.domain.Cat;
 import org.cccs.easql.domain.Country;
 import org.cccs.easql.domain.Dog;
@@ -13,7 +12,8 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 /**
  * User: boycook
@@ -21,57 +21,36 @@ import static org.junit.Assert.*;
  * Time: 19:08
  */
 @SuppressWarnings({"unchecked"})
-public class TestFinderForFields extends DataDrivenTestEnvironment {
+public class TestFinderForFields extends BaseFinderTest {
 
     @Test
-    public void finderShouldWorkForJustClassForPerson() throws Exception {
-        final Collection<Person> results = finder.all(Person.class);
-        final Person craig = (Person) results.toArray()[0];
-        assertThat(results.size(), is(equalTo(2)));
-        assertCraig(craig);
+    public void finderShouldWorkForAllPersons() throws Exception {
+        assertAll(Person.class, false, 2);
     }
 
     @Test
-    public void finderShouldWorkForWithWhereClause() throws Exception {
-        final Map<String, String> where = new HashMap<String, String>();
-        where.put("id", "1");
-        final Collection<Person> results = finder.query(Person.class, false, where);
-        final Person craig = (Person) results.toArray()[0];
-        assertThat(results.size(), is(equalTo(1)));
-        assertCraig(craig);
+    public void finderShouldWorkForAllDogs() throws Exception {
+        assertAll(Dog.class, false, 1);
     }
 
     @Test
-    public void finderShouldWorkForJustClassForDog() throws Exception {
-        final Collection<Dog> results = finder.all(Dog.class);
-        final Dog lassie = (Dog) results.toArray()[0];
-
-        assertThat(results.size(), is(equalTo(1)));
-        assertThat(lassie.id, is(equalTo(1l)));
-        assertThat(lassie.name, is(equalTo("Lassie")));
-        assertNull(lassie.owner);
+    public void finderShouldWorkForAllCats() throws Exception {
+        assertAll(Cat.class, false, 2);
     }
 
     @Test
-    public void finderShouldWorkForJustClassForCat() throws Exception {
-        final Collection<Cat> results = finder.all(Cat.class);
-        final Cat bagpuss = (Cat) results.toArray()[0];
-
-        assertThat(results.size(), is(equalTo(2)));
-        assertThat(bagpuss.id, is(equalTo(1l)));
-        assertThat(bagpuss.name, is(equalTo("Bagpuss")));
-        assertNull(bagpuss.owner);
+    public void finderShouldWorkForAllPersonsWithRelations() throws Exception {
+        assertAll(Person.class, true, 2);
     }
 
     @Test
-    public void finderShouldWorkWithRelations() throws Exception {
-        final Collection<Cat> results = finder.all(Cat.class, true);
-        final Cat bagpuss = (Cat) results.toArray()[0];
+    public void finderShouldWorkForAllDogsWithRelations() throws Exception {
+        assertAll(Dog.class, true, 1);
+    }
 
-        assertThat(results.size(), is(equalTo(2)));
-        assertThat(bagpuss.id, is(equalTo(1l)));
-        assertThat(bagpuss.name, is(equalTo("Bagpuss")));
-        assertCraig(bagpuss.owner);
+    @Test
+    public void finderShouldWorkForAllCatsWithRelations() throws Exception {
+        assertAll(Cat.class, true, 2);
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -127,7 +106,18 @@ public class TestFinderForFields extends DataDrivenTestEnvironment {
         assertThat(lassie.countries.size(), is(equalTo(2)));
     }
 
-    private void assertCraig(Person craig) {
+    @Test
+    public void finderShouldWorkForWithWhereClause() throws Exception {
+        final Map<String, String> where = new HashMap<String, String>();
+        where.put("id", "1");
+        final Collection<Person> results = assertWhere(Person.class, where, 1);
+        final Person craig = (Person) results.toArray()[0];
+        assertCraig(craig);
+    }
+
+    @Override
+    protected void assertCraig(Object object) {
+        Person craig = (Person) object;
         assertNotNull(craig);
         assertThat(craig.id, is(equalTo(1l)));
         assertThat(craig.name, is(equalTo("Craig")));
