@@ -1,7 +1,7 @@
 package org.cccs.easql.validation;
 
 import org.cccs.easql.domain.Cat;
-import org.cccs.easql.domain.NoDefaultConstructor;
+import org.cccs.easql.domain.Invalid;
 import org.cccs.easql.domain.NoSequence;
 import org.junit.Test;
 
@@ -65,13 +65,13 @@ public class TestDefaultDataValidatorForFields {
 
     @Test
     public void validatorShouldDoNothingForNoIdOnCreate() throws ValidationFailureException {
-        final NoDefaultConstructor object = new NoDefaultConstructor(true, true);
+        final Invalid object = new Invalid(true, true);
         getValidator().validateCreate(object);
     }
 
     @Test
     public void validatorShouldDoNothingForNoIdOnUpdate() throws ValidationFailureException {
-        final NoDefaultConstructor object = new NoDefaultConstructor(true, true);
+        final Invalid object = new Invalid(true, true);
         getValidator().validateUpdate(object);
     }
 

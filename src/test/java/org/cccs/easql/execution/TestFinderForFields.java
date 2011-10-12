@@ -1,9 +1,6 @@
 package org.cccs.easql.execution;
 
-import org.cccs.easql.domain.Cat;
-import org.cccs.easql.domain.Country;
-import org.cccs.easql.domain.Dog;
-import org.cccs.easql.domain.Person;
+import org.cccs.easql.domain.*;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -53,20 +50,10 @@ public class TestFinderForFields extends BaseFinderTest {
         assertAll(Cat.class, true, 2);
     }
 
-    @Test(expected = EntityNotFoundException.class)
-    public void finderByIdShouldThrowExceptionForInvalidId() throws EntityNotFoundException {
-        finder.findById(Person.class, -1);
-    }
-
     @Test
     public void finderByIdShouldWork() throws EntityNotFoundException {
         final Person p = finder.findById(Person.class, 1);
         assertCraig(p);
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void finderByKeyShouldThrowExceptionForInvalidKey() throws EntityNotFoundException {
-        finder.findByKey(Person.class, "FOOBAR123");
     }
 
     @Test
@@ -113,6 +100,41 @@ public class TestFinderForFields extends BaseFinderTest {
         final Collection<Person> results = assertWhere(Person.class, where, 1);
         final Person craig = (Person) results.toArray()[0];
         assertCraig(craig);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void finderByIdShouldThrowExceptionForInvalidId() throws EntityNotFoundException {
+        finder.findById(Person.class, -1);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void finderByKeyShouldThrowExceptionForInvalidKey() throws EntityNotFoundException {
+        finder.findByKey(Person.class, "FOOBAR123");
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void findByIdShouldFailForNoId() throws EntityNotFoundException {
+        finder.findById(Invalid.class, 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void findByIdShouldFailForIdNotSpecified() throws EntityNotFoundException {
+        finder.findById(Person.class, 0);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void findByKeyShouldFailForNoKey() throws EntityNotFoundException {
+        finder.findByKey(Invalid.class, "foo");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void findByKeyShouldFailForEmptyKey() throws EntityNotFoundException {
+        finder.findByKey(Person.class, "");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void findByKeyShouldFailForNullKey() throws EntityNotFoundException {
+        finder.findByKey(Person.class, null);
     }
 
     @Override

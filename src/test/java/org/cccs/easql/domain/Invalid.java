@@ -5,8 +5,8 @@ package org.cccs.easql.domain;
  * Date: 13/09/2011
  * Time: 14:48
  */
-public class NoDefaultConstructor {
+public class Invalid {
 
-    public NoDefaultConstructor(boolean foo, boolean bar) {
+    public Invalid(boolean foo, boolean bar) {
     }
 }

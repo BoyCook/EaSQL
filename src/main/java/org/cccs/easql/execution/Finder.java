@@ -41,7 +41,7 @@ public class Finder {
         if (table.id == null) {
             throw new UnsupportedOperationException(format("[%s] has no key to search by", c.getSimpleName()));
         } else if (id == 0) {
-            throw new UnsupportedOperationException(format("Search id for [%s] must not be specified", c.getSimpleName()));
+            throw new IllegalArgumentException(format("Search id for [%s] must not be specified", c.getSimpleName()));
         }
 
         Map<String, String> where = new HashMap<String, String>();
@@ -63,7 +63,7 @@ public class Finder {
         if (table.key == null) {
             throw new UnsupportedOperationException(format("[%s] has no key to search by", c.getSimpleName()));
         } else if (isEmpty(key)) {
-            throw new UnsupportedOperationException(format("Search key for [%s] must not be null", c.getSimpleName()));
+            throw new IllegalArgumentException(format("Search key for [%s] must not be null", c.getSimpleName()));
         }
 
         Map<String, String> where = new HashMap<String, String>();

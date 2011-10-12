@@ -1,12 +1,8 @@
 package org.cccs.easql.validation;
 
 import org.cccs.easql.domain.Cat;
-import org.cccs.easql.domain.NoDefaultConstructor;
-import org.cccs.easql.validation.SchemaValidator;
-import org.cccs.easql.validation.ValidationFailureException;
+import org.cccs.easql.domain.Invalid;
 import org.junit.Test;
-
-import java.lang.reflect.Method;
 
 /**
  * User: boycook
@@ -22,7 +18,7 @@ public class TestSchemaValidator {
 
     @Test(expected = ValidationFailureException.class)
     public void validatorShouldThrowExceptionWhenConstructorDoesNotExist() throws ValidationFailureException {
-        getValidator().validate(NoDefaultConstructor.class);
+        getValidator().validate(Invalid.class);
     }
 
     private SchemaValidator getValidator() {
