@@ -134,4 +134,8 @@ public class SQLGenerator {
         sql.append(updateSQL.toString());
         return sql.toString();
     }
+
+    public String getDeleteSQL(Object o) {
+        return generateDeleteSQL(o);
+    }
 }

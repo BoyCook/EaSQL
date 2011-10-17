@@ -43,7 +43,8 @@ public class Service {
 
     public void delete(Object o) throws ValidationFailureException {
         validator.validateDelete(o);
-        throw new UnsupportedOperationException();
+        SQLGenerator sql = new SQLGenerator();
+        execute(sql.getDeleteSQL(o));
     }
 
     private void execute(String sql) {

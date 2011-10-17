@@ -1,20 +1,15 @@
 package org.cccs.easql.execution;
 
 import org.cccs.easql.config.DataDrivenTestEnvironment;
-import org.cccs.easql.domain.accessors.NoSequence;
-import org.cccs.easql.domain.accessors.Country;
-import org.cccs.easql.domain.accessors.Cat;
-import org.cccs.easql.domain.accessors.Person;
+import org.cccs.easql.domain.accessors.*;
 import org.cccs.easql.validation.ValidationFailureException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * User: boycook
@@ -37,6 +32,7 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
         assertThat(craig.getDogs().size(), is(equalTo(1)));
     }
 
+    //Create assertions
     @Test
     public void createWithoutRelationsShouldWork() throws ValidationFailureException {
         service.insert(new Person("Dave"));
@@ -52,6 +48,7 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
         service.insert(garfield);
     }
 
+    //Update assertions
     @Test
     public void updateShouldWork() throws EntityNotFoundException, ValidationFailureException {
         craig.setEmail("SomeNewEmail");
@@ -132,6 +129,54 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
         assertTrue(spain.getCats().contains(updatedDaisy));
     }
 
+    //Delete assertions
+    @Test(expected = EntityNotFoundException.class)
+    public void deleteShouldWorkWithOne2ManyRelations() throws ValidationFailureException, EntityNotFoundException {
+        final Person craig = finder.findByKey(Person.class, "Craig");
+        assertThat(craig.getCats().size(), is(equalTo(1)));
+        assertThat(craig.getDogs().size(), is(equalTo(1)));
+        service.delete(craig);
+        //Hasn't deleted relations
+        for (Cat cat : craig.getCats()) {
+            assertNotNull(finder.findById(Cat.class, cat.getId()));
+        }
+        for (Dog dog: craig.getDogs()) {
+            assertNotNull(finder.findById(Dog.class, dog.getId()));
+        }
+        finder.findByKey(Person.class, "Craig");
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void deleteShouldWorkWithMany2OneRelations() throws ValidationFailureException, EntityNotFoundException {
+        final Cat daisy = finder.findByKey(Cat.class, "Daisy");
+        assertThat(daisy.getCountries().size(), is(equalTo(2)));
+        assertNotNull(daisy.getOwner());
+        service.delete(daisy);
+        //Hasn't deleted relations
+        assertNotNull(finder.findById(Person.class, daisy.getOwner().getId()));
+        for (Country country : daisy.getCountries()) {
+            assertNotNull(finder.findById(Country.class, country.getId()));
+        }
+        finder.findByKey(Cat.class, "Daisy");
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void deleteShouldWorkWithMany2ManyRelations() throws ValidationFailureException, EntityNotFoundException {
+        final Country england = finder.findByKey(Country.class, "England");
+        assertThat(england.getCats().size(), is(equalTo(2)));
+        assertThat(england.getDogs().size(), is(equalTo(1)));
+        service.delete(england);
+        //Hasn't deleted relations
+        for (Cat cat : england.getCats()) {
+            assertNotNull(finder.findById(Cat.class, cat.getId()));
+        }
+        for (Dog dog: england.getDogs()) {
+            assertNotNull(finder.findById(Dog.class, dog.getId()));
+        }
+        finder.findByKey(Country.class, "England");
+    }
+
+    //Validation assertions
     @Test(expected = ValidationFailureException.class)
     public void validatorShouldFailForMissingMandatoryFieldOnCreate() throws ValidationFailureException {
         final Cat bagpuss = new Cat();
@@ -154,5 +199,17 @@ public class TestServiceForMethods extends DataDrivenTestEnvironment {
     public void validatorShouldFailForMissingPrimaryKeyOnUpdate() throws ValidationFailureException, EntityNotFoundException {
         final Cat bagpuss = new Cat("BagPuss", null);
         service.update(bagpuss);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForNoPrimaryKeyOnDelete() throws ValidationFailureException, EntityNotFoundException {
+        final NoSequence o = new NoSequence("Foo");
+        service.delete(o);
+    }
+
+    @Test(expected = ValidationFailureException.class)
+    public void validatorShouldFailForMissingPrimaryKeyOnDelete() throws ValidationFailureException, EntityNotFoundException {
+        final Cat bagpuss = new Cat("BagPuss", null);
+        service.delete(bagpuss);
     }
 }
