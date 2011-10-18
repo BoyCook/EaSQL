@@ -19,6 +19,10 @@ import static org.cccs.easql.cache.ClassCache.getTable;
  */
 public final class ClassUtils {
 
+    private static final String GET = "get";
+    private static final String IS = "is";
+    private static final String HAS = "has";
+
     public static synchronized DBTable getTableForClass(Class c) {
         TableColumn id = getIdColumn(c);
         TableColumn key = getKeyColumn(c);
@@ -187,12 +191,16 @@ public final class ClassUtils {
     }
 
     public static String stripName(final String name) {
-        if (name.indexOf("get") == 0) {
-            return lowerFirst(name.substring(name.indexOf("get") + 3));
-        } else if (name.indexOf("is") == 0) {
-            return lowerFirst(name.substring(name.indexOf("is") + 2));
-        } else if (name.indexOf("has") == 0) {
-            return lowerFirst(name.substring(name.indexOf("has") + 3));
+        if (name.indexOf(GET) == 0) {
+            return lowerFirst(name.substring(name.indexOf(GET) + GET.length()));
+        } else {
+            if (name.indexOf(IS) == 0) {
+                return lowerFirst(name.substring(name.indexOf(IS) + IS.length()));
+            } else {
+                if (name.indexOf(HAS) == 0) {
+                    return lowerFirst(name.substring(name.indexOf(HAS) + HAS.length()));
+                }
+            }
         }
         return name;
     }
