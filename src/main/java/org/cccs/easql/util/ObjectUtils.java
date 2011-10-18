@@ -2,6 +2,8 @@ package org.cccs.easql.util;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.cccs.easql.domain.TableColumn;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -17,6 +19,8 @@ import static org.cccs.easql.util.ClassUtils.getIdColumn;
  * Time: 23:58
  */
 public final class ObjectUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(ObjectUtils.class);
 
     public static String arrayAsString(String[] values) {
         final StringBuilder string = new StringBuilder();
@@ -44,7 +48,7 @@ public final class ObjectUtils {
         try {
             value = field.get(o);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            log.error("Error getting object value", e);
         }
         return value;
     }
@@ -54,9 +58,9 @@ public final class ObjectUtils {
         try {
             value = method.invoke(o);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            log.error("Error getting object value", e);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            log.error("Error getting object value", e);
         }
         return value;
     }
@@ -83,7 +87,7 @@ public final class ObjectUtils {
         try {
             field.set(o, value);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            log.error("Error setting object value", e);
         }
     }
 
@@ -121,13 +125,13 @@ public final class ObjectUtils {
             try {
                 o = c.getConstructor().newInstance();
             } catch (InvocationTargetException e) {
-                e.printStackTrace();
+                log.error("Error getting new object", e);
             } catch (NoSuchMethodException e) {
-                e.printStackTrace();
+                log.error("Error getting new object", e);
             } catch (InstantiationException e) {
-                e.printStackTrace();
+                log.error("Error getting new object", e);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                log.error("Error getting new object", e);
             }
         }
         return o;

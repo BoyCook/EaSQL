@@ -33,20 +33,16 @@ public class SchemaValidator<T> {
                 throw new ValidationFailureException(tClass.getName() + " must have a constructor");
             }
         } catch (InstantiationException e) {
-            log.debug(errMessage);
-            e.printStackTrace();
+            log.error(errMessage, e);
             throw new ValidationFailureException(tClass.getName() + " must have a constructor", e);
         } catch (IllegalAccessException e) {
-            log.debug(errMessage);
-            e.printStackTrace();
+            log.error(errMessage, e);
             throw new ValidationFailureException(tClass.getName() + " must have a constructor", e);
         } catch (InvocationTargetException e) {
-            log.debug(errMessage);
-            e.printStackTrace();
+            log.error(errMessage, e);
             throw new ValidationFailureException(tClass.getName() + " must have a constructor", e);
         } catch (NoSuchMethodException e) {
-            log.debug(errMessage);
-            e.printStackTrace();
+            log.error(errMessage, e);
             throw new ValidationFailureException(tClass.getName() + " must have a constructor", e);
         }
     }
