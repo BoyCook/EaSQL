@@ -136,6 +136,14 @@ public final class SQLUtils {
         return sql.toString();
     }
 
+    //TODO: deal with different data types specifically if column is foreign key
+    public static String generateClearForeignKeySQL(Object o, TableColumn column) {
+        final DBTable table = getTable(o.getClass());
+        String values = column.getName() + " = 0";
+        String where = table.id.getName() + " = " + table.id.getValue(o);
+        return format(UPDATE_TEMPLATE, table.getName(), values, where);
+    }
+
     public static String generateUpdateSQL(Object o) {
         final DBTable table = getTable(o.getClass());
         StringBuilder values = new StringBuilder();

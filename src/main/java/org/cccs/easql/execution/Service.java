@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 
+import static java.lang.String.format;
 import static org.cccs.easql.util.ObjectUtils.getPrimaryValueAsLong;
 
 /**
@@ -29,12 +30,14 @@ public class Service {
     }
 
     public void insert(Object o) throws ValidationFailureException {
+        log.debug(format("Creating [%s] - %s", o.getClass().getSimpleName(), o.toString()));
         validator.validateCreate(o);
         SQLGenerator sql = new SQLGenerator();
         execute(sql.getInsertSQL(o));
     }
 
     public void update(Object updated) throws ValidationFailureException, EntityNotFoundException {
+        log.debug(format("Updating [%s] - %s", updated.getClass().getSimpleName(), updated.toString()));
         validator.validateUpdate(updated);
         Object original = query.findById(updated.getClass(), getPrimaryValueAsLong(updated));
         SQLGenerator sql = new SQLGenerator();
@@ -42,6 +45,7 @@ public class Service {
     }
 
     public void delete(Object o) throws ValidationFailureException {
+        log.debug(format("Deleting [%s] - %s", o.getClass().getSimpleName(), o.toString()));
         validator.validateDelete(o);
         SQLGenerator sql = new SQLGenerator();
         execute(sql.getDeleteSQL(o));

@@ -1,5 +1,11 @@
 package org.cccs.easql.domain;
 
+import sun.jvm.hotspot.oops.Array;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.cccs.easql.util.ClassUtils.getTableName;
 
 /**
@@ -33,5 +39,25 @@ public class DBTable {
 
     public String getName() {
         return getTableName(this.c);
+    }
+
+    public Class getType() {
+        return this.c;
+    }
+
+    public TableColumn getColumn(DBTable table, TableColumn column) {
+        List<TableColumn> allColumns = new ArrayList<TableColumn>();
+        allColumns.addAll(Arrays.asList(columns));
+        allColumns.addAll(Arrays.asList(one2one));
+        allColumns.addAll(Arrays.asList(one2many));
+        allColumns.addAll(Arrays.asList(many2one));
+        allColumns.addAll(Arrays.asList(many2many));
+
+        for (TableColumn related : allColumns) {
+            if (related.getName().equals(column.getName()) && related.getGenericType().equals(table.getType())) {
+                return related;
+            }
+        }
+        return null;
     }
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.cccs.easql.cache.ClassCache.getTable;
 
 /**
  * User: boycook
@@ -108,6 +109,11 @@ public final class ClassUtils {
         return null;
     }
 
+    public static TableColumn getRelatedColumn(DBTable table, TableColumn column) {
+        final DBTable relatedTable = getTable(column.getGenericType());
+        return relatedTable.getColumn(table, column);
+    }
+
     //TODO: cache
     @SuppressWarnings({"unchecked"})
     public static boolean hasRelations(final Class c, final Class cardinality) {
@@ -154,14 +160,24 @@ public final class ClassUtils {
         return null;
     }
 
+    //TODO handle exceptions
     public static Class getGenericType(Field field) {
-        ParameterizedType stringListType = (ParameterizedType) field.getGenericType();
-        return (Class<?>) stringListType.getActualTypeArguments()[0];
+        try {
+            ParameterizedType stringListType = (ParameterizedType) field.getGenericType();
+            return (Class<?>) stringListType.getActualTypeArguments()[0];
+        } catch (ClassCastException e) {
+            return field.getType();
+        }
     }
 
+    //TODO handle exceptions
     public static Class getGenericType(Method method) {
-        ParameterizedType stringListType = (ParameterizedType) method.getGenericReturnType();
-        return (Class<?>) stringListType.getActualTypeArguments()[0];
+        try {
+            ParameterizedType stringListType = (ParameterizedType) method.getGenericReturnType();
+            return (Class<?>) stringListType.getActualTypeArguments()[0];
+        } catch (ClassCastException e) {
+            return method.getReturnType();
+        }
     }
 
     @SuppressWarnings({"unchecked"})

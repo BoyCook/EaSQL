@@ -5,6 +5,8 @@ import org.cccs.easql.domain.*;
 import org.cccs.easql.validation.ValidationFailureException;
 import org.junit.Test;
 
+import java.util.Collection;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -49,6 +51,7 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
 
     @Test
     public void updateOne2ManyRelationsShouldWork() throws EntityNotFoundException, ValidationFailureException {
+        final Person craigOriginal = finder.findByKey(Person.class, "Craig");
         final Person craig = finder.findByKey(Person.class, "Craig");
         final Cat daisy = finder.findByKey(Cat.class, "Daisy");
         craig.dogs.clear();
@@ -57,6 +60,9 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
         final Cat fluffy = new Cat("Fluffy", craig);
         craig.cats.add(fluffy);
         service.update(craig);
+
+        assertCats(craigOriginal.cats);
+        assertNotDogs(craigOriginal.dogs);
 
         final Person updated = finder.findByKey(Person.class, "Craig");
         assertThat(updated.cats.size(), is(equalTo(2)));
@@ -126,12 +132,8 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
         assertThat(craig.dogs.size(), is(equalTo(1)));
         service.delete(craig);
         //Hasn't deleted relations
-        for (Cat cat : craig.cats) {
-            assertNotNull(finder.findById(Cat.class, cat.id));
-        }
-        for (Dog dog: craig.dogs) {
-            assertNotNull(finder.findById(Dog.class, dog.id));
-        }
+        assertCats(craig.cats);
+        assertDogs(craig.dogs);
         finder.findByKey(Person.class, "Craig");
     }
 
@@ -143,9 +145,7 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
         service.delete(daisy);
         //Hasn't deleted relations
         assertNotNull(finder.findById(Person.class, daisy.owner.id));
-        for (Country country : daisy.countries) {
-            assertNotNull(finder.findById(Country.class, country.id));
-        }
+        assertCountries(daisy.countries);
         finder.findByKey(Cat.class, "Daisy");
     }
 
@@ -156,12 +156,8 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
         assertThat(england.dogs.size(), is(equalTo(1)));
         service.delete(england);
         //Hasn't deleted relations
-        for (Cat cat : england.cats) {
-            assertNotNull(finder.findById(Cat.class, cat.id));
-        }
-        for (Dog dog: england.dogs) {
-            assertNotNull(finder.findById(Dog.class, dog.id));
-        }
+        assertCats(england.cats);
+        assertDogs(england.dogs);
         finder.findByKey(Country.class, "England");
     }
 
@@ -200,5 +196,35 @@ public class TestServiceForFields extends DataDrivenTestEnvironment {
     public void validatorShouldFailForMissingPrimaryKeyOnDelete() throws ValidationFailureException, EntityNotFoundException {
         final Cat bagpuss = new Cat("BagPuss", null);
         service.delete(bagpuss);
+    }
+
+    private void assertCats(Collection<Cat> cats) throws ValidationFailureException, EntityNotFoundException {
+        for (Cat cat : cats) {
+            assertNotNull(finder.findById(Cat.class, cat.id));
+        }
+    }
+
+    private void assertDogs(Collection<Dog> dogs) throws ValidationFailureException, EntityNotFoundException {
+        for (Dog dog: dogs) {
+            assertNotNull(finder.findById(Dog.class, dog.id));
+        }
+    }
+
+    private void assertNotDogs(Collection<Dog> dogs) throws ValidationFailureException {
+        for (Dog dog: dogs) {
+            try {
+                assertNull(finder.findById(Dog.class, dog.id));
+            } catch (EntityNotFoundException e) {
+                //This is expected
+            } catch (ValidationFailureException e) {
+                throw e;
+            }
+        }
+    }
+
+    private void assertCountries(Collection<Country> countries) throws ValidationFailureException, EntityNotFoundException {
+        for (Country country : countries) {
+            assertNotNull(finder.findById(Country.class, country.id));
+        }
     }
 }

@@ -18,7 +18,7 @@ public class Dog {
     @Column(nullable = false, unique = true)
     public String name;
     @ManyToOne
-    @Column(name = "person_id")
+    @Column(name = "person_id", nullable = false)
     public Person owner;
     @ManyToMany
     @JoinTable(name = "dog_countries", joinColumns = {@JoinColumn(name = "dog_id")}, inverseJoinColumns = @JoinColumn(name = "cntId"))

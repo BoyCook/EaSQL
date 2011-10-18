@@ -78,7 +78,13 @@ public class SQLGenerator {
 
                 //Delete items removed from list
                 for (Object remove : removeRelation) {
-                    deleteSQL.append(generateDeleteSQL(remove));
+                    //Person column in Dog class
+                    TableColumn relatedColumn = getRelatedColumn(table, mapping);
+                    if (relatedColumn.getColumn().nullable()) {
+                        updateSQL.append(generateClearForeignKeySQL(remove, relatedColumn));
+                    } else {
+                        deleteSQL.append(generateDeleteSQL(remove));
+                    }
                 }
 
                 for (Object add : addRelation) {
