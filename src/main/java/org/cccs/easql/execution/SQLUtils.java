@@ -22,17 +22,17 @@ import static org.cccs.easql.util.ObjectUtils.value;
 public final class SQLUtils {
 
     //Template SQL
-    private final static String INSERT_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s);";
-    private final static String SELECT_TEMPLATE = "SELECT %s FROM %s";
-    private final static String SELECT_TEMPLATE_WHERE = "SELECT %s FROM %s %s";
-    private final static String UPDATE_TEMPLATE = "UPDATE %s set %s WHERE %s;";
-    private final static String DELETE_TEMPLATE = "DELETE FROM %s;";
-    private final static String DELETE_OBJECT_TEMPLATE = "DELETE FROM %s WHERE %s;";
-    private final static String CREATE_TEMPLATE = "CREATE TABLE %s (%s);";
-    private final static String SELECT_SEQUENCE_TEMPLATE = "SELECT NEXT VALUE FOR %s FROM %s";
-    private final static String CREATE_SEQUENCE_TEMPLATE = "CREATE SEQUENCE %s AS BIGINT START WITH %d INCREMENT BY %d;";
-    private final static String OUTER_JOIN = "LEFT OUTER JOIN %s %s ON %s.%s = %s.%s";
-    private final static String INNER_JOIN = "INNER JOIN %s %s ON %s.%s = %s.%s AND %s.%s = %d";
+    private static final String INSERT_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s);";
+    private static final String SELECT_TEMPLATE = "SELECT %s FROM %s";
+    private static final String SELECT_TEMPLATE_WHERE = "SELECT %s FROM %s %s";
+    private static final String UPDATE_TEMPLATE = "UPDATE %s set %s WHERE %s;";
+    private static final String DELETE_TEMPLATE = "DELETE FROM %s;";
+    private static final String DELETE_OBJECT_TEMPLATE = "DELETE FROM %s WHERE %s;";
+    private static final String CREATE_TEMPLATE = "CREATE TABLE %s (%s);";
+    private static final String SELECT_SEQUENCE_TEMPLATE = "SELECT NEXT VALUE FOR %s FROM %s";
+    private static final String CREATE_SEQUENCE_TEMPLATE = "CREATE SEQUENCE %s AS BIGINT START WITH %d INCREMENT BY %d;";
+    private static final String OUTER_JOIN = "LEFT OUTER JOIN %s %s ON %s.%s = %s.%s";
+    private static final String INNER_JOIN = "INNER JOIN %s %s ON %s.%s = %s.%s AND %s.%s = %d";
 
     public static String generateInsertSQL(Object o) {
         StringBuilder insertColumns = new StringBuilder();
