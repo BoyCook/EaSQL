@@ -27,12 +27,12 @@ public class DBTable {
         this.c = c;
         this.id = id;
         this.key = key;
-        this.columnNames = columnNames;
-        this.columns = columns;
-        this.one2one = one2one;
-        this.one2many = one2many;
-        this.many2one = many2one;
-        this.many2many = many2many;
+        this.columnNames = columnNames.clone();
+        this.columns = columns.clone();
+        this.one2one = one2one.clone();
+        this.one2many = one2many.clone();
+        this.many2one = many2one.clone();
+        this.many2many = many2many.clone();
     }
 
     public String getName() {
